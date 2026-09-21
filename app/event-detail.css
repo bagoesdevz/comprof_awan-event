@@ -122,12 +122,16 @@
 .event-ticket-status { font-size:10px; color:var(--event-muted); background:var(--event-tint); padding:5px 8px; border-radius:6px; }
 .event-ticket-status[data-status="available"] { color:#16765e; background:#edf8f3; }
 .event-ticket-status[data-status="full"] { color:#8c611a; background:#fff8e9; }
-.event-ticket-summary { min-width:0; margin-top:28px; }
+.event-ticket-summary { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; gap:20px; min-width:0; margin-top:28px; }
+.event-ticket-main { min-width:0; }
 .event-ticket h3 { font-size:20px; line-height:1.4; }
 .event-ticket-price { display:block; font-family:var(--font-jakarta),sans-serif; font-size:clamp(30px,3vw,40px); color:var(--brand); margin-top:10px; letter-spacing:-.04em; }
 .event-ticket-unit { font-size:10px; color:var(--event-muted); margin-top:4px; }
-.event-ticket-quota { font-size:11px; color:var(--brand-body); margin-top:14px; }
-.event-ticket-period { font-size:10px; color:var(--event-muted); margin-top:6px; line-height:1.8; }
+.event-ticket-availability { min-width:126px; padding:14px 16px; border-radius:12px; background:var(--event-tint); text-align:right; }
+.event-ticket-availability span,.event-ticket-availability small { display:block; color:var(--event-muted); font-size:10px; line-height:1.4; }
+.event-ticket-availability strong { display:block; margin-top:3px; color:var(--brand); font-family:var(--font-jakarta),sans-serif; font-size:clamp(34px,4vw,48px); line-height:.95; letter-spacing:-.06em; }
+.event-ticket-availability small { margin-top:5px; }
+.event-ticket-period { grid-column:1 / -1; font-size:10px; color:var(--event-muted); margin-top:0; line-height:1.8; }
 .event-ticket-benefits { min-width:0; margin-top:24px; padding-top:22px; border-top:1px solid var(--brand-border); }
 .event-ticket ul { display:grid; gap:12px; }
 .event-ticket li { display:flex; gap:10px; font-size:13px; line-height:1.65; color:var(--brand-body); }
@@ -199,6 +203,8 @@
   .event-outcome-line { margin-top:16px; }
   .event-ticket-grid { grid-template-columns:minmax(0,1fr); }
   .event-ticket { padding:18px; }
+  .event-ticket-summary { gap:14px; }
+  .event-ticket-availability { min-width:112px; padding:12px; }
   .event-countdown { gap:9px; width:100%; }
   .event-countdown > div { flex:1; min-width:0; }
   .event-countdown-section { gap:28px; margin-block:40px; padding:28px 20px; }

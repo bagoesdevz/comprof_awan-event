@@ -126,7 +126,15 @@ export function EventPricingSection({ event, id, attendance, onAttendanceChange,
         const status = ticketState(event, ticket, now);
         return <article className="event-ticket" key={ticket.id} data-ticket-status={status}>
           <div className="event-ticket-top"><span className="event-format">{attendanceLabels[ticket.attendance]}</span><span className="event-ticket-status" data-status={status}>{ticketStatusLabels[status]}</span></div>
-          <div className="event-ticket-summary"><h3>{ticket.name}</h3><strong className="event-ticket-price">{ticket.price === 0 ? "Gratis" : money(ticket.price)}</strong><span className="event-ticket-unit">per tiket</span><p className="event-ticket-quota">{Math.max(0, ticket.quotaLeft)} dari {ticket.quota} tiket tersedia</p>{(ticket.startsAt || ticket.endsAt) && <p className="event-ticket-period">{ticket.startsAt && <>Mulai {eventDateTime(ticket.startsAt)}<br /></>}{ticket.endsAt && <>Sampai {eventDateTime(ticket.endsAt)}</>}</p>}</div>
+          <div className="event-ticket-summary">
+            <div className="event-ticket-main"><h3>{ticket.name}</h3><strong className="event-ticket-price">{ticket.price === 0 ? "Gratis" : money(ticket.price)}</strong><span className="event-ticket-unit">per tiket</span></div>
+            <div className="event-ticket-availability" aria-label={`${Math.max(0, ticket.quotaLeft)} dari ${ticket.quota} tiket tersedia`}>
+              <span>Tiket tersedia</span>
+              <strong>{Math.max(0, ticket.quotaLeft).toLocaleString("id-ID")}</strong>
+              <small>dari {ticket.quota.toLocaleString("id-ID")}</small>
+            </div>
+            {(ticket.startsAt || ticket.endsAt) && <p className="event-ticket-period">{ticket.startsAt && <>Mulai {eventDateTime(ticket.startsAt)}<br /></>}{ticket.endsAt && <>Sampai {eventDateTime(ticket.endsAt)}</>}</p>}
+          </div>
           <div className="event-ticket-benefits"><ul>{ticket.benefits.map(benefit => <li key={benefit}><Check size={17} aria-hidden="true" /><span>{benefit}</span></li>)}</ul></div>
           <div className="event-ticket-footer">
             {ticket.quantityLimit && <p className="event-section-note">Maksimal {ticket.quantityLimit} tiket per pemesanan.</p>}

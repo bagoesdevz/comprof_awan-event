@@ -1,0 +1,3 @@
+export default function DashboardLoading() {
+  return <div className="mx-auto max-w-[1280px] animate-pulse" role="status" aria-label="Memuat dashboard peserta"><div className="h-3 w-40 rounded-full bg-primary-100" /><div className="mt-5 h-14 max-w-lg rounded-2xl bg-primary-100" /><div className="mt-4 h-4 max-w-md rounded-full bg-content-title/10" /><div className="mt-9 grid gap-3 sm:grid-cols-3">{Array.from({ length: 3 }, (_, index) => <div key={index} className="h-40 rounded-[24px_24px_24px_6px] bg-white shadow-diffusion" />)}</div><div className="mt-6 h-[430px] rounded-[28px_28px_28px_7px] bg-primary-950" /><span className="sr-only">Memuat...</span></div>;
+}

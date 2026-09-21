@@ -1,0 +1,3 @@
+export default function AdminLoading() {
+  return <div className="mx-auto max-w-[1440px] animate-pulse" role="status" aria-label="Memuat dashboard admin"><div className="h-3 w-44 rounded-full bg-primary-100" /><div className="mt-5 h-14 max-w-xl rounded-2xl bg-primary-100" /><div className="mt-4 h-4 max-w-md rounded-full bg-content-title/10" /><div className="mt-9 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <div key={index} className="h-40 rounded-[24px_24px_24px_6px] bg-white shadow-diffusion" />)}</div><div className="mt-6 h-[420px] rounded-[26px_26px_26px_7px] bg-white shadow-diffusion" /><span className="sr-only">Memuat...</span></div>;
+}

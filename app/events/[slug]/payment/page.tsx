@@ -1,0 +1,2 @@
+import { Checkout } from "@/components/platform/checkout";import { PublicShell } from "@/components/site/public-shell";
+export default function PaymentPage({params,searchParams}:{params:{slug:string};searchParams:{registration?:string}}){return <PublicShell><div className="px-4 py-14"><Checkout slug={params.slug} registrationId={typeof searchParams.registration==="string"?searchParams.registration:undefined}/></div></PublicShell>;}

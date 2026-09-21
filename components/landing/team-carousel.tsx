@@ -1,0 +1,2 @@
+import { companyProfile } from "@/lib/company-profile";
+export function TeamCarousel(){return <section className="brand-section"><div className="brand-container"><h2 className="mb-8">Tim Awan Event</h2><div className="grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">{companyProfile.team.map(m=><article key={m.name} className="border-t border-primary-100 pt-5"><h3 className="text-lg font-semibold">{m.name}</h3><p className="mt-2 text-sm text-content-muted">{m.role}</p></article>)}</div></div></section>;}

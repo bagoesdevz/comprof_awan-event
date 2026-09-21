@@ -1,0 +1,1 @@
+import { EventPresentation } from "@/components/platform/event-presentation";import { PublicShell } from "@/components/site/public-shell";export default function Page({params}:{params:{slug:string}}){return <PublicShell><EventPresentation slug={params.slug}/></PublicShell>;}

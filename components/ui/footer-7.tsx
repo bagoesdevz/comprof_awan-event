@@ -1,6 +1,9 @@
+"use client";
+
 import type { ReactElement } from "react";
 import Image from "next/image";
 import { FaFacebook, FaInstagram, FaLinkedin, FaTwitter, FaYoutube } from "react-icons/fa";
+import { usePlatform } from "@/components/platform/provider";
 
 export interface Footer7Props {
   logo?: {
@@ -97,6 +100,15 @@ export function Footer7({
     href: "https://www.berdignus.my.id",
   },
 }: Footer7Props) {
+  const { state, ready } = usePlatform();
+  const visibleSections = sections.map((section) => ({
+    ...section,
+    links: section.links.filter((link) => {
+      if (link.href !== "/login" && link.href !== "/register-account") return true;
+      return ready && !state.session.loggedIn;
+    }),
+  }));
+
   return (
     <footer className="border-t border-primary-100 bg-primary-950 text-white" aria-label="Footer Awan Event">
       <div className="brand-container py-16 sm:py-20 lg:py-24">
@@ -128,7 +140,7 @@ export function Footer7({
           </div>
 
           <div className="grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-3 sm:gap-6 lg:gap-10">
-            {sections.map((section, sectionIndex) => (
+            {visibleSections.map((section, sectionIndex) => (
               <section key={section.title} className={sectionIndex === 2 ? "col-span-2 sm:col-span-1" : undefined} aria-labelledby={`footer-${section.title.toLowerCase().replaceAll(" ", "-")}`}>
                 <h2 id={`footer-${section.title.toLowerCase().replaceAll(" ", "-")}`} className="font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-primary-400">{section.title}</h2>
                 <ul className={`mt-5 grid gap-1 text-sm text-white/60 ${sectionIndex === 2 ? "grid-cols-2 sm:grid-cols-1" : ""}`}>

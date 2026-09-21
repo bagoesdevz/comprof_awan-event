@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { usePlatform } from "@/components/platform/provider";
 
 export type Navbar7Link = {
   label: string;
@@ -33,6 +34,7 @@ export function Navbar7({
   ctaLabel = "Daftar",
 }: Navbar7Props) {
   const pathname = usePathname();
+  const { state, ready } = usePlatform();
   const [open, setOpen] = useState(false);
   const toggleRef = useRef<HTMLButtonElement>(null);
 
@@ -72,6 +74,9 @@ export function Navbar7({
     );
   });
 
+  const signedIn = ready && state.session.loggedIn;
+  const accountHref = state.session.role === "participant" ? "/dashboard" : "/admin";
+
   return (
     <header className="public-header">
       <div className="brand-container relative flex min-h-[80px] items-center justify-between gap-5 py-3">
@@ -81,20 +86,33 @@ export function Navbar7({
           {navigationLinks}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
-          <Link
-            href={loginHref}
-            className="inline-flex min-h-11 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-content-title transition-colors hover:bg-primary-100 hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
-          >
-            {loginLabel}
-          </Link>
-          <Link
-            href={ctaHref}
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-950 px-6 text-[13px] font-semibold text-white shadow-[0_10px_24px_-14px_rgba(33,16,82,0.8)] transition hover:-translate-y-0.5 hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
-          >
-            {ctaLabel}
-          </Link>
-        </div>
+        {ready && (
+          <div className="hidden items-center gap-2 lg:flex">
+            {signedIn ? (
+              <Link
+                href={accountHref}
+                className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-950 px-6 text-[13px] font-semibold text-white shadow-[0_10px_24px_-14px_rgba(33,16,82,0.8)] transition hover:-translate-y-0.5 hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href={loginHref}
+                  className="inline-flex min-h-11 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-content-title transition-colors hover:bg-primary-100 hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
+                >
+                  {loginLabel}
+                </Link>
+                <Link
+                  href={ctaHref}
+                  className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-950 px-6 text-[13px] font-semibold text-white shadow-[0_10px_24px_-14px_rgba(33,16,82,0.8)] transition hover:-translate-y-0.5 hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
+                >
+                  {ctaLabel}
+                </Link>
+              </>
+            )}
+          </div>
+        )}
 
         <button
           ref={toggleRef}
@@ -119,22 +137,36 @@ export function Navbar7({
           aria-hidden={!open}
         >
           <div className="grid gap-1">{navigationLinks}</div>
-          <div className="mt-3 grid grid-cols-2 gap-2 border-t border-content-title/10 pt-3">
-            <Link
-              href={loginHref}
-              className="inline-flex min-h-12 items-center justify-center rounded-full border border-content-title/10 bg-white px-4 text-sm font-semibold text-content-title"
-              tabIndex={open ? undefined : -1}
-            >
-              {loginLabel}
-            </Link>
-            <Link
-              href={ctaHref}
-              className="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-950 px-4 text-sm font-semibold text-white"
-              tabIndex={open ? undefined : -1}
-            >
-              {ctaLabel}
-            </Link>
-          </div>
+          {ready && (
+            <div className={`mt-3 grid gap-2 border-t border-content-title/10 pt-3 ${signedIn ? "grid-cols-1" : "grid-cols-2"}`}>
+              {signedIn ? (
+                <Link
+                  href={accountHref}
+                  className="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-950 px-4 text-sm font-semibold text-white"
+                  tabIndex={open ? undefined : -1}
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href={loginHref}
+                    className="inline-flex min-h-12 items-center justify-center rounded-full border border-content-title/10 bg-white px-4 text-sm font-semibold text-content-title"
+                    tabIndex={open ? undefined : -1}
+                  >
+                    {loginLabel}
+                  </Link>
+                  <Link
+                    href={ctaHref}
+                    className="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-950 px-4 text-sm font-semibold text-white"
+                    tabIndex={open ? undefined : -1}
+                  >
+                    {ctaLabel}
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
         </nav>
       </div>
     </header>

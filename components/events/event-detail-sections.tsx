@@ -11,7 +11,6 @@ import { lifecycleLabels, money, type Block, type ManagedEvent } from "@/lib/pla
 
 type SectionProps = { event: ManagedEvent; block: Block; id: string };
 type AttendanceProps = { attendance: Attendance; onAttendanceChange: (attendance: Attendance) => void };
-const participantPortraits = ["photo-1494790108377-be9c29b29330", "photo-1500648767791-00dcc994a43e", "photo-1534528741775-53994a69daeb", "photo-1507003211169-0a1dd7228f2d"];
 const defaultModerator: ManagedEvent["speakers"][number] = { photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&h=520&q=85", name: "Moderator Event", role: "Moderator", organization: "Awan Event Network", bio: "Memandu alur diskusi, tanya jawab, dan rangkuman sesi selama kegiatan." };
 
 function eventSpeakerProfiles(event: ManagedEvent): ManagedEvent["speakers"] {
@@ -29,9 +28,9 @@ export function EventImage({ src, alt, className = "", priority = false }: { src
   return <div className={`event-image ${className}`}>{failed ? <span className="event-image-fallback">Gambar belum tersedia</span> : <Image src={src} alt={alt} fill unoptimized priority={priority} sizes="(max-width: 760px) 90vw, 560px" onError={() => setFailed(true)} />}</div>;
 }
 
-export function EventHero({ event, block, id, ticketAnchor }: SectionProps & { ticketAnchor?: string }) {
+export function EventHero({ event, block, id, ticketAnchor, participantCount }: SectionProps & { ticketAnchor?: string; participantCount: number }) {
   const visual = eventVisual(event, block);
-  const joined = Math.max(0, event.capacity - event.quotaLeft);
+  const joined = Math.max(0, participantCount);
   const benefitItems = [
     { Icon: GraduationCap, title: "Pemateri ahli", text: event.speakers.length ? "Praktisi berpengalaman" : "Segera diumumkan" },
     { Icon: BookOpen, title: "Materi terstruktur", text: "Relevan dan aplikatif" },
@@ -56,10 +55,9 @@ export function EventHero({ event, block, id, ticketAnchor }: SectionProps & { t
           </dl>
           <div className="event-hero-actions"><EventAction event={event} />{ticketAnchor && <a href={`#${ticketAnchor}`} className="brand-button brand-button--outline">Lihat pilihan tiket<ArrowRight size={16} aria-hidden="true" /></a>}</div>
           <div className="event-participant-proof">
-            <div className="event-participant-avatars" aria-hidden="true">{participantPortraits.map(photo => <span key={photo}><Image src={`https://images.unsplash.com/${photo}?auto=format&fit=crop&w=96&h=96&q=80`} alt="" fill unoptimized sizes="34px" /></span>)}</div>
-            <p><strong>{joined > 0 ? `${joined.toLocaleString("id-ID")} peserta` : "Pendaftaran dibuka"}</strong><span>{joined > 0 ? "telah bergabung dalam event ini" : "Jadilah bagian dari sesi ini"}</span></p>
+            <div className="event-participant-avatars" aria-hidden="true"><span><Users size={18} /></span></div>
+            <p><strong>{joined.toLocaleString("id-ID")} peserta</strong><span>terdaftar di event ini</span></p>
           </div>
-          <p className="event-hero-note"><span className="event-category">{event.category}</span><span>Satu akun untuk seluruh perjalanan belajar.</span></p>
         </div>
         <div className="event-hero-visual">
           <div className="event-hero-visual-heading"><span className="brand-eyebrow">Awan Event · {event.programType}</span><BrandSlogan /></div>

@@ -41,7 +41,7 @@ export type Campaign = {id:string;name:string;eventSlug:string;audience:string;t
 export type CmsArticle = {id:string;slug:string;title:string;category:string;cover:string;content:string;excerpt:string;author:string;seoTitle:string;seoDescription:string;publishDate:string;status:"Draft"|"Review"|"Published"|"Archived"};
 export type PlatformState = {
   version:1; session:{loggedIn:boolean;email:string;role:Role}; profiles:Record<string,Profile>; events:ManagedEvent[];
-  registrations:Registration[]; notices:Notice[]; leads:Lead[]; waitlist:WaitEntry[]; templates:Template[]; campaigns:Campaign[];
+  registrations:Registration[]; participantCounts:Record<string,number>; notices:Notice[]; leads:Lead[]; waitlist:WaitEntry[]; templates:Template[]; campaigns:Campaign[];
   cms:Record<string,{title:string;body:string;image:string;status:string}>; articles:CmsArticle[];
 };
 export const activityLabels:Record<Activity,string>={"pre-test":"Pre-test",attendance:"Kehadiran","post-test":"Post-test",feedback:"Feedback"};
@@ -64,7 +64,7 @@ export function newRegistration(event:ManagedEvent,ticketId:string,p:Profile):Re
 }
 export const defaultProfile=blankProfile("");
 export function initialState():PlatformState{return {
- version:1,session:{loggedIn:false,email:"",role:"participant"},profiles:{},events:[],registrations:[],notices:[],leads:[],waitlist:[],templates:[],campaigns:[],cms:{},articles:[]
+ version:1,session:{loggedIn:false,email:"",role:"participant"},profiles:{},events:[],registrations:[],participantCounts:{},notices:[],leads:[],waitlist:[],templates:[],campaigns:[],cms:{},articles:[]
 };}
 export function eligible(r:Registration,e?:ManagedEvent){return r.payment==="paid"&&(!e?.preTest.enabled||r.progress["pre-test"])&&r.progress.attendance&&(!e?.postTest.enabled||r.progress["post-test"])&&r.progress.feedback;}
 export function nextAction(r:Registration,e:ManagedEvent){

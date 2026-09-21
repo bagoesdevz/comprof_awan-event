@@ -20,7 +20,7 @@ function ExtraBlock({ event, block, id }: { event: ManagedEvent; block: Block; i
   </section>;
 }
 
-function EventDetail({ event }: { event: ManagedEvent }) {
+function EventDetail({ event, participantCount }: { event: ManagedEvent; participantCount: number }) {
   const [attendance, setAttendance] = useState<Attendance>(() => eventAttendanceMode(event));
   const [now, setNow] = useState(Date.now);
   useEffect(() => {
@@ -52,7 +52,7 @@ function EventDetail({ event }: { event: ManagedEvent }) {
     {sections.map(({ block, id }) => {
       const props = { event, block, id };
       const attendanceProps = { attendance: selectedAttendance, onAttendanceChange: setAttendance };
-      if (block.type === "Hero") return <EventHero key={block.id} {...props} ticketAnchor={ticketAnchor} />;
+      if (block.type === "Hero") return <EventHero key={block.id} {...props} participantCount={participantCount} ticketAnchor={ticketAnchor} />;
       if (block.type === "Speaker") return <EventSpeakerSection key={block.id} {...props} />;
       if (block.type === "About") return <EventAboutSection key={block.id} {...props} />;
       if (block.type === "Benefits") return <EventBenefitsSection key={block.id} {...props} />;
@@ -73,5 +73,5 @@ export function EventPresentation({ slug, previewEvent }: { slug: string; previe
   const event = previewEvent || state.events.find(item => item.slug === slug);
   if (!ready && !previewEvent) return <div className="brand-container event-detail-loading" role="status" aria-label="Memuat detail event"><div /><div /><span className="sr-only">Memuat detail event…</span></div>;
   if (!event || (!previewEvent && event.publication !== "published")) return <div className="brand-container event-detail-section"><Empty title="Event belum tersedia" href="/events" /></div>;
-  return <EventDetail key={event.slug} event={event} />;
+  return <EventDetail key={event.slug} event={event} participantCount={state.participantCounts[event.slug] || 0} />;
 }

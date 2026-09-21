@@ -2,7 +2,7 @@ import "server-only";
 import type { User } from "@supabase/supabase-js";
 import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
-import { blankProfile,initialState,activityAllowed,type PlatformState,type ManagedEvent } from "@/lib/platform-model";
+import { blankProfile,initialState,activityAllowed,type PlatformState,type ManagedEvent,type Registration } from "@/lib/platform-model";
 import type { RecordRow,Collection,Change } from "@/lib/platform-records";
 import { HttpError } from "./http";
 export function roleOf(user:User|null){const role=user?.app_metadata?.role;return role==="super"||role==="operational"?role:"participant";}
@@ -36,6 +36,8 @@ export function eventForViewer(event:ManagedEvent,state:PlatformState,admin:bool
 export async function snapshot(user:User|null){
  const state=initialState(),revisions:Record<string,number>={},admin=roleOf(user)!=="participant",email=user?.email?.toLowerCase();
  state.session={loggedIn:!!user,email:email||"",role:roleOf(user)};
+ const allRegistrations=await records("registrations");
+ for(const row of allRegistrations){const registration=row.data as unknown as Registration;if(registration.payment!=="paid")continue;state.participantCounts[registration.eventSlug]=(state.participantCounts[registration.eventSlug]||0)+Math.max(1,registration.quantity||1);}
  const groups=await Promise.all([
  records("events",undefined,admin?undefined:true),records("cms",undefined,admin?undefined:true),records("articles",undefined,admin?undefined:true),
  ...(email?[records("profiles",admin?undefined:email),records("registrations",admin?undefined:email),records("notices",admin?undefined:email)]:[]),

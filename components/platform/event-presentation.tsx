@@ -41,18 +41,20 @@ function EventDetail({ event, participantCount }: { event: ManagedEvent; partici
     ids.add(id);
     return { block, id };
   });
-  const ticketAnchor = sections.find(({ block }) => block.type === "Ticket" || block.type === "Pricing")?.id;
+  const countdownSections = sections.filter(({ block }) => block.type === "Countdown");
   const hasHero = blocks.some(block => block.type === "Hero");
-
+  const orderedSections = hasHero
+    ? sections.flatMap(section => section.block.type === "Hero" ? [section, ...countdownSections] : section.block.type === "Countdown" ? [] : [section])
+    : [...countdownSections, ...sections.filter(({ block }) => block.type !== "Countdown")];
   const template = event.programType.toLowerCase().includes("webinar") ? "webinar" : event.programType.toLowerCase().includes("seminar") ? "seminar" : event.programType.toLowerCase().includes("pelatihan") || event.programType.toLowerCase().includes("workshop") ? "pelatihan" : "default";
 
   return <div className={`event-detail-page event-template-${template}`}>
     <nav className="brand-container event-breadcrumb" aria-label="Breadcrumb"><Link href="/">Beranda</Link><ChevronRight size={13} aria-hidden="true" /><Link href="/events">Event</Link><ChevronRight size={13} aria-hidden="true" /><span aria-current="page">{event.title}</span></nav>
     {!hasHero && <header className="brand-container event-no-hero"><span className="brand-eyebrow">{event.programType}</span><h1>{event.title}</h1></header>}
-    {sections.map(({ block, id }) => {
+    {orderedSections.map(({ block, id }) => {
       const props = { event, block, id };
       const attendanceProps = { attendance: selectedAttendance, onAttendanceChange: setAttendance };
-      if (block.type === "Hero") return <EventHero key={block.id} {...props} participantCount={participantCount} ticketAnchor={ticketAnchor} />;
+      if (block.type === "Hero") return <EventHero key={block.id} {...props} participantCount={participantCount} />;
       if (block.type === "Speaker") return <EventSpeakerSection key={block.id} {...props} />;
       if (block.type === "About") return <EventAboutSection key={block.id} {...props} />;
       if (block.type === "Benefits") return <EventBenefitsSection key={block.id} {...props} />;

@@ -9,6 +9,7 @@ export type EventSummary = {
   category: string;
   type: EventType;
   startAt: string;
+  endAt?: string;
   duration: string;
   city: string;
   venue: string;

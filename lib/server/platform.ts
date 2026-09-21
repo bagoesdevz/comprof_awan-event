@@ -21,7 +21,14 @@ export async function record(collection:string,id:string){
 }
 export async function findEvent(slug:string){const {data,error}=await getServiceSupabaseClient().from("platform_records").select("*").eq("collection","events").eq("data->>slug",slug).maybeSingle();if(error)throw new Error(error.message);if(!data)throw new HttpError(404,"Event tidak ditemukan.");return data as unknown as RecordRow;}
 export function liveEvent(event:ManagedEvent):ManagedEvent{
- const now=Date.now();return {...event,lifecycle:now<new Date(event.startAt).getTime()?"upcoming":now>new Date(event.endAt).getTime()?"completed":"ongoing"};
+ const normalized=structuredClone(event);
+ if(normalized.tickets.length===1&&normalized.capacity!==normalized.tickets[0].quota){
+  const ticket=normalized.tickets[0],sold=Math.max(0,ticket.quota-ticket.quotaLeft);
+  ticket.quota=normalized.capacity;ticket.quotaLeft=Math.max(0,normalized.capacity-sold);
+ }
+ normalized.capacity=normalized.tickets.reduce((total,ticket)=>total+ticket.quota,0);
+ normalized.quotaLeft=normalized.tickets.reduce((total,ticket)=>total+ticket.quotaLeft,0);
+ const now=Date.now();return {...normalized,lifecycle:now<new Date(normalized.startAt).getTime()?"upcoming":now>new Date(normalized.endAt).getTime()?"completed":"ongoing"};
 }
 export function eventForViewer(event:ManagedEvent,state:PlatformState,admin:boolean):ManagedEvent{
  const e=structuredClone(liveEvent(event));if(admin)return e;

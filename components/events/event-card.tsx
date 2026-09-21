@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { EventType, EventSummary, RegistrationStatus } from "@/lib/event-types";
+import { eventTimeRange } from "@/lib/event-time";
 
 const typeLabel: Record<EventType, string> = {
   ONLINE: "Online",
@@ -149,7 +150,7 @@ export function EventCard({ event, index }: EventCardProps) {
           <div>
             <dt className="detail-label">Tanggal &amp; waktu</dt>
             <dd className="detail-value">{dateFormatter.format(new Date(event.startAt))}</dd>
-            <dd className="mt-1 text-xs text-content-muted">{event.duration}</dd>
+            <dd className="mt-1 text-xs text-content-muted">{eventTimeRange(event.startAt, event.endAt)}</dd>
           </div>
           <div>
             <dt className="detail-label">Lokasi</dt>

@@ -105,7 +105,7 @@ export function Footer7({
     ...section,
     links: section.links.filter((link) => {
       if (link.href !== "/login" && link.href !== "/register-account") return true;
-      return ready && !state.session.loggedIn;
+      return !ready || !state.session.loggedIn;
     }),
   }));
 
@@ -120,7 +120,7 @@ export function Footer7({
               </span>
               <span>
                 <strong className="block font-display text-2xl font-bold tracking-[-0.045em]">{logo.title}</strong>
-                <span className="mt-1 block text-[10px] tracking-[0.02em] text-white/45">Educate · Empower · Better Tomorrow</span>
+                <span className="mt-1 block text-[10px] tracking-[0.02em] text-white/75">Educate · Empower · Better Tomorrow</span>
               </span>
             </a>
 
@@ -142,7 +142,7 @@ export function Footer7({
           <div className="grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-3 sm:gap-6 lg:gap-10">
             {visibleSections.map((section, sectionIndex) => (
               <section key={section.title} className={sectionIndex === 2 ? "col-span-2 sm:col-span-1" : undefined} aria-labelledby={`footer-${section.title.toLowerCase().replaceAll(" ", "-")}`}>
-                <h2 id={`footer-${section.title.toLowerCase().replaceAll(" ", "-")}`} className="font-mono text-[10px] font-medium uppercase tracking-[0.15em] text-primary-400">{section.title}</h2>
+                <h2 id={`footer-${section.title.toLowerCase().replaceAll(" ", "-")}`} className="text-sm font-semibold text-white">{section.title}</h2>
                 <ul className={`mt-5 grid gap-1 text-sm text-white/60 ${sectionIndex === 2 ? "grid-cols-2 sm:grid-cols-1" : ""}`}>
                   {section.links.map((link) => (
                     <li key={link.href}>
@@ -155,7 +155,7 @@ export function Footer7({
           </div>
         </div>
 
-        <div className="mt-14 grid gap-5 border-t border-white/10 pt-7 text-xs text-white/45 md:grid-cols-[1fr_auto] md:items-center">
+        <div className="mt-14 grid gap-5 border-t border-white/10 pt-7 text-xs text-white/75 md:grid-cols-[1fr_auto] md:items-center">
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
             <p>{copyright}</p>
             <p>

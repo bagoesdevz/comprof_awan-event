@@ -8,6 +8,7 @@ import "./speakers.css";
 import "./testimonials.css";
 import "./event-detail.css";
 import "./production.css";
+import "./admin-polish.css";
 import { PlatformProvider } from "@/components/platform/provider";
 
 const mono = DM_Mono({

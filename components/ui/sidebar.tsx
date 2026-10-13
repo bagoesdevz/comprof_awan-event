@@ -114,7 +114,7 @@ export const SidebarInset = React.forwardRef<HTMLElement, React.ComponentProps<"
 export const SidebarTrigger = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(function SidebarTrigger({ className, onClick, ...props }, ref) {
   const { toggleSidebar } = useSidebar();
   return (
-    <Button ref={ref} type="button" variant="ghost" size="icon" className={cn("h-11 w-11 rounded-2xl bg-primary-100 text-primary-800 hover:bg-primary-100 hover:text-primary-950", className)} onClick={(event) => { onClick?.(event); toggleSidebar(); }} aria-label="Buka atau tutup sidebar" {...props}>
+    <Button ref={ref} type="button" variant="ghost" size="icon" className={cn("h-11 w-11 rounded-xl text-content-body hover:bg-primary-100 hover:text-primary-950", className)} onClick={(event) => { onClick?.(event); toggleSidebar(); }} aria-label="Buka atau tutup sidebar" {...props}>
       <PanelLeft className="h-5 w-5" aria-hidden="true" />
     </Button>
   );

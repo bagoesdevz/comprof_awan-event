@@ -147,10 +147,9 @@ export function ParticipantsStudio() {
     <div className="participants-studio mx-auto max-w-[1440px]">
       <PageHeading
         eyebrow="Operasional / Peserta"
-        title="Peserta dan enrollment"
-        description="Telusuri akun, event, tiket, pembayaran, dan progres peserta dari satu ruang kerja."
+        title="Peserta"
         action={
-          <button type="button" className="flow-button secondary" onClick={downloadCsv}>
+          <button type="button" className="flow-button secondary" onClick={downloadCsv} disabled={!rows.length}>
             <Download size={16} aria-hidden="true" />
             Ekspor CSV
           </button>
@@ -269,8 +268,9 @@ export function ParticipantsStudio() {
         {!rows.length && (
           <div className="participant-empty">
             <Search size={22} aria-hidden="true" />
-            <h3>Peserta tidak ditemukan</h3>
-            <p>Coba ubah kata kunci atau filter yang digunakan.</p>
+            <h3>{state.registrations.length ? "Peserta tidak ditemukan" : "Belum ada peserta"}</h3>
+            <p>{state.registrations.length ? "Coba ubah kata kunci atau filter yang digunakan." : "Pendaftaran akan muncul setelah peserta mengikuti event."}</p>
+            {(query.trim() || payment !== "all" || eventSlug !== "all") && <button type="button" className="flow-button secondary mt-4" onClick={() => { setQuery(""); setPayment("all"); setEventSlug("all"); }}>Hapus filter</button>}
           </div>
         )}
       </section>

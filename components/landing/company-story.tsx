@@ -76,7 +76,7 @@ export function CompanyStory({ section = "all" }: { section?: CompanyStorySectio
                 <p key={idx}>{p}</p>
               ))}
               <Link href="/about" className="brand-button">
-                Lihat company profile
+                Tentang Awan Event
               </Link>
               <ul className="about-values">
                 <li><ShieldCheck size={18} aria-hidden="true" />Profesional</li>
@@ -183,13 +183,14 @@ export function ServicesSection() {
             const Icon = icons[index];
             return (
               <article key={number} data-reveal>
+                <span className="service-number" aria-hidden="true">{number}</span>
                 <span className={`brand-icon ${index === 3 ? "brand-icon--pink" : ""}`}>
                   <Icon size={25} aria-hidden="true" />
                 </span>
                 <h3>{title}</h3>
                 <p>{copy}</p>
-                <Link href="/events" className="brand-text-link">
-                  Jelajahi event <ArrowRight size={15} aria-hidden="true" />
+                <Link href={index === 3 ? "/programs/request" : "/events"} className="brand-text-link">
+                  {index === 3 ? "Ajukan program institusi" : "Lihat event terkait"} <ArrowRight size={15} aria-hidden="true" />
                 </Link>
               </article>
             );
@@ -209,8 +210,8 @@ export function ContactCta() {
       id="kontak"
       title={cmsCta?.title ? cmsCta.title : <>Rencanakan program<br />untuk institusi Anda.</>}
       description={cmsCta?.body || "Temukan program sesuai kebutuhan Anda."}
-      buttonText="Lihat event"
-      buttonHref="/events"
+      buttonText="Ajukan program institusi"
+      buttonHref="/programs/request"
       avatars={[]}
     />{cmsCta?.image&&<div className="brand-container py-8"><Image src={cmsCta.image} unoptimized alt={cmsCta.title} width={1200} height={675} className="max-h-96 w-full object-contain"/></div>}</>
   );

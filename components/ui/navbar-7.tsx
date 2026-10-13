@@ -86,7 +86,7 @@ export function Navbar7({
           {navigationLinks}
         </nav>
 
-        {ready && (
+        {(
           <div className="hidden items-center gap-2 lg:flex">
             {signedIn ? (
               <Link
@@ -117,13 +117,14 @@ export function Navbar7({
         <button
           ref={toggleRef}
           type="button"
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-content-title/10 bg-white text-primary-800 shadow-sm transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 lg:hidden"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-content-title/10 bg-white px-3 text-sm font-semibold text-primary-800 transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 lg:hidden"
           aria-expanded={open}
           aria-controls="awan-public-menu"
           aria-label={open ? "Tutup menu" : "Buka menu"}
           onClick={() => setOpen((current) => !current)}
         >
           {open ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
+          <span>Menu</span>
         </button>
 
         <nav
@@ -137,7 +138,7 @@ export function Navbar7({
           aria-hidden={!open}
         >
           <div className="grid gap-1">{navigationLinks}</div>
-          {ready && (
+          {(
             <div className={`mt-3 grid gap-2 border-t border-content-title/10 pt-3 ${signedIn ? "grid-cols-1" : "grid-cols-2"}`}>
               {signedIn ? (
                 <Link

@@ -162,12 +162,12 @@ export function CertificateMonitoring() {
   return (
     <>
       <section
-        className="grid gap-px overflow-hidden rounded-[24px_24px_24px_6px] border border-content-title/10 bg-content-title/10 sm:grid-cols-3"
+        className="grid gap-px overflow-hidden rounded-2xl border border-content-title/10 bg-content-title/10 sm:grid-cols-3"
         aria-label="Ringkasan sertifikat"
       >
         <article className="bg-white p-5 sm:p-6">
           <MailCheck className="h-5 w-5 text-[#087A55]" aria-hidden="true" />
-          <span className="mt-5 detail-label">Email terkirim</span>
+          <span className="mt-5 mb-2 block text-xs text-content-muted">Email terkirim</span>
           <strong className="text-3xl font-semibold tracking-[-0.04em]">{sentCount}</strong>
           <p className="mt-2 text-xs text-content-muted">
             Dari {certRows.length} sertifikat terdaftar
@@ -175,22 +175,22 @@ export function CertificateMonitoring() {
         </article>
         <article className="bg-white p-5 sm:p-6">
           <Download className="h-5 w-5 text-primary-600" aria-hidden="true" />
-          <span className="mt-5 detail-label">Sudah diunduh</span>
+          <span className="mt-5 mb-2 block text-xs text-content-muted">Sudah diunduh</span>
           <strong className="text-3xl font-semibold tracking-[-0.04em]">{downloadedCount}</strong>
           <p className="mt-2 text-xs text-content-muted">Peserta telah membuka sertifikat</p>
         </article>
-        <article className="bg-primary-950 p-5 text-white sm:p-6">
-          <TriangleAlert className="h-5 w-5 text-primary-400" aria-hidden="true" />
-          <span className="mt-5 mb-2 block font-mono text-[9px] uppercase tracking-[0.12em] text-primary-400">
+        <article className={`p-5 sm:p-6 ${attentionCount > 0 ? "bg-[#FEF2F2]" : "bg-white"}`}>
+          <TriangleAlert className={`h-5 w-5 ${attentionCount > 0 ? "text-[#B42318]" : "text-primary-600"}`} aria-hidden="true" />
+          <span className="mt-5 mb-2 block text-xs text-content-muted">
             Perlu ditindaklanjuti
           </span>
           <strong className="text-3xl font-semibold tracking-[-0.04em]">{attentionCount}</strong>
-          <p className="mt-2 text-xs text-white/55">Menunggu kelayakan atau email gagal</p>
+          <p className="mt-2 text-xs text-content-muted">Menunggu kelayakan atau email gagal</p>
         </article>
       </section>
 
       <section
-        className="mt-6 overflow-hidden rounded-[26px_26px_26px_7px] border border-content-title/10 bg-white shadow-diffusion"
+        className="mt-6 overflow-hidden rounded-2xl border border-content-title/10 bg-white"
         aria-labelledby="cert-monitor-title"
       >
         <div className="border-b border-content-title/10 p-5 sm:p-7">
@@ -245,7 +245,7 @@ export function CertificateMonitoring() {
         ) : filtered.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1100px] text-left">
-              <thead className="bg-surface-muted font-mono text-[9px] uppercase tracking-[0.1em] text-content-muted">
+              <thead className="bg-surface-muted text-xs text-content-muted">
                 <tr>
                   <th className="px-5 py-4 font-medium sm:px-7">Peserta</th>
                   <th className="px-5 py-4 font-medium">Event</th>

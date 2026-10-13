@@ -9,12 +9,14 @@ import { ArticleEditor } from "@/components/admin/article-editor";
 import { type CmsArticle } from "@/lib/platform-model";
 
 const sections = ["Home", "About", "Team", "Services", "Partners", "FAQ", "CTA", "Footer"];
+const sectionLabels: Record<string, string> = { Home: "Pembuka", About: "Tentang kami", Team: "Tim", Services: "Layanan", Partners: "Mitra", FAQ: "Pertanyaan umum", CTA: "Ajakan program", Footer: "Footer" };
 
 export default function AdminCmsPage() {
   const { state, update, saving } = usePlatform();
   const [section, setSection] = useState("Home");
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [notice, setNotice] = useState("");
+  const [noticeTone, setNoticeTone] = useState<"success" | "danger">("success");
   const [tab, setTab] = useState<"pages" | "articles">("pages");
   const [editingArticle, setEditingArticle] = useState<CmsArticle | null>(null);
 
@@ -28,6 +30,7 @@ export default function AdminCmsPage() {
   function select(key: string) {
     setSection(key);
     setMode("edit");
+    setNotice("");
   }
 
   async function save(e: FormEvent) {
@@ -38,6 +41,7 @@ export default function AdminCmsPage() {
       s.cms[section] = payload;
     });
     setNotice(ok ? "Konten tersimpan." : "Perubahan belum tersimpan. Coba lagi.");
+    setNoticeTone(ok ? "success" : "danger");
   }
 
   function newArticle() {
@@ -80,22 +84,23 @@ export default function AdminCmsPage() {
         }
       />
 
-      <div className="flow-tabs" role="tablist">
-        <button role="tab" aria-selected={tab === "pages"} onClick={() => setTab("pages")}>
+      <div className="flow-tabs" role="group" aria-label="Jenis konten">
+        <button type="button" aria-pressed={tab === "pages"} onClick={() => setTab("pages")}>
           Halaman
         </button>
-        <button role="tab" aria-selected={tab === "articles"} onClick={() => setTab("articles")}>
+        <button type="button" aria-pressed={tab === "articles"} onClick={() => setTab("articles")}>
           Artikel ({state.articles.length})
         </button>
       </div>
 
       {tab === "pages" && (
         <>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="cms-section-picker mt-4" role="group" aria-label="Bagian halaman">
             {sections.map((x) => (
               <button
                 key={x}
                 type="button"
+                aria-pressed={section === x}
                 className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
                   section === x
                     ? "bg-primary-950 text-white"
@@ -103,20 +108,20 @@ export default function AdminCmsPage() {
                 }`}
                 onClick={() => select(x)}
               >
-                {x}
+                {sectionLabels[x]}
               </button>
             ))}
           </div>
 
           {notice && (
-            <p className={`flow-alert mt-4 ${notice.startsWith("Gagal") ? "danger" : "success"}`} role="status">
+            <p className={`flow-alert mt-4 ${noticeTone}`} role={noticeTone === "danger" ? "alert" : "status"}>
               {notice}
             </p>
           )}
 
           <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
             {mode === "edit" ? (
-              <Panel title={"Konten " + section}>
+              <Panel title={"Konten " + sectionLabels[section]}>
                 <form onSubmit={save} className="grid gap-5">
                   <Field label="Judul">
                     <input
@@ -143,6 +148,7 @@ export default function AdminCmsPage() {
                         try {
                           setDraft({ ...draft, image: await readImage(file) });
                         } catch (err) {
+                          setNoticeTone("danger");
                           setNotice((err as Error).message);
                         }
                       }}
@@ -155,7 +161,7 @@ export default function AdminCmsPage() {
                   )}
                   <div className="flex flex-wrap justify-between gap-3 border-t pt-6">
                     <Badge tone={value.status === "Published" ? "success" : "warning"}>
-                      {value.status === "Published" ? "Published" : "Draft"}
+                      {value.status === "Published" ? "Terbit" : "Draf"}
                     </Badge>
                     <button className="flow-button" disabled={saving}>
                       <Save size={16} />
@@ -166,12 +172,13 @@ export default function AdminCmsPage() {
               </Panel>
             ) : (
               <Panel title="Pratinjau konten">
-                <div className="rounded-2xl bg-primary-950 p-7 text-white">
-                  <span className="font-mono text-xs text-primary-400">{section}</span>
-                  <h2 className="mt-5 text-4xl font-semibold">{draft.title}</h2>
-                  <p className="mt-5 whitespace-pre-line text-sm leading-7 text-white/65">
+                <div className="rounded-xl bg-surface-muted p-6">
+                  <span className="text-xs font-medium text-content-muted">{sectionLabels[section]}</span>
+                  <h2 className="mt-4 text-2xl font-semibold">{draft.title}</h2>
+                  <p className="mt-4 whitespace-pre-line text-sm leading-7 text-content-body">
                     {draft.body || "Belum ada isi konten."}
                   </p>
+                  {draft.image && <Image src={draft.image} unoptimized alt="Pratinjau visual" width={900} height={600} className="mt-6 max-h-80 w-full rounded-xl object-contain" />}
                 </div>
               </Panel>
             )}

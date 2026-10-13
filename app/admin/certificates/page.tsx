@@ -11,8 +11,7 @@ export default function AdminCertificatesPage() {
   return (
     <div className="mx-auto max-w-[1440px]">
       <PageHeading
-        title="Monitoring sertifikat"
-        description="Pantau status penerbitan dan kelayakan sertifikat peserta event."
+        title="Sertifikat"
       />
       <div className="mt-8">
         <CertificateMonitoring />

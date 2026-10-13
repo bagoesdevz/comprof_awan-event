@@ -13,13 +13,13 @@ export default function HomePage() {
       <MotionObserver />
       <LearningHero />
       <TrustBar />
-      <CompanyStory section="about" />
       <section id="event-list" className="brand-section featured-programs">
         <div className="brand-container">
           <div className="brand-section-heading"><div data-reveal><h2>Event mendatang</h2></div><div><Link href="/events" className="brand-text-link">Lihat semua event <ArrowRight size={16} aria-hidden="true" /></Link></div></div>
           <FeaturedPrograms />
         </div>
       </section>
+      <CompanyStory section="about" />
       <ServicesSection />
       <ProfessionalSpeakers />
       <CompanyStory section="vision" />

@@ -13,9 +13,12 @@ const config: Config = {
           950: "#211052",
           900: "#32186B",
           800: "#452A95",
+          700: "#5031AD",
           600: "#5B3CC4",
+          500: "#7051D5",
           400: "#A855F7",
           100: "#F0EBFF",
+          50: "#F8F5FF",
         },
         accent: "#D66FD6",
         brandBlue: "#4A6CF7",
@@ -28,7 +31,7 @@ const config: Config = {
         content: {
           title: "#211052",
           body: "#5D607D",
-          muted: "#73758D",
+          muted: "#62647B",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",

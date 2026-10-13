@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import { motion, useInView, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
-import { BarChart3, GraduationCap, Heart, Lightbulb, Pause, Play } from "lucide-react";
+import { BarChart3, GraduationCap, Heart, Pause, Play } from "lucide-react";
 import { usePlatform } from "@/components/platform/provider";
 import styles from "./learning-hero.module.css";
 
@@ -52,10 +52,7 @@ export function LearningHero() {
       data-motion={motionEnabled ? "running" : "paused"}
       onPointerMove={handlePointerMove} onPointerLeave={() => { mouseX.set(0); mouseY.set(0); }}>
       <div className={styles.decorations} aria-hidden="true">
-        <motion.div style={{ x: backgroundX }} className={styles.glowPosition}><div className={styles.glowRight} /></motion.div>
-        <div className={styles.glowCenter} />
-        <div className={styles.circle} />
-        <div className={styles.orbit} />
+        <motion.div style={{ x: backgroundX }} className={styles.circle} />
         <div className={`${styles.wave} ${styles.waveOne}`} />
         <div className={`${styles.wave} ${styles.waveTwo}`} />
         <div className={`${styles.wave} ${styles.waveThree}`} />
@@ -79,7 +76,6 @@ export function LearningHero() {
           </p>
           <div className={`${styles.actions} ${styles.reveal}`}>
             <a href="#event-list" className={`${styles.button} ${styles.primary}`}>
-              <span className={styles.shine} aria-hidden="true" />
               <span className={styles.buttonLabel}>Lihat event mendatang</span>
             </a>
             <a href="#tentang" className={`${styles.button} ${styles.secondary}`}>Kenali Awan Event</a>
@@ -109,11 +105,7 @@ export function LearningHero() {
               <IconBox pink><Heart size={20} aria-hidden="true" /></IconBox>
               <div><p className={styles.cardTitle}>Program institusi</p><p className={styles.cardCopy}>Sesuai kebutuhan<br />organisasi</p></div>
             </FloatingCard>
-            <div className={styles.quote}><Lightbulb size={25} aria-hidden="true" /><p>Investasi terbaik<br />adalah ilmu.</p></div>
-            <div className={styles.slogan}><p>Learn,<br />Grow,<br />Bright<br />Tomorrow.</p></div>
-            <FloatingBall className={styles.ballOne} delay={0} />
-            <FloatingBall className={styles.ballTwo} delay={1} />
-            <FloatingBall className={styles.ballThree} delay={2} />
+            <div className={styles.slogan}><p>Learn, Grow,<br />Bright Tomorrow.</p></div>
           </div>
         </div>
       </div>
@@ -134,8 +126,4 @@ function FloatingCard({ children, className, delay = 0, rotate = 0 }: { children
 
 function IconBox({ children, pink = false }: { children: ReactNode; pink?: boolean }) {
   return <div className={`${styles.iconBox} ${pink ? styles.iconPink : ""}`}>{children}</div>;
-}
-
-function FloatingBall({ className, delay }: { className: string; delay: number }) {
-  return <div aria-hidden="true" className={`${styles.ball} ${className}`} style={{ animationDelay: `${delay}s` }} />;
 }

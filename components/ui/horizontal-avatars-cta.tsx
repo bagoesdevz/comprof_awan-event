@@ -52,26 +52,22 @@ export function HorizontalAvatarsCTA({
       aria-labelledby={id ? id + "-title" : undefined}
     >
       <div className={styles.decorations} aria-hidden="true">
-        <div className={styles.glow} />
-        <div className={cn(styles.ring, styles.ringSmall)} />
-        <div className={cn(styles.ring, styles.ringLarge)} />
         <div className={cn(styles.wave, styles.waveOne)} />
         <div className={cn(styles.wave, styles.waveTwo)} />
       </div>
 
       <motion.div
         className={styles.content}
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 18 }}
+        initial={false}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
       >
-        <span className={styles.eyebrow}>Bergabung dan berkembang bersama</span>
         <h2 id={id ? id + "-title" : undefined}>{title}</h2>
         <p>{description}</p>
         <a className={styles.button} href={buttonHref}>{buttonText}</a>
       </motion.div>
 
-      <div className={styles.avatarRail} aria-label="Peserta yang belajar bersama Awan Event">
+      {avatars.length > 0 && <div className={styles.avatarRail} aria-label="Peserta yang belajar bersama Awan Event">
         {avatars.map((avatar, index) => (
           <motion.div
             key={avatar.src + "-" + index}
@@ -99,9 +95,7 @@ export function HorizontalAvatarsCTA({
             />
           </motion.div>
         ))}
-      </div>
-
-      <span className={styles.note}>Komunitas belajar yang terus bertumbuh</span>
+      </div>}
     </section>
   );
 }

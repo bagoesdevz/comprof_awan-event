@@ -88,25 +88,25 @@ const adminGroups: SidebarNavigationGroup[] = [
     label: "Peserta & kegiatan",
     items: [
       { href: "/admin/operations/participants", label: "Peserta", icon: Users },
-      { href: "/admin/operations/waitlist", label: "Waitlist", icon: ListChecks },
+      { href: "/admin/operations/waitlist", label: "Daftar tunggu", icon: ListChecks },
       { href: "/admin/operations/evaluations", label: "Evaluasi", icon: ClipboardCheck },
       { href: "/admin/certificates", label: "Sertifikat", icon: Award },
       { href: "/admin/check-in", label: "Check-in", icon: QrCode },
     ],
   },
   {
-    label: "Finance & komunikasi",
+    label: "Keuangan & komunikasi",
     items: [
       { href: "/admin/payments", label: "Transaksi", icon: CreditCard },
-      { href: "/admin/operations/finance", label: "Finance", icon: WalletCards },
-      { href: "/admin/reminders", label: "Pengingat WA", icon: Megaphone },
+      { href: "/admin/operations/finance", label: "Keuangan", icon: WalletCards },
+      { href: "/admin/reminders", label: "Draf pesan", icon: Megaphone },
     ],
   },
   {
     label: "Sistem",
     superOnly: true,
     items: [
-      { href: "/admin/users", label: "Users & roles", icon: ShieldCheck },
+      { href: "/admin/users", label: "Akun & peran", icon: ShieldCheck },
       { href: "/admin/operations/settings", label: "Pengaturan", icon: UserCog },
     ],
   },
@@ -166,7 +166,7 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
                       asChild
                       isActive={active}
                       tooltip={item.label}
-                      className={expanded ? "min-h-10 rounded-xl text-[13px] font-medium" : undefined}
+                      className={expanded ? "min-h-11 rounded-xl text-[13px] font-medium" : undefined}
                     >
                       <Link href={item.href} aria-current={active ? "page" : undefined} onClick={closeMobile}>
                         <Icon aria-hidden="true" />
@@ -190,14 +190,14 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
           return (
             <Collapsible
               key={`${platformState.session.role}-${group.label}`}
-              defaultOpen={groupIsActive || area === "participant"}
+              defaultOpen={groupIsActive || area === "participant" || group.label === "Event & konten"}
               className="group/collapsible"
             >
               <SidebarGroup>
                 <CollapsibleTrigger asChild>
                   <button
                     type="button"
-                    className="flex min-h-10 w-full items-center gap-2 rounded-xl px-3 text-left text-[13px] font-medium text-content-body outline-none transition hover:bg-primary-100/70 hover:text-primary-800 focus-visible:ring-2 focus-visible:ring-primary-400 data-[state=open]:bg-primary-100/40 data-[state=open]:text-primary-800"
+                    className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-left text-xs font-semibold text-content-body outline-none transition hover:bg-primary-100/70 hover:text-primary-800 focus-visible:ring-2 focus-visible:ring-primary-600 data-[state=open]:text-primary-800"
                   >
                     <span className="min-w-0 flex-1 truncate">{group.label}</span>
                     <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" aria-hidden="true" />
@@ -234,7 +234,7 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
               onClick={() => update((draft) => { draft.session.loggedIn = false; })}
               aria-label="Keluar dari akun"
               title="Keluar"
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-content-muted transition hover:bg-white hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400"
+              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-content-muted transition hover:bg-white hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
             </Link>

@@ -9,11 +9,12 @@ input::placeholder, textarea::placeholder { color: var(--ui-muted); opacity: 1; 
 .flow-heading h1, #admin-content h1, #participant-content h1 { font-size: clamp(28px, 3vw, 38px); line-height: 1.2; letter-spacing: -.03em; margin-top: 0; }
 .flow-heading p { max-width: 65ch; }
 .flow-panel { min-width: 0; border-radius: 16px; box-shadow: none; }
+.flow-panel > div > h2 { font-size: 18px; line-height: 1.4; }
 .flow-panel .flow-panel { border: 0; padding-inline: 0; border-radius: 0; }
 .flow-button { min-height: 44px; border-radius: 10px; letter-spacing: normal; }
-.flow-button.secondary:hover { color: #fff; }
+.flow-button.secondary:hover { color: #452a95; background: #f0ebff; border-color: #9783c5; }
 .flow-button:disabled { cursor: not-allowed; opacity: .55; }
-.flow-field input, .flow-field select, .flow-field textarea { min-width: 0; border-radius: 10px; font-size: 16px; }
+.flow-field input:not([type=checkbox]):not([type=radio]), .flow-field select, .flow-field textarea { min-width: 0; border-radius: 10px; font-size: 16px; border-color: #948ba6; }
 .flow-field small { color: var(--ui-muted); }
 .flow-tabs { max-width: 100%; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: thin; }
 .flow-tabs > * { flex-shrink: 0; }
@@ -33,7 +34,22 @@ input::placeholder, textarea::placeholder { color: var(--ui-muted); opacity: 1; 
 .public-page-hero p { max-width: 60ch; }
 .save-status { position: fixed; bottom: 20px; right: 20px; z-index: 80; max-width: min(420px,calc(100% - 32px)); border: 1px solid var(--ui-border); border-radius: 12px; background: #fff; padding: 14px 18px; box-shadow: 0 8px 28px -12px #21105244; font-size: 14px; }
 .admin-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.program-state { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; padding: 32px; border: 1px solid var(--ui-border); border-radius: 16px; background: white; }
+.program-state > svg { color: #5b3cc4; }
+.program-state > div { flex: 1; min-width: min(100%,220px); }
+.program-state h3 { font-size: 20px; font-weight: 600; }
+.program-state p { margin-top: 6px; color: var(--ui-muted); font-size: 14px; line-height: 1.7; }
+.featured-program-grid--single { grid-template-columns: minmax(0,1fr); }
+.featured-program-grid--single .program-card { display: grid; grid-template-columns: minmax(0,.85fr) minmax(0,1.15fr); }
+.featured-program-grid--single .program-card-image { min-height: 280px; aspect-ratio: auto; }
+.featured-program-grid--single .program-card-copy { padding: 32px; }
+.featured-program-grid--single h3 { font-size: clamp(22px,2.5vw,30px); }
 @media (max-width: 640px) {
+ .program-state { padding: 24px; align-items: flex-start; }
+ .program-state .brand-button { width: 100%; }
+ .featured-program-grid--single .program-card { display: flex; }
+ .featured-program-grid--single .program-card-image { min-height: 0; aspect-ratio: 1.85; }
+ .featured-program-grid--single .program-card-copy { padding: 24px; }
  .flow-heading { align-items: flex-start; }
  .flow-panel { padding: 20px; }
  .flow-heading > :last-child { max-width: 100%; }

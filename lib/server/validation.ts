@@ -1,9 +1,13 @@
 import { z } from "zod";
 const text=z.string().trim().max(10000),short=z.string().trim().max(254);
-const image=z.string().max(2048).refine(v=>!v||v.startsWith("/")&&!v.startsWith("//")||/^https:\/\//.test(v),"URL gambar tidak valid.");
+const image=z.string().max(2048).refine(v=>{
+ if(!v)return true;
+ if(v.startsWith("/"))return !v.startsWith("//")&&!v.includes("\\")&&!/[\u0000-\u001f]/.test(v);
+ try{const url=new URL(v);return url.protocol==="https:"&&!url.username&&!url.password;}catch{return false;}
+},"URL gambar tidak valid.");
 const timestamp=z.string().refine(v=>!v||Number.isFinite(Date.parse(v)),"Tanggal tidak valid.");
-const question=z.object({id:short.min(1),text:text.min(1),options:z.array(short.min(1)).min(2).max(8),correct:z.number().int().min(0),score:z.number().min(1).max(100)}).refine(q=>q.correct<q.options.length);
-const assessment=z.object({enabled:z.boolean(),questions:z.array(question).max(100),passingScore:z.number().min(0).max(100),attempts:z.number().int().min(1).max(20),timeLimit:z.number().int().min(1).max(300)}).refine(a=>!a.enabled||a.questions.length>0,"Tambahkan soal evaluasi.");
+const question=z.object({id:short.min(1),text,options:z.array(short).min(2).max(8),correct:z.number().int().min(0),score:z.number().min(1).max(100)}).refine(q=>q.correct<q.options.length);
+const assessment=z.object({enabled:z.boolean(),questions:z.array(question).max(100),passingScore:z.number().min(0).max(100),attempts:z.number().int().min(1).max(20),timeLimit:z.number().int().min(1).max(300)}).refine(a=>new Set(a.questions.map(q=>q.id)).size===a.questions.length,"ID soal harus unik.");
 export const eventSchema=z.object({
  id:short.min(1),slug:z.string().max(120).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),title:short.min(3),
  programType:z.enum(["Webinar","Seminar","Pelatihan","Workshop"]),type:z.enum(["ONLINE","ONSITE","HYBRID"]),
@@ -26,7 +30,11 @@ export const eventSchema=z.object({
 }).refine(e=>Number.isFinite(Date.parse(e.startAt))&&Date.parse(e.endAt)>Date.parse(e.startAt),"Waktu selesai harus setelah waktu mulai.")
  .refine(e=>e.publication!=="published"||e.tickets.length>0,"Tambahkan tiket sebelum menerbitkan.")
  .refine(e=>new Set(e.tickets.map(t=>t.id)).size===e.tickets.length,"ID tiket harus unik.")
- .refine(e=>!e.certificateEnabled||!!e.certificateTemplate,"Unggah template sertifikat.");
+ .refine(e=>new Set(e.blocks.map(block=>block.id)).size===e.blocks.length,"ID bagian halaman harus unik.")
+ .refine(e=>new Set(e.customFields.map(field=>field.id)).size===e.customFields.length,"ID kolom pendaftaran harus unik.")
+ .refine(e=>e.tickets.every(ticket=>!ticket.startsAt||!ticket.endsAt||Date.parse(ticket.endsAt)>Date.parse(ticket.startsAt)),"Periode penjualan tiket tidak valid.")
+ .refine(e=>e.publication!=="published"||[e.preTest,e.postTest].every(test=>!test.enabled||test.questions.length>0&&test.questions.every(q=>q.text.trim()&&q.options.every(option=>option.trim()))),"Lengkapi soal dan pilihan jawaban sebelum menerbitkan.")
+ .refine(e=>e.publication!=="published"||!e.certificateEnabled||!!e.certificateTemplate,"Unggah template sertifikat.");
 export const profileSchema=z.object({name:short.min(2),email:z.string().email(),phone:short.min(8),gender:z.enum(["male","female","prefer_not_to_say"]),birthPlace:short.min(2),birthDate:timestamp,profession:short.min(2),institution:short,city:short.min(2),address:text,province:short,position:short,category:short,specialization:short,source:short.min(1)});
 export const contentSchema=z.object({title:short.min(1),body:text,image,status:z.enum(["Draft","Published"])});
 export const articleSchema=z.object({id:short,slug:z.string().regex(/^[a-z0-9-]+$/),title:short.min(1),category:short,cover:image,content:text,excerpt:text,author:short,seoTitle:short,seoDescription:text,publishDate:timestamp,status:z.enum(["Draft","Review","Published","Archived"])});

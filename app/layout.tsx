@@ -22,7 +22,7 @@ const caveat = Caveat({ subsets: ["latin"], weight: ["400", "500"], variable: "-
 export const metadata: Metadata = {
   title: "Awan Event | Learn, Grow, Bright Tomorrow",
   description:
-    "Temukan event, training, assessment, dan sertifikasi profesional di Awan Event.",
+    "Webinar, seminar, dan pelatihan kesehatan untuk tenaga kesehatan serta institusi.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

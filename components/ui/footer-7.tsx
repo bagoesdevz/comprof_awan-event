@@ -116,7 +116,7 @@ export function Footer7({
           <div className="flex flex-col items-start">
             <a href={logo.url} className="inline-flex min-h-11 items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-4 focus-visible:ring-offset-primary-950">
               <span className="grid h-14 w-14 shrink-0 overflow-hidden rounded-full border border-white/15 bg-white">
-                <Image src={logo.src} alt={logo.alt} title={logo.title} width={56} height={56} className="h-full w-full object-cover" />
+                <Image src={logo.src} unoptimized alt={logo.alt} title={logo.title} width={56} height={56} className="h-full w-full object-cover" />
               </span>
               <span>
                 <strong className="block font-display text-2xl font-bold tracking-[-0.045em]">{logo.title}</strong>

@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/certificates",
       "schedule": "7 0 * * *"
+    },
+    {
+      "path": "/api/cron/payments",
+      "schedule": "15 0 * * *"
     }
   ]
 }

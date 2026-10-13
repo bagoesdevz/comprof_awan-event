@@ -6,17 +6,15 @@ import { useEffect, useState, type ReactNode } from "react";
 import { ArrowRight, CalendarDays, Check, ChevronDown, ExternalLink, GraduationCap, Headphones, MapPin, Target, Users, Video } from "lucide-react";
 import { BrandSlogan, BrandWaves } from "@/components/brand/brand-elements";
 import { EventAction } from "@/components/events/event-action";
-import { attendanceLabels, attendanceOptions, blockTitle, eventAttendanceMode, eventDate, eventDateTime, eventFaq, eventVisual, participationSteps, ticketState, type Attendance } from "@/lib/event-detail";
+import { attendanceLabels, attendanceOptions, blockTitle, eventAttendanceMode, eventDate, eventDateTime, eventFaq, eventHeroContent, eventVisual, participationSteps, ticketState, type Attendance } from "@/lib/event-detail";
 import { eventTimeRange } from "@/lib/event-time";
 import { lifecycleLabels, money, type Block, type ManagedEvent } from "@/lib/platform-model";
 
 type SectionProps = { event: ManagedEvent; block: Block; id: string };
 type AttendanceProps = { attendance: Attendance; onAttendanceChange: (attendance: Attendance) => void };
-const defaultModerator: ManagedEvent["speakers"][number] = { photo: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&h=520&q=85", name: "Moderator Event", role: "Moderator", organization: "Awan Event Network", bio: "Memandu alur diskusi, tanya jawab, dan rangkuman sesi selama kegiatan." };
-
 function eventSpeakerProfiles(event: ManagedEvent): ManagedEvent["speakers"] {
-  const profiles = event.speakers.length ? event.speakers : [{ name: event.speaker, role: "Pembicara utama", organization: "Awan Event Network", bio: "Praktisi yang memfasilitasi sesi berbasis pengalaman dan studi kasus." }];
-  return profiles.length === 1 ? [...profiles, defaultModerator] : profiles;
+  if (event.speakers.length) return event.speakers;
+  return event.speaker.trim() ? [{ name: event.speaker, role: "Pembicara", organization: "", bio: "" }] : [];
 }
 
 export function EventSectionHeading({ eyebrow, title, children }: { eyebrow: string; title: string; children?: ReactNode }) {
@@ -30,15 +28,15 @@ export function EventImage({ src, alt, className = "", priority = false }: { src
 }
 
 export function EventHero({ event, block, id, participantCount }: SectionProps & { participantCount: number }) {
-  const visual = eventVisual(event, block);
+  const { title, summary, visual } = eventHeroContent(event, block);
   const joined = Math.max(0, participantCount);
   return <section id={id} className="event-detail-hero">
       <BrandWaves className="event-hero-waves" />
       <div className="brand-container event-hero-grid">
         <div className="event-hero-copy">
           <div className="event-labels"><span className="event-tag">{event.programType}</span><span className="event-format">{attendanceLabels[event.type]}</span><span className="event-lifecycle" data-status={event.lifecycle}>{lifecycleLabels[event.lifecycle]}</span></div>
-          <h1>{event.title}</h1>
-          <p className="event-hero-summary">{event.summary || event.description}</p>
+          <h1>{title}</h1>
+          <p className="event-hero-summary">{summary}</p>
           <dl className="event-hero-meta">
             <div><span className="event-hero-meta-icon"><CalendarDays aria-hidden="true" size={22} /></span><div><dt>Tanggal & waktu</dt><dd>{eventDate(event.startAt)}<small>{eventTimeRange(event.startAt, event.endAt)}</small></dd></div></div>
             <div><span className="event-hero-meta-icon">{event.type === "ONLINE" ? <Video aria-hidden="true" size={22} /> : <MapPin aria-hidden="true" size={22} />}</span><div><dt>{event.type === "ONLINE" ? "Platform" : "Lokasi kegiatan"}</dt><dd>{event.type === "ONLINE" ? `Online melalui ${event.meetingProvider}` : event.mapLabel || event.venue}<small>{event.type === "HYBRID" ? `Tersedia juga online melalui ${event.meetingProvider}` : event.type === "ONLINE" ? "Akses melalui dashboard peserta" : event.city}</small></dd></div></div>
@@ -103,13 +101,13 @@ export function EventAccessSection({ event, block, id, attendance, onAttendanceC
   const mode = attendanceOptions(event).length === 1 ? eventAttendanceMode(event) : attendance;
   const online = mode === "ONLINE";
   const selectable = attendanceOptions(event).length > 1;
-  const platform = event.programType.toLowerCase() === "webinar" ? "Zoom" : event.meetingProvider;
+  const platform = event.meetingProvider;
   const location = event.mapLabel || event.venue;
   return <section id={id} className="brand-container event-detail-section">
-    <EventSectionHeading eyebrow="Akses & alur kehadiran" title={blockTitle(block, online ? "Bergabung dari mana saja." : "Sampai bertemu di lokasi kegiatan.")}>{selectable ? "Pilih cara hadir untuk melihat petunjuk yang sesuai dengan tiket Anda." : online ? "Akses webinar tersedia melalui Zoom." : "Seminar berlangsung secara offline di lokasi kegiatan."}</EventSectionHeading>
+    <EventSectionHeading eyebrow="Akses & alur kehadiran" title={blockTitle(block, online ? "Bergabung dari mana saja." : "Sampai bertemu di lokasi kegiatan.")}>{selectable ? "Pilih cara hadir untuk melihat petunjuk yang sesuai dengan tiket Anda." : online ? `Akses sesi tersedia melalui ${platform}.` : "Kegiatan berlangsung tatap muka di lokasi yang tercantum."}</EventSectionHeading>
     <AttendanceSelector event={event} attendance={attendance} onAttendanceChange={onAttendanceChange} label="Petunjuk kehadiran" />
     <div className="event-access-grid" data-attendance={mode}>
-      <div className="event-access-place"><span className="brand-icon">{online ? <Video size={26} aria-hidden="true" /> : <MapPin size={26} aria-hidden="true" />}</span><span className="brand-eyebrow">{online ? "Akses online" : "Lokasi tatap muka"}</span><h3>{online ? platform : location || "Lokasi segera diumumkan"}</h3><p>{online ? "Selesaikan pembayaran dan pre-test. Buka akses sesi melalui dashboard saat kegiatan dimulai." : event.venueAddress || event.city}</p>{!online && location && <a className="brand-text-link" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([location, event.venueAddress, event.city].filter(Boolean).join(" "))}`} target="_blank" rel="noreferrer">Buka Google Maps<ExternalLink size={15} aria-hidden="true" /></a>}<p className="event-section-note">{online ? "Siapkan perangkat, koneksi internet, dan audio yang memadai." : "Siapkan tiket QR dan identitas sesuai data pendaftaran untuk check-in."}</p></div>
+      <div className="event-access-place"><span className="brand-icon">{online ? <Video size={26} aria-hidden="true" /> : <MapPin size={26} aria-hidden="true" />}</span><span className="brand-eyebrow">{online ? "Akses online" : "Lokasi tatap muka"}</span><h3>{online ? platform : location || "Lokasi segera diumumkan"}</h3><p>{online ? `Lengkapi pendaftaran${event.preTest.enabled ? " dan pre-test" : ""}. Buka akses sesi melalui dashboard saat kegiatan dimulai.` : event.venueAddress || event.city}</p>{!online && location && <a className="brand-text-link" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([location, event.venueAddress, event.city].filter(Boolean).join(" "))}`} target="_blank" rel="noreferrer">Buka Google Maps<ExternalLink size={15} aria-hidden="true" /></a>}<p className="event-section-note">{online ? "Siapkan perangkat, koneksi internet, dan audio yang memadai." : "Siapkan tiket QR dan identitas sesuai data pendaftaran untuk check-in."}</p></div>
       <ol className="event-journey">{participationSteps(event, mode).map(step => <li key={step.title}><span className="event-journey-dot" aria-hidden="true" /><div><h3>{step.title}</h3><p>{step.text}</p></div></li>)}</ol>
     </div>
   </section>;

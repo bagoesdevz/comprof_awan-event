@@ -101,11 +101,6 @@ values (
   true,
   1
 )
-on conflict (collection, id) do update
-set
-  data = excluded.data,
-  published = excluded.published,
-  owner_email = excluded.owner_email,
-  updated_at = now();
+on conflict (collection, id) do nothing;
 
 commit;

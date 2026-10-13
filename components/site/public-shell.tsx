@@ -22,6 +22,7 @@ export function PublicFooter() {
   const footerCms = state.cms["Footer"];
   return (
     <Footer7
+      logo={footerCms?.image ? {url:"/",src:footerCms.image,alt:"Logo Awan Event",title:"Awan Event"} : undefined}
       description={footerCms?.body || undefined}
       copyright={footerCms?.title || undefined}
     />

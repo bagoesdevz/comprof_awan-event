@@ -23,6 +23,7 @@ import {
 import { BrandWaves } from "@/components/brand/brand-elements";
 import { companyProfile } from "@/lib/company-profile";
 import { TeamCarousel } from "@/components/landing/team-carousel";
+import { CmsContent } from "@/components/site/cms-content";
 
 const serviceIcons = [GraduationCap, Presentation, UsersRound, MonitorPlay, BookOpenCheck, Building2, Lightbulb, Network];
 const valueIcons = [Award, ShieldCheck, Handshake, Lightbulb, Sparkles, HeartHandshake];
@@ -50,10 +51,7 @@ export function CompanyProfilePage() {
 
           <div data-reveal>
             
-            <h2 className="mt-5 max-w-2xl text-[clamp(36px,5vw,64px)] font-semibold leading-[0.98] tracking-tight">Wadah profesional untuk belajar, berlatih, dan berkembang.</h2>
-            <div className="mt-7 grid gap-4 text-sm leading-7 text-content-body">
-              {companyProfile.overview.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-            </div>
+            <CmsContent section="About" fallbackTitle="Wadah profesional untuk belajar, berlatih, dan berkembang." fallbackBody={companyProfile.overview}/>
             <dl className="mt-9 grid gap-px overflow-hidden rounded-2xl border border-primary-600/10 bg-primary-600/10 sm:grid-cols-3">
               {[['8', 'Portofolio layanan'], ['14+', 'Bidang materi'], ['3', 'Format kegiatan']].map(([value, label]) => <div key={label} className="bg-white p-5"><dt className="text-xs text-content-muted">{label}</dt><dd className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-primary-800">{value}</dd></div>)}
             </dl>
@@ -110,6 +108,7 @@ export function CompanyProfilePage() {
       </section>
 
       <TeamCarousel />
+      <section className="brand-section"><div className="brand-container"><CmsContent section="Partners"/></div></section>
 
       <section id="program" className="brand-section bg-white">
         <div className="brand-container grid gap-6 lg:grid-cols-[1.15fr_.85fr]">

@@ -59,13 +59,14 @@ function toCertRow(r: Registration, eventTitle: string): CertRow | null {
         minute: "2-digit",
       })
     : "Belum tersedia";
-  // Derive email status from payment + certificate status
   const emailStatus: keyof typeof statusMeta =
-    r.certificate.status === "revoked"
+    r.certificate.emailError
       ? "failed"
-      : r.payment !== "paid"
-        ? "waiting"
-        : "sent";
+      : r.certificate.emailSentAt
+        ? "sent"
+        : r.certificate.emailClaimUntil && Date.parse(r.certificate.emailClaimUntil) > Date.now()
+          ? "processing"
+          : "waiting";
   return {
     id: r.certificate.number,
     participant: r.name,
@@ -73,8 +74,8 @@ function toCertRow(r: Registration, eventTitle: string): CertRow | null {
     event: eventTitle,
     issuedAt: issued,
     emailStatus,
-    emailedAt: r.paidAt
-      ? new Date(r.paidAt).toLocaleString("id-ID", {
+    emailedAt: r.certificate.emailSentAt
+      ? new Date(r.certificate.emailSentAt).toLocaleString("id-ID", {
           day: "2-digit",
           month: "short",
           year: "numeric",
@@ -82,8 +83,8 @@ function toCertRow(r: Registration, eventTitle: string): CertRow | null {
           minute: "2-digit",
         })
       : null,
-    downloadCount: 0,
-    lastDownloadedAt: null,
+    downloadCount: r.certificate.downloadCount ?? 0,
+    lastDownloadedAt: r.certificate.lastDownloadedAt ?? null,
     token: r.certificate.token,
   };
 }

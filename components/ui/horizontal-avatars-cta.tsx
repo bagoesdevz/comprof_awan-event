@@ -31,7 +31,7 @@ export function HorizontalAvatarsCTA({
   id,
 }: HorizontalAvatarsCTAProps) {
   const sectionRef = useRef<HTMLElement>(null);
-  const inView = useInView(sectionRef, { amount: 0.12 });
+  const inView = useInView(sectionRef, { amount: "some" });
   const reducedMotion = useReducedMotion();
   const [pageVisible, setPageVisible] = useState(true);
   const motionEnabled = inView && !reducedMotion && pageVisible;
@@ -105,4 +105,3 @@ export function HorizontalAvatarsCTA({
     </section>
   );
 }
-

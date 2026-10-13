@@ -24,6 +24,7 @@ export async function PATCH(request:Request){
    const schemas={events:eventSchema,cms:contentSchema,articles:articleSchema,leads:leadSchema,templates:templateSchema,campaigns:campaignSchema};
    if(!(change.collection in schemas))throw new HttpError(403,"Perubahan ini memerlukan tindakan khusus.");
    data=schemas[change.collection as keyof typeof schemas].parse(change.data);
+   if(change.collection==="cms"&&!["Home","About","Team","Services","Partners","FAQ","CTA","Footer"].includes(change.id))throw new HttpError(422,"Bagian konten tidak tersedia.");
    if(change.collection!=="cms"&&data.id!==change.id)throw new HttpError(422,"ID tidak cocok.");
    if(change.collection==="events"&&old){
     if(data.slug!==old.data.slug)throw new HttpError(422,"Slug event yang tersimpan tidak dapat diubah.");
@@ -32,7 +33,13 @@ export async function PATCH(request:Request){
     for(const ticket of before){const next=after.find(t=>t.id===ticket.id);const sold=ticket.quota-ticket.quotaLeft;if(sold>0&&(!next||next.quota<sold))throw new HttpError(409,"Tiket yang sudah dipesan tidak dapat dihapus atau dikurangi di bawah jumlah pesanan.");}
     after.forEach(t=>{const prev=before.find(v=>v.id===t.id);t.quotaLeft=t.quota-(prev?prev.quota-prev.quotaLeft:0)});
    }
-   if(change.collection==="events")published=data.publication==="published";
+   if(change.collection==="events"){
+    const tickets=data.tickets as Array<{quota:number;quotaLeft:number}>;
+    if(!old)tickets.forEach(ticket=>{ticket.quotaLeft=ticket.quota;});
+    data.capacity=tickets.reduce((total,ticket)=>total+ticket.quota,0);
+    data.quotaLeft=tickets.reduce((total,ticket)=>total+ticket.quotaLeft,0);
+    published=data.publication==="published";
+   }
    if(["cms","articles"].includes(change.collection))published=data.status==="Published";
    if(change.collection==="campaigns"&&old?.data.status!=="Queued"&&old)throw new HttpError(409,"Pesan yang sudah diproses tidak dapat diubah.");
   }

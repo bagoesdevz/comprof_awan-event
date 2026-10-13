@@ -1,133 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import {
-  getPublicSupabaseClient,
-  SupabaseConfigurationError,
-} from "@/lib/supabase/server";
-
-export const dynamic = "force-dynamic";
-
-const publicWebinarColumns = [
-  "id",
-  "slug",
-  "title",
-  "summary",
-  "category",
-  "event_type",
-  "city",
-  "venue",
-  "price",
-  "credits",
-  "registration_status",
-  "start_date",
-  "end_date",
-].join(",");
-
-const eventTypes = ["ONLINE", "ONSITE", "HYBRID"] as const;
-type EventType = (typeof eventTypes)[number];
-
-function isEventType(value: string): value is EventType {
-  return eventTypes.some((eventType) => eventType === value);
-}
-
-function errorResponse(code: string, message: string, status: number) {
-  return NextResponse.json({ error: { code, message } }, { status });
-}
-
-function parseLimit(value: string | null) {
-  if (value === null) return 12;
-
-  const limit = Number(value);
-  if (!Number.isInteger(limit) || limit < 1 || limit > 50) return null;
-
-  return limit;
-}
-
-export async function GET(request: NextRequest) {
-  const limit = parseLimit(request.nextUrl.searchParams.get("limit"));
-  if (limit === null) {
-    return errorResponse(
-      "INVALID_LIMIT",
-      "Parameter limit harus berupa bilangan bulat antara 1 dan 50.",
-      400,
-    );
-  }
-
-  const category = request.nextUrl.searchParams.get("category")?.trim();
-  if (category && category.length > 100) {
-    return errorResponse(
-      "INVALID_CATEGORY",
-      "Parameter category maksimal 100 karakter.",
-      400,
-    );
-  }
-
-  const eventTypeParam = request.nextUrl.searchParams.get("type")?.toUpperCase();
-  let eventType: EventType | undefined;
-  if (eventTypeParam) {
-    if (!isEventType(eventTypeParam)) {
-      return errorResponse(
-        "INVALID_EVENT_TYPE",
-        "Parameter type harus ONLINE, ONSITE, atau HYBRID.",
-        400,
-      );
-    }
-    eventType = eventTypeParam;
-  }
-
-  try {
-    const supabase = getPublicSupabaseClient();
-    let query = supabase
-      .from("webinars")
-      .select(publicWebinarColumns, { count: "exact" })
-      .eq("is_published", true)
-      .order("start_date", { ascending: true })
-      .limit(limit);
-
-    if (category) query = query.eq("category", category);
-    if (eventType) query = query.eq("event_type", eventType);
-
-    const { data, error, count } = await query;
-
-    if (error) {
-      console.error("Gagal mengambil daftar webinar", {
-        code: error.code,
-        message: error.message,
-      });
-      return errorResponse(
-        "WEBINAR_QUERY_FAILED",
-        "Daftar webinar belum dapat dimuat.",
-        502,
-      );
-    }
-
-    return NextResponse.json(
-      {
-        data: data ?? [],
-        meta: {
-          count: count ?? data?.length ?? 0,
-          limit,
-        },
-      },
-      {
-        headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-        },
-      },
-    );
-  } catch (error) {
-    if (error instanceof SupabaseConfigurationError) {
-      return errorResponse(
-        "SUPABASE_NOT_CONFIGURED",
-        "Layanan webinar belum dikonfigurasi.",
-        503,
-      );
-    }
-
-    console.error("Kesalahan tak terduga pada endpoint webinar", error);
-    return errorResponse(
-      "INTERNAL_SERVER_ERROR",
-      "Terjadi kesalahan saat memuat webinar.",
-      500,
-    );
-  }
-}
+import { z } from "zod";
+import { getServiceSupabaseClient } from "@/lib/supabase/server";
+import { publicEventData } from "@/lib/server/public-events";
+import { fail,json } from "@/lib/server/http";
+import type { ManagedEvent } from "@/lib/platform-model";
+export const dynamic="force-dynamic";
+const filters=z.object({limit:z.coerce.number().int().min(1).max(50).default(12),category:z.string().max(100).optional(),type:z.enum(["ONLINE","ONSITE","HYBRID"]).optional()});
+export async function GET(request:Request){try{
+ const input=filters.parse(Object.fromEntries(new URL(request.url).searchParams));
+ let query=getServiceSupabaseClient().from("platform_records").select("data",{count:"exact"}).eq("collection","events").eq("published",true).order("data->>startAt").limit(input.limit);
+ if(input.category)query=query.eq("data->>category",input.category);
+ if(input.type)query=query.eq("data->>type",input.type);
+ const {data,error,count}=await query;if(error)throw new Error("Event query failed");
+ return json({data:(data||[]).map(row=>publicEventData(row.data as unknown as ManagedEvent)),meta:{count:count||0,limit:input.limit}});
+}catch(error){return fail(error)}}

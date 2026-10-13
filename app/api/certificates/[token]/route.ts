@@ -10,8 +10,9 @@ function err(code: string, message: string, status: number) {
   return NextResponse.json({ error: { code, message } }, { status, headers: { "Cache-Control": "no-store" } });
 }
 
-export async function GET(_request: Request, { params }: { params: { token: string } }) {
-  const token = params.token.trim().toLowerCase();
+export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
+  const route = await params;
+  const token = route.token.trim().toLowerCase();
   if (!uuidPattern.test(token)) {
     return err("INVALID_TOKEN", "Token sertifikat tidak valid.", 422);
   }
@@ -53,6 +54,7 @@ export async function GET(_request: Request, { params }: { params: { token: stri
     }
 
     const event = evtRow?.data as unknown as ManagedEvent | undefined;
+    if(!event)return err("NOT_FOUND","Data event sertifikat tidak ditemukan.",404);
 
     return NextResponse.json(
       {
@@ -63,7 +65,7 @@ export async function GET(_request: Request, { params }: { params: { token: stri
           eventStartDate: event?.startAt ?? null,
           eventEndDate: event?.endAt ?? null,
           issuedAt: cert.issuedAt,
-          status: cert.status,
+          status: reg.payment==="paid" ? cert.status : "revoked",
         },
       },
       { headers: { "Cache-Control": "no-store" } },

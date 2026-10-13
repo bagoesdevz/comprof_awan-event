@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState,type FormEvent } from "react";
+import { useEffect,useState,type FormEvent } from "react";
 import { Eye,EyeOff } from "lucide-react";
 import { Field } from "@/components/platform/ui";
 import { usePlatform } from "@/components/platform/provider";
@@ -10,6 +10,7 @@ import { authErrorMessage } from "@/lib/auth-errors";
 import { safeNext } from "@/lib/platform-model";
 export function AuthForm({mode}:{mode:"login"|"register"}){
  const router=useRouter(),{refresh}=usePlatform();const [busy,setBusy]=useState(false),[error,setError]=useState(""),[sent,setSent]=useState(false),[show,setShow]=useState(false);
+ useEffect(()=>{if(new URLSearchParams(window.location.search).get("error")==="confirmation")setError("Tautan konfirmasi sudah kedaluwarsa atau tidak valid. Minta tautan baru melalui halaman lupa sandi.");},[]);
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();setBusy(true);setError("");const f=new FormData(e.currentTarget),email=String(f.get("email")).trim().toLowerCase(),password=String(f.get("password"));
   try{const auth=browserSupabase().auth;

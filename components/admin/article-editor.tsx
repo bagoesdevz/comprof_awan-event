@@ -155,7 +155,7 @@ export function ArticleEditor({
                 <span className="text-sm text-content-muted">Status</span>
                 <Badge tone={statusTone[draft.status]}>{draft.status}</Badge>
               </div>
-              <Field label="">
+              <Field label="Status penerbitan">
                 <select
                   value={draft.status}
                   onChange={(e) => set("status", e.target.value as CmsArticle["status"])}

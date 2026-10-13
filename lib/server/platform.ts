@@ -32,7 +32,7 @@ export function liveEvent(event:ManagedEvent):ManagedEvent{
 }
 export function eventForViewer(event:ManagedEvent,state:PlatformState,admin:boolean):ManagedEvent{
  const e=structuredClone(liveEvent(event));if(admin)return e;
- const reg=state.registrations.find(r=>r.eventSlug===e.slug);
+ const reg=state.registrations.find(r=>r.eventSlug===e.slug&&r.payment==="paid");
  const canJoin=reg&&activityAllowed(reg,e,"webinar")&&(!e.accessOpensAt||Date.now()>=new Date(e.accessOpensAt).getTime());
  if(!canJoin){e.meetingUrl="";e.meetingId="";e.meetingPasscode="";}
  e.preTest.questions=e.preTest.questions.map(q=>({...q,correct:-1}));
@@ -43,8 +43,9 @@ export function eventForViewer(event:ManagedEvent,state:PlatformState,admin:bool
 export async function snapshot(user:User|null){
  const state=initialState(),revisions:Record<string,number>={},admin=roleOf(user)!=="participant",email=user?.email?.toLowerCase();
  state.session={loggedIn:!!user,email:email||"",role:roleOf(user)};
- const allRegistrations=await records("registrations");
- for(const row of allRegistrations){const registration=row.data as unknown as Registration;if(registration.payment!=="paid")continue;state.participantCounts[registration.eventSlug]=(state.participantCounts[registration.eventSlug]||0)+Math.max(1,registration.quantity||1);}
+ const {data:counts,error:countError}=await getServiceSupabaseClient().rpc("platform_participant_counts",{});
+ if(countError)throw new Error("Participant counts unavailable");
+ for(const count of counts||[])state.participantCounts[count.event_slug]=Number(count.participants);
  const groups=await Promise.all([
  records("events",undefined,admin?undefined:true),records("cms",undefined,admin?undefined:true),records("articles",undefined,admin?undefined:true),
  ...(email?[records("profiles",admin?undefined:email),records("registrations",admin?undefined:email),records("notices",admin?undefined:email)]:[]),

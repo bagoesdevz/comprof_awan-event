@@ -5,6 +5,7 @@
 /.next/
 /.next-build-cache/
 /.next-copy-audit/
+/.next-hero-check/
 /out/
 
 # production
@@ -30,6 +31,8 @@ next-env.d.ts
 # local QA artifacts and agent metadata
 /.tmp-responsive-check/
 /tmp/
+/.next-production/
 /.claude/
 /.codex/
 /.ngodingpakeai/
+/supabase/.temp/

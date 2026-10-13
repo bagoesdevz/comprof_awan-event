@@ -58,6 +58,7 @@ export function CompanyStory({ section = "all" }: { section?: CompanyStorySectio
             <div className="about-photo" data-reveal>
               <Image
                 src={aboutImage}
+                unoptimized={Boolean(cmsAbout?.image)}
                 alt="Ilustrasi kolaborasi peserta dalam sesi belajar kelompok."
                 fill
                 sizes="(max-width: 760px) 90vw, 500px"
@@ -177,6 +178,7 @@ export function ServicesSection() {
           <p data-reveal>{servicesDesc}</p>
         </div>
         <div className="service-grid">
+          {cmsServices?.image&&<Image src={cmsServices.image} unoptimized alt={servicesTitle} width={1200} height={675} className="col-span-full max-h-96 w-full object-contain"/>}
           {services.map(([number, title, copy], index) => {
             const Icon = icons[index];
             return (
@@ -203,13 +205,13 @@ export function ContactCta() {
   const cmsCta = state.cms["CTA"];
 
   return (
-    <HorizontalAvatarsCTA
+    <><HorizontalAvatarsCTA
       id="kontak"
       title={cmsCta?.title ? cmsCta.title : <>Rencanakan program<br />untuk institusi Anda.</>}
       description={cmsCta?.body || "Temukan program sesuai kebutuhan Anda."}
       buttonText="Lihat event"
       buttonHref="/events"
       avatars={[]}
-    />
+    />{cmsCta?.image&&<div className="brand-container py-8"><Image src={cmsCta.image} unoptimized alt={cmsCta.title} width={1200} height={675} className="max-h-96 w-full object-contain"/></div>}</>
   );
 }

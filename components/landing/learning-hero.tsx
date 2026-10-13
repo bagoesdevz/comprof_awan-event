@@ -90,7 +90,7 @@ export function LearningHero() {
           <div className={styles.personPosition}>
             <motion.div className={styles.personMotion} style={{ x: personX, y: personY }}>
               <div className={styles.personReveal}>
-                <Image src="/brand/learning-professional.png" alt="Profesional muda dengan tablet, siap belajar bersama Awan Event" fill priority
+                <Image src={cmsHome?.image || "/brand/learning-professional.png"} alt={cmsHome?.image ? "Gambar program Awan Event" : "Profesional muda dengan tablet, siap belajar bersama Awan Event"} unoptimized={Boolean(cmsHome?.image)} fill priority
                   sizes="(max-width: 640px) 90vw, (max-width: 1023px) 500px, 40vw" className={styles.personImage} />
               </div>
             </motion.div>

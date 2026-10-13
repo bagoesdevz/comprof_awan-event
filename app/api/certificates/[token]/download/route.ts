@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServiceSupabaseClient, SupabaseConfigurationError } from "@/lib/supabase/server";
 import type { ManagedEvent, Registration } from "@/lib/platform-model";
+import { certificateTemplateData } from "@/lib/server/certificate-template";
+import { currentUser } from "@/lib/supabase/auth";
+import { requireUser, roleOf, record, commit } from "@/lib/server/platform";
+import { fail, HttpError } from "@/lib/server/http";
+import { z } from "zod";
 import { eligible } from "@/lib/platform-model";
 
 export const dynamic = "force-dynamic";
@@ -11,32 +16,21 @@ function xmlEscape(s: string) {
   return s.replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]!));
 }
 
-/** Izinkan hanya URL Supabase storage atau path relatif */
-function safeCertificateTemplateUrl(raw: string): string {
-  if (!raw) return "";
-  if (raw.startsWith("/") && !raw.startsWith("//")) return raw;
-  try {
-    const u = new URL(raw);
-    if (u.protocol === "https:" && /\.supabase\.co$/.test(u.hostname)) return raw;
-  } catch {
-    // bukan URL valid
-  }
-  return "";
-}
-
-export async function GET(_request: Request, { params }: { params: { token: string } }) {
-  const token = params.token.trim().toLowerCase();
+export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
+  const route = await params;
+  const token = route.token.trim().toLowerCase();
   if (!uuidPattern.test(token)) {
     return NextResponse.json({ error: "Token tidak valid." }, { status: 422 });
   }
 
   try {
+    const user = requireUser(await currentUser());
     const supabase = getServiceSupabaseClient();
 
     // Cari registrasi berdasarkan certificate.token di platform_records
     const { data, error } = await supabase
       .from("platform_records")
-      .select("data")
+      .select("id,data,owner_email")
       .eq("collection", "registrations")
       .eq("data->certificate->>token", token)
       .maybeSingle();
@@ -45,6 +39,7 @@ export async function GET(_request: Request, { params }: { params: { token: stri
       return NextResponse.json({ error: "Sertifikat tidak ditemukan." }, { status: 404 });
     }
 
+    if (data.owner_email !== user.email.toLowerCase() && roleOf(user) === "participant") throw new HttpError(403, "Sertifikat tidak diizinkan.");
     const reg = data.data as unknown as Registration;
     const cert = reg.certificate;
     if (!cert || cert.status !== "valid") {
@@ -55,7 +50,7 @@ export async function GET(_request: Request, { params }: { params: { token: stri
     }
 
     // Ambil event untuk template + placement + eligibility check
-    const { data: evtRow } = await supabase
+    const { data: evtRow, error: eventError } = await supabase
       .from("platform_records")
       .select("data")
       .eq("collection", "events")
@@ -64,20 +59,16 @@ export async function GET(_request: Request, { params }: { params: { token: stri
 
     const event = evtRow?.data as unknown as ManagedEvent | undefined;
 
-    if (event && !eligible(reg, event)) {
+    if (eventError) throw new HttpError(503, "Data event belum dapat dimuat.");
+    if (!event || !event.certificateEnabled) throw new HttpError(409, "Data sertifikat belum lengkap.");
+    if (!eligible(reg, event)) {
       return NextResponse.json({ error: "Sertifikat belum memenuhi syarat." }, { status: 403 });
     }
 
-    const placement = event?.certificatePlacement ?? {
-      name: { x: 50, y: 47, size: 42, color: "#211052" },
-      number: { x: 50, y: 68, size: 20, color: "#5D607D" },
-    };
-
-    const safeTemplate = safeCertificateTemplateUrl(event?.certificateTemplate ?? "");
-
-    const imageTag = safeTemplate
-      ? `<image href="${xmlEscape(safeTemplate)}" width="1400" height="990" preserveAspectRatio="xMidYMid slice"/>`
-      : `<rect width="1400" height="990" fill="#F4F1FE"/>`;
+    const point = z.object({x:z.number().min(0).max(100),y:z.number().min(0).max(100),size:z.number().min(8).max(120),color:z.string().regex(/^#[0-9a-f]{6}$/i)});
+    const placement = z.object({name:point,number:point}).parse(event.certificatePlacement);
+    const template = await certificateTemplateData(event.certificateTemplate);
+    const imageTag = `<image href="${template}" width="1400" height="990" preserveAspectRatio="xMidYMid slice"/>`;
 
     const svg = [
       `<?xml version="1.0" encoding="UTF-8"?>`,
@@ -89,6 +80,12 @@ export async function GET(_request: Request, { params }: { params: { token: stri
       `</svg>`,
     ].join("\n");
 
+    const fresh = await record("registrations",data.id);
+    const current = fresh?.data as unknown as Registration | undefined;
+    if (!fresh || !current?.certificate || current.certificate.status !== "valid" || !eligible(current,event)) throw new HttpError(403,"Sertifikat tidak dapat diunduh.");
+    current.certificate.downloadCount = (current.certificate.downloadCount || 0) + 1;
+    current.certificate.lastDownloadedAt = new Date().toISOString();
+    await commit([{collection:"registrations",id:fresh.id,revision:fresh.revision,owner_email:fresh.owner_email,data:current as unknown as Record<string,unknown>}]);
     const filename = encodeURIComponent(cert.number) + ".svg";
 
     return new Response(svg, {
@@ -102,7 +99,6 @@ export async function GET(_request: Request, { params }: { params: { token: stri
     if (error instanceof SupabaseConfigurationError) {
       return NextResponse.json({ error: "Layanan belum tersedia." }, { status: 503 });
     }
-    console.error("Certificate download unexpected error", error);
-    return NextResponse.json({ error: "Gagal mengunduh sertifikat." }, { status: 500 });
+    return fail(error);
   }
 }

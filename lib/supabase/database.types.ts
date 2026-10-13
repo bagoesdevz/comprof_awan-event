@@ -205,6 +205,10 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      platform_pending_payments: {Args:{p_limit:number};Returns:Array<{registration_id:string}>};
+      platform_mark_payment_checked: {Args:{p_id:string};Returns:undefined};
+      platform_certificate_candidates: { Args:{p_limit:number}; Returns:Array<{registration_id:string}> };
+      platform_participant_counts: { Args: Record<string,never>; Returns: Array<{event_slug:string;participants:number}> };
       commit_platform_changes: { Args:{p_changes:Json}; Returns:undefined };
       consume_api_limit: { Args:{p_key:string;p_limit:number;p_seconds:number}; Returns:boolean };
 

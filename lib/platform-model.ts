@@ -26,12 +26,13 @@ export type ManagedEvent = EventDetail & {
   reminder:string; banner:string;
 };
 export type Registration = {
+  orderId?:string;
   id:string; eventSlug:string; email:string; name:string; phone:string; ticketId:string; ticketName:string; attendance:"ONLINE"|"ONSITE";
   quantity:number; amount:number; payment:PaymentStatus; createdAt:string; paidAt?:string; method?:string; fee:number; refund:number;
   answers:Record<string,string>; members:{name:string;email:string}[]; progress:Record<Activity,boolean>;
   attempts:Record<"pre-test"|"post-test",number>; scores:Partial<Record<"pre-test"|"post-test",number>>;
   feedback?:{overall:number;speaker:number;material:number;organization:number;comment:string};
-  attendanceAt?:string; testStartedAt?:Partial<Record<"pre-test"|"post-test",string>>; certificate?:{number:string;token:string;issuedAt:string;status:"valid"|"revoked"};
+  attendanceAt?:string; testStartedAt?:Partial<Record<"pre-test"|"post-test",string>>; certificate?:{number:string;token:string;issuedAt:string;status:"valid"|"revoked";emailSentAt?:string;emailMessageId?:string;emailClaimUntil?:string;emailError?:string;downloadCount?:number;lastDownloadedAt?:string};
 };
 export type Lead = {id:string;name:string;email:string;phone:string;institution:string;kind:string;message:string;status:string;pic:string;followUp:string;notes:string;history:string[]};
 export type WaitEntry = {id:string;name:string;email:string;phone:string;eventSlug:string;ticketId:string;position:number;joinedAt:string;status:"waiting"|"notified"|"withdrawn"};
@@ -71,7 +72,7 @@ export function requiredActivities(e:ManagedEvent):Activity[]{
  return [...(e.preTest.enabled?["pre-test" as const]:[]),"attendance",...(e.postTest.enabled?["post-test" as const]:[]),"feedback"];
 }
 export function nextAction(r:Registration,e:ManagedEvent){
- if(r.payment!=="paid")return {label:r.payment==="pending"?"Selesaikan pembayaran":"Tinjau pembayaran",href:`/events/${e.slug}/payment?registration=${r.id}&ticket=${r.ticketId}`,note:paymentLabels[r.payment]};
+ if(r.payment!=="paid")return {label:r.orderId?"Periksa tiket grup":r.payment==="pending"?"Selesaikan pembayaran":"Tinjau pembayaran",href:`/events/${e.slug}/payment?registration=${r.id}&ticket=${r.ticketId}`,note:r.orderId?"Pembayaran dilakukan oleh pemesan tiket grup.":paymentLabels[r.payment]};
  if(e.preTest.enabled&&!r.progress["pre-test"])return {label:"Kerjakan pre-test",href:`/dashboard/events/${e.slug}/pre-test`,note:"Petakan pemahaman awal sebelum mengikuti sesi."};
  if(!r.progress.attendance)return {label:e.lifecycle==="upcoming"?"Lihat jadwal event":"Masuk ke event",href:`/dashboard/events/${e.slug}/webinar`,note:e.lifecycle==="upcoming"?"Akses dibuka saat event dimulai.":"Kehadiran dicatat saat Anda mengakses sesi."};
  if(e.postTest.enabled&&!r.progress["post-test"])return {label:e.lifecycle==="completed"?"Kerjakan post-test":"Kembali ke event",href:`/dashboard/events/${e.slug}/${e.lifecycle==="completed"?"post-test":"webinar"}`,note:"Post-test terbuka setelah sesi berakhir."};

@@ -94,8 +94,8 @@ export function createCertificateEmailContent(input: CertificateEmailInput) {
     html: `
       <div style="font-family:Arial,sans-serif;line-height:1.6;color:#241656;max-width:640px;margin:0 auto">
         <p style="color:#6b6480">Halo ${safeName},</p>
-        <h1 style="font-size:30px;line-height:1.2;margin:16px 0">Sertifikatmu sudah tersedia.</h1>
-        <p>Terima kasih telah mengikuti <strong>${safeTitle}</strong>. Sertifikat digitalmu telah diterbitkan dan siap diunduh.</p>
+        <h1 style="font-size:30px;line-height:1.2;margin:16px 0">Sertifikat Anda sudah tersedia.</h1>
+        <p>Sertifikat untuk <strong>${safeTitle}</strong> telah diterbitkan dan siap diunduh.</p>
         <div style="margin:26px 0;padding:18px 20px;border:1px solid #e9e1fb;border-radius:16px;background:#faf9ff">
           <div style="font-size:12px;color:#6b6480">Nomor sertifikat</div>
           <strong style="display:block;margin-top:4px;font-family:monospace">${safeCertificateNumber}</strong>
@@ -134,6 +134,7 @@ export async function sendCertificateEmail(input: CertificateEmailInput) {
       ...content,
     }),
     cache: "no-store",
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!response.ok) {

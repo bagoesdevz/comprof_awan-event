@@ -4,13 +4,9 @@ import type {User} from "@supabase/supabase-js";
 import {type ManagedEvent,type Registration,emptyProgress,activityAllowed,eligible} from "@/lib/platform-model";
 import {record,records,findEvent,commit,requireUser,requireAdmin,liveEvent} from "./platform";
 import {HttpError} from "./http";
-const registrationInput=z.object({type:z.literal("register"),eventSlug:z.string().max(120),ticketId:z.string().max(120),answers:z.record(z.string(),z.string().max(2000)).default({}),members:z.array(z.object({name:z.string().min(2).max(160),email:z.string().email()})).max(49).default([])});
+import {issueCertificate} from "./certificates";
+const registrationInput=z.object({type:z.literal("register"),eventSlug:z.string().max(120),ticketId:z.string().max(120),answers:z.record(z.string(),z.string().max(2000)).default({}),members:z.array(z.object({name:z.string().trim().min(2).max(160),email:z.string().trim().email().max(254)})).max(49).default([])});
 const activityInput=z.object({type:z.enum(["start-test","submit-test","attendance","feedback","check-in","revoke-certificate"]),id:z.string().max(254),eventSlug:z.string().optional(),test:z.enum(["pre-test","post-test"]).optional(),answers:z.record(z.string(),z.number().int().min(0).max(7)).optional(),feedback:z.object({overall:z.number().int().min(1).max(5),speaker:z.number().int().min(1).max(5),material:z.number().int().min(1).max(5),organization:z.number().int().min(1).max(5),comment:z.string().max(3000)}).optional()});
-function issue(r:Registration,e:ManagedEvent){
- if(e.certificateEnabled&&e.certificateTemplate&&eligible(r,e)&&!r.certificate){
- const token=crypto.randomUUID();r.certificate={token,number:e.certificatePattern.replaceAll("{year}",String(new Date().getFullYear())).replaceAll("{sequence}",r.id.replace("AWN-","")),issuedAt:new Date().toISOString(),status:"valid"};
- }
-}
 export async function runAction(user:User|null,raw:unknown){
  const u=requireUser(user),email=u.email.toLowerCase();
  if((raw as {type?:unknown})?.type==="register"){
@@ -27,7 +23,14 @@ export async function runAction(user:User|null,raw:unknown){
   for(const field of event.customFields)if(field.required&&!input.answers[field.id]?.trim())throw new HttpError(422,"Isi "+field.label+".");
   const now=new Date().toISOString(),r:Registration={id:"AWN-"+crypto.randomUUID().replaceAll("-","").slice(0,16).toUpperCase(),eventSlug:event.slug,email,name:String(p.name),phone:String(p.phone),ticketId:ticket.id,ticketName:ticket.name,attendance:ticket.attendance,quantity,amount:ticket.price*quantity,payment:ticket.price===0?"paid":"pending",createdAt:now,...(ticket.price===0?{paidAt:now,method:"Gratis"}:{}),fee:0,refund:0,answers:input.answers,members:input.members,progress:emptyProgress(),attempts:{"pre-test":0,"post-test":0},scores:{}};
   ticket.quotaLeft-=quantity;event.quotaLeft=event.tickets.reduce((n,t)=>n+t.quotaLeft,0);
-  await commit([{collection:"events",id:er.id,revision:er.revision,data:event as unknown as Record<string,unknown>,published:er.published},{collection:"registrations",id:r.id,revision:0,data:r as unknown as Record<string,unknown>,owner_email:email}]);
+  const memberRegistrations:Registration[]=input.members.map(member=>({
+   ...structuredClone(r),id:"AWN-"+crypto.randomUUID().replaceAll("-","").slice(0,16).toUpperCase(),orderId:r.id,
+   name:member.name.trim(),email:member.email.toLowerCase(),phone:"",quantity:1,amount:0,members:[],answers:{},
+  }));
+  await commit([
+   {collection:"events",id:er.id,revision:er.revision,data:event as unknown as Record<string,unknown>,published:er.published},
+   ...[r,...memberRegistrations].map(registration=>({collection:"registrations" as const,id:registration.id,revision:0,data:registration as unknown as Record<string,unknown>,owner_email:registration.email})),
+  ]);
   return {registration:r};
  }
  const input=activityInput.parse(raw),rr=await record("registrations",input.id);
@@ -63,7 +66,7 @@ export async function runAction(user:User|null,raw:unknown){
    r.attempts[key]++;r.scores[key]=score;r.progress[key]=!expired&&score>=test.passingScore;delete r.testStartedAt[key];
   }
  }
- issue(r,event);
+ issueCertificate(r,event);
  await commit([{collection:"registrations",id:r.id,revision:rr.revision,data:r as unknown as Record<string,unknown>,owner_email:rr.owner_email}]);
  return {registration:r,message:input.type==="check-in"?r.name+" tercatat hadir.":"Perubahan tersimpan."};
 }

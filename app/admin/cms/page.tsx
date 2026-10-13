@@ -150,7 +150,7 @@ export default function AdminCmsPage() {
                   </Field>
                   {draft.image && (
                     <div className="relative aspect-video overflow-hidden rounded-2xl">
-                      <Image src={draft.image} alt="Pratinjau visual" fill className="object-cover" />
+                      <Image src={draft.image} unoptimized alt="Pratinjau visual" fill className="object-cover" />
                     </div>
                   )}
                   <div className="flex flex-wrap justify-between gap-3 border-t pt-6">

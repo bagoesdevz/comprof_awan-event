@@ -1,1 +1,1 @@
-import { ParticipantWorkspace } from "@/components/platform/participant-workspace";export default function Page({params}:{params:{slug:string}}){return <ParticipantWorkspace slug={params.slug}/>;}
+import { ParticipantWorkspace } from "@/components/platform/participant-workspace";export default async function Page({params}:{params: Promise<{slug:string}>}){const route=await params;return <ParticipantWorkspace slug={route.slug}/>;}

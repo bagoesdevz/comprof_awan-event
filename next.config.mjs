@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  distDir: ".next-production",
+  distDir: process.env.VERCEL === "1" ? ".next" : ".next-production",
   poweredByHeader: false,
   async headers() {
     return [{ source: "/:path*", headers: [

@@ -10,6 +10,8 @@ Pemeriksaan live: `/api/platform` merespons 200 dan memuat event `contoh-webinar
 
 ## Perubahan dan bukti
 
+Deployment awal commit `c419e0f` gagal setelah build karena Vercel mencari `.next/routes-manifest.json`, sedangkan build lokal menggunakan `.next-production`. Konfigurasi sekarang memakai `.next` pada Vercel dan mempertahankan `.next-production` untuk workspace Windows.
+
 Hero event dan poster program menggunakan data CMS. Bagian company profile mendukung konten tersimpan. Formulir, akses admin, dialog preview, batas request, dan unggahan diperketat. Next.js diperbarui ke 15.5.27.
 
 API menggunakan `platform_records`. Pendaftaran grup membuat kepesertaan terpisah. Reservasi kuota, expiry, dan refund berjalan atomik dengan revision. Callback memeriksa signature dan status otoritatif Midtrans; refund penuh mengembalikan kuota sekali dan mencabut sertifikat grup.

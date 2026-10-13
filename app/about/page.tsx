@@ -4,7 +4,7 @@ import { CompanyProfilePage } from "@/components/landing/company-profile-page";
 import { MotionObserver } from "@/components/landing/motion-observer";
 
 export const metadata: Metadata = {
-  title: "Tentang Awan Event — Pendidikan dan Pelatihan Kesehatan",
+  title: "Tentang Awan Event | Pendidikan dan Pelatihan Kesehatan",
   description: "Profil Awan Event, layanan pendidikan dan pelatihan kesehatan di bawah naungan PT Awan Berkah Bermartabat.",
 };
 

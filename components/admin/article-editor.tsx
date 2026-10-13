@@ -55,7 +55,7 @@ export function ArticleEditor({
     if (ok) {
       setNotice("Artikel tersimpan.");
     } else {
-      setNotice("Gagal menyimpan — coba lagi.");
+      setNotice("Perubahan belum tersimpan. Coba lagi.");
     }
   }
 
@@ -111,7 +111,7 @@ export function ArticleEditor({
                   rows={3}
                   value={draft.excerpt}
                   onChange={(e) => set("excerpt", e.target.value)}
-                  placeholder="1–2 kalimat ringkasan artikel."
+                  placeholder="1 sampai 2 kalimat ringkasan artikel."
                   maxLength={300}
                 />
               </Field>

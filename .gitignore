@@ -4,6 +4,7 @@
 # next.js
 /.next/
 /.next-build-cache/
+/.next-copy-audit/
 /out/
 
 # production

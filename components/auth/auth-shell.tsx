@@ -19,7 +19,7 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
       </Link>
       <section className="auth-minimal-shell" aria-labelledby="auth-title">
         <div className="auth-minimal-card">
-          <Link href="/" className="auth-minimal-brand" aria-label="Awan Event — Beranda">
+          <Link href="/" className="auth-minimal-brand" aria-label="Awan Event | Beranda">
             <Image src="/awan-event-logo.jpeg" alt="Awan Event" width={52} height={52} priority />
           </Link>
           <div className="auth-minimal-heading">

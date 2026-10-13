@@ -146,7 +146,7 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
             <p className="mt-3 text-[11px] font-medium text-content-muted">{area === "participant" ? "Ruang peserta" : "Pusat operasional"}</p>
           </div>
         ) : (
-          <Link href="/" aria-label="Awan Event — Beranda" className="mx-auto grid h-10 w-10 place-items-center overflow-hidden rounded-full ring-1 ring-primary-600/15">
+          <Link href="/" aria-label="Awan Event | Beranda" className="mx-auto grid h-10 w-10 place-items-center overflow-hidden rounded-full ring-1 ring-primary-600/15">
             <Image src="/awan-event-logo.jpeg" alt="" width={40} height={40} />
           </Link>
         )}

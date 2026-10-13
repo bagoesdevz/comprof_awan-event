@@ -58,7 +58,7 @@ function toCertRow(r: Registration, eventTitle: string): CertRow | null {
         hour: "2-digit",
         minute: "2-digit",
       })
-    : "—";
+    : "Belum tersedia";
   // Derive email status from payment + certificate status
   const emailStatus: keyof typeof statusMeta =
     r.certificate.status === "revoked"

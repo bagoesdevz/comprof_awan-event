@@ -154,7 +154,7 @@ export function EventCountdownSection({ event, block, id }: SectionProps) {
     return () => window.clearInterval(timer);
   }, [event.lifecycle]);
   const remaining = now === null ? null : Math.max(0, Date.parse(event.startAt) - now);
-  const values = remaining === null ? ["—", "—", "—", "—"] : [Math.floor(remaining / 86400000), Math.floor(remaining / 3600000) % 24, Math.floor(remaining / 60000) % 60, Math.floor(remaining / 1000) % 60].map(value => String(value).padStart(2, "0"));
+  const values = remaining === null ? ["…", "…", "…", "…"] : [Math.floor(remaining / 86400000), Math.floor(remaining / 3600000) % 24, Math.floor(remaining / 60000) % 60, Math.floor(remaining / 1000) % 60].map(value => String(value).padStart(2, "0"));
   const title = event.lifecycle === "completed" ? "Terima kasih telah belajar bersama." : event.lifecycle === "ongoing" ? "Kegiatan sedang berlangsung." : "Catat jadwal, siapkan langkah Anda.";
   return <section id={id} className="brand-container event-detail-section event-countdown-section"><div><span className="brand-eyebrow">{event.lifecycle === "upcoming" ? "Menuju hari kegiatan" : "Status kegiatan"}</span><h2>{blockTitle(block, title)}</h2><p className="event-section-note">{eventDate(event.startAt)} · {eventTimeRange(event.startAt, event.endAt)}</p></div>{event.lifecycle === "upcoming" && <dl className="event-countdown" aria-label="Waktu menuju kegiatan">{["Hari", "Jam", "Menit", "Detik"].map((label, index) => <div key={label}><dt>{label}</dt><dd>{values[index]}</dd></div>)}</dl>}</section>;
 }

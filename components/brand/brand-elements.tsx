@@ -4,7 +4,7 @@ import { useId } from "react";
 
 export function BrandLogo({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href="/" className={`brand-logo ${compact ? "brand-logo--compact" : ""}`} aria-label="Awan Event — Beranda">
+    <Link href="/" className={`brand-logo ${compact ? "brand-logo--compact" : ""}`} aria-label="Awan Event | Beranda">
       <Image src="/awan-event-logo.jpeg" alt="" width={56} height={56} priority />
       <span><strong>Awan Event</strong><small>Educate · Empower · Better Tomorrow</small></span>
     </Link>

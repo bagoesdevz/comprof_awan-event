@@ -205,7 +205,7 @@ export function ContactCta() {
   return (
     <HorizontalAvatarsCTA
       id="kontak"
-      title={cmsCta?.title ? cmsCta.title : <>Tingkatkan kompetensimu.<br />Jadilah orang hebat selanjutnya.</>}
+      title={cmsCta?.title ? cmsCta.title : <>Rencanakan program<br />untuk institusi Anda.</>}
       description={cmsCta?.body || "Temukan program sesuai kebutuhan Anda."}
       buttonText="Lihat event"
       buttonHref="/events"

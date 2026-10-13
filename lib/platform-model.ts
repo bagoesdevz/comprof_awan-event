@@ -44,7 +44,7 @@ export type PlatformState = {
   registrations:Registration[]; participantCounts:Record<string,number>; notices:Notice[]; leads:Lead[]; waitlist:WaitEntry[]; templates:Template[]; campaigns:Campaign[];
   cms:Record<string,{title:string;body:string;image:string;status:string}>; articles:CmsArticle[];
 };
-export const activityLabels:Record<Activity,string>={"pre-test":"Pre-test",attendance:"Kehadiran","post-test":"Post-test",feedback:"Feedback"};
+export const activityLabels:Record<Activity,string>={"pre-test":"Pre-test",attendance:"Kehadiran","post-test":"Post-test",feedback:"Evaluasi acara"};
 export const paymentLabels:Record<PaymentStatus,string>={pending:"Menunggu pembayaran",paid:"Lunas",failed:"Gagal",expired:"Kedaluwarsa",cancelled:"Dibatalkan",refunded:"Dikembalikan"};
 export const lifecycleLabels={upcoming:"Akan datang",ongoing:"Berlangsung",completed:"Selesai"};
 export const money=(n:number)=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n);
@@ -67,13 +67,18 @@ export function initialState():PlatformState{return {
  version:1,session:{loggedIn:false,email:"",role:"participant"},profiles:{},events:[],registrations:[],participantCounts:{},notices:[],leads:[],waitlist:[],templates:[],campaigns:[],cms:{},articles:[]
 };}
 export function eligible(r:Registration,e?:ManagedEvent){return r.payment==="paid"&&(!e?.preTest.enabled||r.progress["pre-test"])&&r.progress.attendance&&(!e?.postTest.enabled||r.progress["post-test"])&&r.progress.feedback;}
+export function requiredActivities(e:ManagedEvent):Activity[]{
+ return [...(e.preTest.enabled?["pre-test" as const]:[]),"attendance",...(e.postTest.enabled?["post-test" as const]:[]),"feedback"];
+}
 export function nextAction(r:Registration,e:ManagedEvent){
  if(r.payment!=="paid")return {label:r.payment==="pending"?"Selesaikan pembayaran":"Tinjau pembayaran",href:`/events/${e.slug}/payment?registration=${r.id}&ticket=${r.ticketId}`,note:paymentLabels[r.payment]};
  if(e.preTest.enabled&&!r.progress["pre-test"])return {label:"Kerjakan pre-test",href:`/dashboard/events/${e.slug}/pre-test`,note:"Petakan pemahaman awal sebelum mengikuti sesi."};
- if(!r.progress.attendance)return {label:e.lifecycle==="upcoming"?"Lihat jadwal event":"Masuk ke event",href:`/dashboard/events/${e.slug}/webinar`,note:e.lifecycle==="upcoming"?"Akses dibuka saat event dimulai.":"Kehadiran dicatat saat kamu mengakses sesi."};
+ if(!r.progress.attendance)return {label:e.lifecycle==="upcoming"?"Lihat jadwal event":"Masuk ke event",href:`/dashboard/events/${e.slug}/webinar`,note:e.lifecycle==="upcoming"?"Akses dibuka saat event dimulai.":"Kehadiran dicatat saat Anda mengakses sesi."};
  if(e.postTest.enabled&&!r.progress["post-test"])return {label:e.lifecycle==="completed"?"Kerjakan post-test":"Kembali ke event",href:`/dashboard/events/${e.slug}/${e.lifecycle==="completed"?"post-test":"webinar"}`,note:"Post-test terbuka setelah sesi berakhir."};
- if(!r.progress.feedback)return {label:"Bagikan feedback",href:`/dashboard/events/${e.slug}/feedback`,note:"Satu langkah lagi menuju sertifikatmu."};
- return {label:"Lihat sertifikat",href:"/dashboard/certificates",note:"Empat persyaratan telah terpenuhi."};
+ if(!r.progress.feedback)return {label:"Isi evaluasi acara",href:`/dashboard/events/${e.slug}/feedback`,note:"Berikan penilaian terhadap materi dan penyelenggaraan event."};
+ if(!e.certificateEnabled)return {label:"Lihat riwayat event",href:"/dashboard/history",note:"Aktivitas selesai. Event ini tidak menyediakan sertifikat."};
+ if(!r.certificate)return {label:"Periksa sertifikat",href:"/dashboard/certificates",note:"Persyaratan terpenuhi. Sertifikat belum terbit."};
+ return {label:"Lihat sertifikat",href:"/dashboard/certificates",note:r.certificate.status==="revoked"?"Sertifikat dicabut. Hubungi tim melalui halaman kontak untuk bantuan.":"Sertifikat sudah terbit."};
 }
 export function activityAllowed(r:Registration,e:ManagedEvent,a:Activity|"webinar"){
  if(r.payment!=="paid")return false;

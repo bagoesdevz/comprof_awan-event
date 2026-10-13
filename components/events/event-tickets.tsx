@@ -44,7 +44,7 @@ export function EventTickets({ tickets, eventSlug, registrationStatus }: EventTi
         <div className="mb-10 grid gap-6 sm:mb-14 md:grid-cols-[1fr_auto] md:items-end md:gap-7">
           <div>
             
-            <h2 id="tickets-heading" className="mt-5 text-[clamp(38px,5vw,72px)] font-semibold leading-[0.96] tracking-tight sm:tracking-[-0.06em]">Pilih cara hadirmu.</h2>
+            <h2 id="tickets-heading" className="mt-5 text-[clamp(38px,5vw,72px)] font-semibold leading-[0.96] tracking-tight sm:tracking-[-0.06em]">Pilih tiket dan cara hadir.</h2>
           </div>
           <p className="max-w-sm text-sm leading-6 text-content-muted md:text-right">Pembelian belum aktif pada tahap frontend. Pilihan berikut memakai data tiruan.</p>
         </div>

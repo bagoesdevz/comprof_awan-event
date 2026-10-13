@@ -3,7 +3,7 @@ import { CertificateMonitoring } from "@/components/admin/certificate-monitoring
 import { PageHeading } from "@/components/platform/ui";
 
 export const metadata: Metadata = {
-  title: "Monitoring Sertifikat — Awan Event Admin",
+  title: "Monitoring Sertifikat | Awan Event Admin",
   description: "Pantau penerbitan dan distribusi sertifikat peserta.",
 };
 

@@ -40,7 +40,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <main className="admin-session-loading" aria-live="polite" aria-busy="true">
         <BrandLogo compact />
         <span><ShieldCheck size={19} aria-hidden="true" /></span>
-        <p>{ready ? "Mengalihkan ke ruang akunmu…" : "Memeriksa sesi admin…"}</p>
+        <p>{ready ? "Mengalihkan ke halaman akun Anda…" : "Memeriksa sesi admin…"}</p>
       </main>
     );
   }

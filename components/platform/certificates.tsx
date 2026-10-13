@@ -10,6 +10,7 @@ export function CertificatePanel({ registration }: { registration: Registration 
   const { state } = usePlatform();
   const event = state.events.find((e) => e.slug === registration.eventSlug);
   const cert = registration.certificate;
+  if (!event?.certificateEnabled && !cert) return <Panel title={event?.title ?? registration.eventSlug}><p className="text-sm text-content-muted">Event ini tidak menyediakan sertifikat.</p></Panel>;
 
   function download() {
     if (!cert || cert.status !== "valid") return;
@@ -35,7 +36,7 @@ export function CertificatePanel({ registration }: { registration: Registration 
               disabled={!canDownload}
               className="flow-button"
               onClick={download}
-              title={canDownload ? "Unduh sertifikat SVG" : "Persyaratan belum terpenuhi"}
+              title={canDownload ? "Unduh sertifikat SVG" : cert.status === "revoked" ? "Sertifikat dicabut" : "Persyaratan belum terpenuhi"}
             >
               Unduh sertifikat
             </button>
@@ -46,9 +47,9 @@ export function CertificatePanel({ registration }: { registration: Registration 
         </>
       ) : (
         <>
-          <Badge tone="warning">Belum memenuhi syarat</Badge>
+          <Badge tone="warning">{event && eligible(registration, event) ? "Belum terbit" : "Belum memenuhi syarat"}</Badge>
           <p className="my-4 text-sm leading-6 text-content-muted">
-            Lengkapi aktivitas yang diwajibkan untuk menerbitkan sertifikat.
+            {event && eligible(registration, event) ? "Persyaratan terpenuhi. Sertifikat belum terbit." : "Lengkapi aktivitas yang diwajibkan untuk memperoleh sertifikat."}
           </p>
           {event && (
             <Link className="flow-button secondary" href={`/dashboard/events/${event.slug}`}>

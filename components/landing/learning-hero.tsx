@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import { motion, useInView, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
-import { BarChart3, GraduationCap, Heart, Lightbulb, Pause, Play, UsersRound } from "lucide-react";
+import { BarChart3, GraduationCap, Heart, Lightbulb, Pause, Play } from "lucide-react";
 import { usePlatform } from "@/components/platform/provider";
 import styles from "./learning-hero.module.css";
 
@@ -68,19 +68,19 @@ export function LearningHero() {
               <span>{cmsHome.title}</span>
             ) : (
               <>
-                <span>Pendidikan Berkualitas</span>{" "}
-                <span>untuk Masa Depan</span>{" "}
-                <span className={styles.titleAccent}>yang Lebih Baik.</span>
+                <span>Webinar, seminar,</span>{" "}
+                <span>dan pelatihan</span>{" "}
+                <span className={styles.titleAccent}>kesehatan.</span>
               </>
             )}
           </h1>
           <p className={`${styles.description} ${styles.reveal}`}>
-            {cmsHome?.body || "Webinar, seminar, dan pelatihan untuk mengembangkan kompetensi Anda."}
+            {cmsHome?.body || "Lihat program pendidikan dan pelatihan untuk tenaga kesehatan dan institusi."}
           </p>
           <div className={`${styles.actions} ${styles.reveal}`}>
             <a href="#event-list" className={`${styles.button} ${styles.primary}`}>
               <span className={styles.shine} aria-hidden="true" />
-              <span className={styles.buttonLabel}>Lihat Program Kami</span>
+              <span className={styles.buttonLabel}>Lihat event mendatang</span>
             </a>
             <a href="#tentang" className={`${styles.button} ${styles.secondary}`}>Kenali Awan Event</a>
           </div>
@@ -99,19 +99,15 @@ export function LearningHero() {
           <div className={styles.desktopDetails}>
             <FloatingCard className={styles.knowledge}>
               <IconBox><GraduationCap size={21} aria-hidden="true" /></IconBox>
-              <div><p className={styles.cardTitle}>Ilmu hari ini</p><p className={styles.cardCopy}>Kesempatan<br />masa depan</p></div>
+              <div><p className={styles.cardTitle}>Materi kesehatan</p><p className={styles.cardCopy}>Untuk tenaga<br />kesehatan</p></div>
             </FloatingCard>
             <FloatingCard className={styles.competence} delay={0.7}>
               <IconBox><BarChart3 size={20} aria-hidden="true" /></IconBox>
-              <div><p className={styles.cardTitle}>Kompetensi</p><p className={styles.cardCopy}>Untuk dampak<br />yang nyata</p></div>
-            </FloatingCard>
-            <FloatingCard className={styles.alumni} delay={1.1} rotate={-5}>
-              <IconBox><UsersRound size={21} aria-hidden="true" /></IconBox>
-              <div><p className={styles.cardNumber}>100+</p><p className={styles.cardCopy}>Alumni berkembang</p></div>
+              <div><p className={styles.cardTitle}>Pelatihan</p><p className={styles.cardCopy}>Pengembangan<br />kompetensi</p></div>
             </FloatingCard>
             <FloatingCard className={styles.people} delay={1.5} rotate={-3}>
               <IconBox pink><Heart size={20} aria-hidden="true" /></IconBox>
-              <div><p className={styles.cardTitle}>Manusia</p><p className={styles.cardCopy}>Lebih siap.<br />Lebih berdaya.</p></div>
+              <div><p className={styles.cardTitle}>Program institusi</p><p className={styles.cardCopy}>Sesuai kebutuhan<br />organisasi</p></div>
             </FloatingCard>
             <div className={styles.quote}><Lightbulb size={25} aria-hidden="true" /><p>Investasi terbaik<br />adalah ilmu.</p></div>
             <div className={styles.slogan}><p>Learn,<br />Grow,<br />Bright<br />Tomorrow.</p></div>

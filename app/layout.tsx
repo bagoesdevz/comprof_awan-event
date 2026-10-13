@@ -20,7 +20,7 @@ const mono = DM_Mono({
 const caveat = Caveat({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-caveat", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Awan Event — Learn, Grow, Bright Tomorrow",
+  title: "Awan Event | Learn, Grow, Bright Tomorrow",
   description:
     "Temukan event, training, assessment, dan sertifikasi profesional di Awan Event.",
 };

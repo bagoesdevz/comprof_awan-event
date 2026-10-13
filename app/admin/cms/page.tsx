@@ -37,7 +37,7 @@ export default function AdminCmsPage() {
     const ok = await update((s) => {
       s.cms[section] = payload;
     });
-    setNotice(ok ? "Konten tersimpan." : "Gagal menyimpan — coba lagi.");
+    setNotice(ok ? "Konten tersimpan." : "Perubahan belum tersimpan. Coba lagi.");
   }
 
   function newArticle() {

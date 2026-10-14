@@ -1,0 +1,12 @@
+.people-heading { max-width: 880px; margin: 0 auto 40px; text-align: center; }
+.people-heading h2,.event-detail-page .people-heading h2 { margin: 0; font-size: clamp(30px, 4.4vw, 58px); line-height: 1.12; letter-spacing: -.04em; }
+.people-heading p { margin: 18px auto 0; max-width: 720px; font-size: 15px; line-height: 1.8; color: var(--brand-body); }
+.people-section { background: var(--brand-surface); }
+.people-heading > .grid { gap: 0; }
+.team-photo-editor { display: grid; gap: 16px; }
+.team-photo-field { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 16px; padding-top: 16px; border-top: 1px solid var(--brand-border); }
+.team-photo-field .team-photo-thumb { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 12px; background: #eeedf1; }
+.team-photo-thumb img { object-fit: cover; object-position: center 25%; }
+.team-photo-thumb:empty::after { content: ""; position: absolute; inset: 20% 25%; border-radius: 50% 50% 16% 16%; background: #d7d4df; }
+@media (min-width: 1000px) { .people-heading { margin-bottom: 64px; } }
+@media (max-width: 619px) { .people-heading { margin-bottom: 28px; } .people-heading p { font-size: 14px; margin-top: 14px; } }

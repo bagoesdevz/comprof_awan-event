@@ -1,0 +1,22 @@
+.event-share-panel { display: grid; gap: 24px; }
+.event-share-copy { min-width: 0; display: grid; align-content: start; gap: 16px; }
+.event-share-copy h2 { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 700; line-height: 1.4; }
+.event-share-copy > p { color: var(--brand-body); font-size: 14px; line-height: 1.8; }
+.event-share-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.event-share-preview { display: grid; align-items: center; justify-items: center; padding: 12px; background: #fff; border: 1px solid var(--brand-border); border-radius: 16px; min-height: 200px; }
+.event-share-preview img { width: 200px; height: auto; max-width: 100%; }
+.event-share-status { padding: 16px; background: var(--brand-soft); border-radius: 12px; }
+.registration-group-overlay { position: fixed; inset: 0; z-index: 60; background: rgb(33 16 82 / 45%); }
+.registration-group-dialog { position: fixed; top: 50%; left: 50%; z-index: 61; transform: translate(-50%, -50%); width: min(480px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; padding: 32px; border-radius: 24px; background: #fff; color: var(--brand-deep); box-shadow: 0 20px 60px rgb(33 16 82 / 15%); }
+.registration-group-icon { display: grid; place-items: center; width: 56px; height: 56px; margin-bottom: 20px; border-radius: 16px; background: var(--brand-soft); color: var(--brand); }
+.registration-group-dialog h2 { font-size: 26px; font-weight: 700; line-height: 1.3; }
+.registration-group-event { margin-top: 8px; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.registration-group-description { margin-top: 16px; color: var(--brand-body); font-size: 14px; line-height: 1.8; }
+.registration-group-payment { margin-top: 16px; padding: 12px 16px; border-radius: 12px; background: #fff7ed; color: #9a3412; font-size: 14px; line-height: 1.7; }
+.registration-group-actions { display: grid; gap: 10px; margin-top: 24px; }
+.registration-group-actions > * { width: 100%; text-align: center; white-space: normal; }
+.registration-group-note { margin-top: 16px; color: var(--brand-muted); font-size: 12px; line-height: 1.7; }
+.registration-group-close { position: absolute; top: 12px; right: 12px; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; color: var(--brand-body); }
+.registration-group-close:hover { background: var(--brand-soft); }
+@media (min-width: 720px) { .event-share-panel { grid-template-columns: minmax(0, 1fr) 224px; } }
+@media (max-width: 480px) { .registration-group-dialog { padding: 24px; } .registration-group-dialog h2 { font-size: 23px; } .event-share-actions > * { flex: 1 1 auto; } }

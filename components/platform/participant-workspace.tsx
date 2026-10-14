@@ -8,6 +8,7 @@ import { usePlatform } from "./provider";
 import { Badge, Empty, PageHeading, Panel, exportCsv } from "./ui";
 import { defaultProfile, eligible, lifecycleLabels, money, nextAction, paymentLabels, requiredActivities, type ManagedEvent, type Registration } from "@/lib/platform-model";
 import { eventVisual } from "@/lib/event-detail";
+import { eventPublicPath } from "@/lib/event-sharing";
 import { EligibilityPanel } from "@/components/dashboard/eligibility-panel";
 
 function RecommendationCard({ event }: { event: ManagedEvent }) {
@@ -36,7 +37,7 @@ function RecommendationCard({ event }: { event: ManagedEvent }) {
         {!visual && <div className="mb-4 flex flex-wrap gap-2"><Badge>{event.programType}</Badge><Badge>{event.type === "ONLINE" ? "Online" : event.type === "ONSITE" ? "Offline" : "Hybrid"}</Badge></div>}
         <h3 className="text-xl font-semibold leading-tight tracking-[-.025em]">{event.title}</h3>
         <p className="mb-5 mt-3 text-sm leading-6 text-content-muted">{event.category} · Mulai {new Date(event.startAt).toLocaleDateString("id-ID")} · {money(event.price)}</p>
-        <Link className="flow-button" href={`/events/${event.slug}`}>Pelajari program</Link>
+        <Link className="flow-button" href={eventPublicPath(event)}>Pelajari program</Link>
       </div>
     </article>
   );

@@ -19,7 +19,7 @@ export type ManagedEvent = EventDetail & {
   programType:string; lifecycle:"upcoming"|"ongoing"|"completed"; publication:"draft"|"published";
   endAt:string; capacity:number; waitlist:boolean; meetingProvider:"Zoom"|"Google Meet"; meetingUrl:string;
   meetingId:string; meetingPasscode:string; accessOpensAt:string;
-  objectives?:string; learningMethods?:string[]; partner?:string; coordinator?:string;
+  objectives?:string; learningMethods?:string[]; partner?:string; coordinator?:string; whatsappGroupUrl?:string;
   requirements?:string; evaluationPlan?:string; documentationPlan?:string;
   customFields:{id:string;label:string;required:boolean}[]; blocks:Block[];
   preTest:Assessment; postTest:Assessment; certificateEnabled:boolean; certificatePattern:string; certificateTemplate:string; certificatePlacement:CertificatePlacement;

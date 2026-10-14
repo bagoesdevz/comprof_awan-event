@@ -1,3 +1,17 @@
+"use client";
+
 import { companyProfile } from "@/lib/company-profile";
 import { CmsContent } from "@/components/site/cms-content";
-export function TeamCarousel(){return <section className="brand-section"><div className="brand-container"><div className="mb-8"><CmsContent section="Team" fallbackTitle="Tim Awan Event"/></div><div className="grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">{companyProfile.team.map(m=><article key={m.name} className="border-t border-primary-100 pt-5"><h3 className="text-lg font-semibold">{m.name}</h3><p className="mt-2 text-sm text-content-muted">{m.role}</p></article>)}</div></div></section>;}
+import { usePlatform } from "@/components/platform/provider";
+import { PersonCard, PersonGrid } from "@/components/ui/person-card";
+import { teamPhotoSection } from "@/lib/team-content";
+
+export function TeamCarousel() {
+  const { state } = usePlatform();
+  return <section id="tim" className="brand-section people-section"><div className="brand-container">
+    <div className="people-heading"><CmsContent section="Team" fallbackTitle="Tim Awan Event" /></div>
+    <PersonGrid count={companyProfile.team.length}>{companyProfile.team.map((member, index) => <PersonCard
+      key={member.name} name={member.name} role={member.role} photo={state.cms[teamPhotoSection(index)]?.image}
+    />)}</PersonGrid>
+  </div></section>;
+}

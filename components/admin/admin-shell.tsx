@@ -8,11 +8,13 @@ import { AppSidebar, getSidebarNavigation } from "@/components/app-sidebar";
 import { BrandLogo } from "@/components/brand/brand-elements";
 import { usePlatform } from "@/components/platform/provider";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { isEventPublicCode } from "@/lib/event-sharing";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { state, ready, error, refresh } = usePlatform();
+  const { state, ready, error, refresh, action } = usePlatform();
+  const linksInitialized = useRef(false);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -41,6 +43,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [pathname, ready, router, state.session.loggedIn, state.session.role]);
 
   const authorized = ready && state.session.loggedIn && state.session.role !== "participant";
+
+  useEffect(() => {
+    if (!authorized || linksInitialized.current || !state.events.some(event => !isEventPublicCode(event.publicCode))) return;
+    linksInitialized.current = true;
+    void action({ type: "ensure-event-links" });
+  }, [authorized, state.events, action]);
 
   if (!authorized) {
     return (

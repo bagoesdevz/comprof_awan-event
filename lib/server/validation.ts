@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { whatsappGroupLink } from "@/lib/event-sharing";
 const text=z.string().trim().max(10000),short=z.string().trim().max(254);
 const image=z.string().max(2048).refine(v=>{
  if(!v)return true;
@@ -22,6 +23,7 @@ export const eventSchema=z.object({
  preTest:assessment,postTest:assessment,meetingProvider:z.enum(["Zoom","Google Meet"]),
  meetingUrl:z.string().max(2048).refine(v=>!v||/^https:\/\/([a-z0-9-]+\.)?zoom\.us\//i.test(v)||/^https:\/\/meet\.google\.com\//i.test(v),"Gunakan link Zoom atau Google Meet."),
  meetingId:short,meetingPasscode:short,accessOpensAt:timestamp,
+ whatsappGroupUrl:z.string().trim().max(2048).refine(v=>!v||!!whatsappGroupLink(v),"Gunakan tautan undangan grup https://chat.whatsapp.com/...").optional(),
  certificateEnabled:z.boolean(),certificatePattern:short.min(1),certificateTemplate:image,
  certificatePlacement:z.object({name:z.object({x:z.number().min(0).max(100),y:z.number().min(0).max(100),size:z.number().min(8).max(120),color:z.string().regex(/^#[0-9a-f]{6}$/i)}),number:z.object({x:z.number().min(0).max(100),y:z.number().min(0).max(100),size:z.number().min(8).max(120),color:z.string().regex(/^#[0-9a-f]{6}$/i)})}),
  reminder:short,banner:image,customFields:z.array(z.object({id:short,label:short.min(1),required:z.boolean()})).max(30),

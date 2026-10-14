@@ -1,4 +1,5 @@
 import "server-only";
+import { whatsappGroupLink, isEventPublicCode } from "@/lib/event-sharing";
 import type { User } from "@supabase/supabase-js";
 import { getServiceSupabaseClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
@@ -20,6 +21,14 @@ export async function record(collection:string,id:string){
  if(error)throw new Error(error.message);return data as unknown as RecordRow|null;
 }
 export async function findEvent(slug:string){const {data,error}=await getServiceSupabaseClient().from("platform_records").select("*").eq("collection","events").eq("data->>slug",slug).maybeSingle();if(error)throw new Error(error.message);if(!data)throw new HttpError(404,"Event tidak ditemukan.");return data as unknown as RecordRow;}
+export async function findPublicEvent(code:string){
+ if(!isEventPublicCode(code))throw new HttpError(404,"Event tidak ditemukan.");
+ const {data,error}=await getServiceSupabaseClient().from("platform_records").select("data").eq("collection","events").eq("published",true).eq("data->>publicCode",code).maybeSingle();
+ if(error)throw new Error("Event query failed");
+ const event=data?.data as unknown as ManagedEvent|undefined;
+ if(!event||event.publication!=="published")throw new HttpError(404,"Event tidak ditemukan.");
+ return event;
+}
 export function liveEvent(event:ManagedEvent):ManagedEvent{
  const normalized=structuredClone(event);
  if(normalized.tickets.length===1&&normalized.capacity!==normalized.tickets[0].quota){
@@ -32,6 +41,8 @@ export function liveEvent(event:ManagedEvent):ManagedEvent{
 }
 export function eventForViewer(event:ManagedEvent,state:PlatformState,admin:boolean):ManagedEvent{
  const e=structuredClone(liveEvent(event));if(admin)return e;
+ const registered=state.session.loggedIn&&state.registrations.some(r=>r.eventSlug===e.slug&&r.email.toLowerCase()===state.session.email.toLowerCase()&&!["cancelled","expired","refunded"].includes(r.payment));
+ e.whatsappGroupUrl=registered?whatsappGroupLink(e.whatsappGroupUrl):"";
  const reg=state.registrations.find(r=>r.eventSlug===e.slug&&r.payment==="paid");
  const canJoin=reg&&activityAllowed(reg,e,"webinar")&&(!e.accessOpensAt||Date.now()>=new Date(e.accessOpensAt).getTime());
  if(!canJoin){e.meetingUrl="";e.meetingId="";e.meetingPasscode="";}

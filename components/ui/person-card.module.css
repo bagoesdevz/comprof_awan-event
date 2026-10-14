@@ -1,0 +1,54 @@
+.wrapper { width: 100%; container-type: inline-size; }
+.wrapper[data-count="1"] { max-width: 400px; margin-inline: auto; }
+.wrapper[data-count="2"] { max-width: 824px; margin-inline: auto; }
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 24px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 8px 16px -12px rgb(33 16 82 / 35%);
+}
+.portrait {
+  flex-shrink: 0;
+  position: relative;
+  aspect-ratio: 1.1;
+  overflow: hidden;
+  background: #eeedf1;
+}
+.photo { object-fit: cover; object-position: center 25%; }
+.skeleton { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+.skeletonHead { width: 24%; aspect-ratio: 1; border-radius: 50%; background: #d7d4df; }
+.skeletonBody { width: 50%; height: 26%; border-radius: 70px 70px 12px 12px; background: #d7d4df; }
+.placeholderLabel { margin-top: 8px; color: #655b78; font-size: 13px; }
+.badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  max-width: calc(100% - 40px);
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #5b3cc4;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.identity { display: flex; flex: 1; flex-direction: column; justify-content: center; min-height: 130px; padding: 24px; background: #5b3cc4; color: #fff; }
+.identity h3 { margin: 0; color: #fff; font-size: 20px; font-weight: 700; line-height: 1.25; letter-spacing: .015em; text-transform: uppercase; text-wrap: initial; overflow-wrap: anywhere; }
+.role { margin: 7px 0 0; font-size: 12px; font-weight: 550; line-height: 1.65; letter-spacing: .06em; text-transform: uppercase; overflow-wrap: anywhere; }
+.organization { margin: 5px 0 0; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.bio { margin: 0; padding: 20px 24px 24px; color: #5d607d; font-size: 14px; line-height: 1.8; white-space: pre-line; overflow-wrap: anywhere; }
+@container (min-width: 600px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@container (min-width: 940px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

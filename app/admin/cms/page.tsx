@@ -7,6 +7,9 @@ import { readImage } from "@/components/platform/assets";
 import { Badge, Field, PageHeading, Panel } from "@/components/platform/ui";
 import { ArticleEditor } from "@/components/admin/article-editor";
 import { type CmsArticle } from "@/lib/platform-model";
+import { companyProfile } from "@/lib/company-profile";
+import { teamPhotoSection } from "@/lib/team-content";
+import { PersonCard, PersonGrid } from "@/components/ui/person-card";
 
 const sections = ["Home", "About", "Team", "Services", "Partners", "FAQ", "CTA", "Footer"];
 const sectionLabels: Record<string, string> = { Home: "Pembuka", About: "Tentang kami", Team: "Tim", Services: "Layanan", Partners: "Mitra", FAQ: "Pertanyaan umum", CTA: "Ajakan program", Footer: "Footer" };
@@ -22,9 +25,15 @@ export default function AdminCmsPage() {
 
   const value = state.cms[section] ?? { title: section, body: "", image: "", status: "Draft" };
   const [draft, setDraft] = useState(value);
+  const [teamPhotos, setTeamPhotos] = useState<Record<string, string>>({});
+  const [uploadingPhotos, setUploadingPhotos] = useState<string[]>([]);
 
   useEffect(() => {
     setDraft(state.cms[section] ?? { title: section, body: "", image: "", status: "Draft" });
+    setTeamPhotos(Object.fromEntries(companyProfile.team.map((_, index) => {
+      const key = teamPhotoSection(index);
+      return [key, state.cms[key]?.image || ""];
+    })));
   }, [section, state.cms]);
 
   function select(key: string) {
@@ -39,6 +48,11 @@ export default function AdminCmsPage() {
     const payload = { ...draft, status: "Published" as const };
     const ok = await update((s) => {
       s.cms[section] = payload;
+      if (section === "Team") companyProfile.team.forEach((member, index) => {
+        const key = teamPhotoSection(index);
+        const image = teamPhotos[key] || "";
+        if (image || s.cms[key]) s.cms[key] = { title: member.name, body: member.role, image, status: "Published" };
+      });
     });
     setNotice(ok ? "Konten tersimpan." : "Perubahan belum tersimpan. Coba lagi.");
     setNoticeTone(ok ? "success" : "danger");
@@ -61,6 +75,20 @@ export default function AdminCmsPage() {
       status: "Draft",
     };
     setEditingArticle(blank);
+  }
+
+  async function uploadTeamPhoto(key: string, file: File) {
+    setUploadingPhotos(current => [...current, key]);
+    setNotice("");
+    try {
+      const image = await readImage(file);
+      setTeamPhotos(current => ({ ...current, [key]: image }));
+    } catch (error) {
+      setNoticeTone("danger");
+      setNotice((error as Error).message);
+    } finally {
+      setUploadingPhotos(current => current.filter(item => item !== key));
+    }
   }
 
   if (editingArticle) {
@@ -101,6 +129,7 @@ export default function AdminCmsPage() {
                 key={x}
                 type="button"
                 aria-pressed={section === x}
+                disabled={saving || uploadingPhotos.length > 0}
                 className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
                   section === x
                     ? "bg-primary-950 text-white"
@@ -138,7 +167,7 @@ export default function AdminCmsPage() {
                       placeholder="Tulis konten dalam bahasa yang mudah dipahami."
                     />
                   </Field>
-                  <Field label="Visual / cover">
+                  <Field label={section === "Team" ? "Foto tim bersama (opsional)" : "Visual / cover"}>
                     <input
                       type="file"
                       accept="image/png,image/jpeg,image/webp"
@@ -159,11 +188,31 @@ export default function AdminCmsPage() {
                       <Image src={draft.image} unoptimized alt="Pratinjau visual" fill className="object-cover" />
                     </div>
                   )}
+                  {section === "Team" && <fieldset className="team-photo-editor">
+                    <legend className="mb-2 text-base font-semibold">Foto anggota tim</legend>
+                    <p className="text-sm text-content-muted">PNG, JPG, atau WebP maksimal 5 MB. Tanpa foto, kartu menampilkan skeleton. Simpan &amp; terbitkan untuk menerapkan perubahan.</p>
+                    {companyProfile.team.map((member, index) => {
+                      const key = teamPhotoSection(index);
+                      const uploading = uploadingPhotos.includes(key);
+                      return <div key={key} className="team-photo-field">
+                        <div className="team-photo-thumb">{teamPhotos[key] && <Image src={teamPhotos[key]} alt={`Pratinjau ${member.name}`} fill unoptimized sizes="76px" />}</div>
+                        <div className="grid min-w-0 gap-2">
+                          <Field label={member.name}><input
+                            type="file" accept="image/png,image/jpeg,image/webp" disabled={uploading || saving}
+                            onChange={event => { const file = event.target.files?.[0]; if (file) void uploadTeamPhoto(key, file); event.target.value = ""; }}
+                          /></Field>
+                          <p className="text-xs text-content-muted">{member.role}</p>
+                          {uploading && <p role="status" className="text-sm text-content-muted">Mengunggah foto…</p>}
+                          {teamPhotos[key] && <button type="button" disabled={uploading || saving} className="flow-button secondary justify-self-start" onClick={() => setTeamPhotos(current => ({ ...current, [key]: "" }))}>Hapus foto</button>}
+                        </div>
+                      </div>;
+                    })}
+                  </fieldset>}
                   <div className="flex flex-wrap justify-between gap-3 border-t pt-6">
                     <Badge tone={value.status === "Published" ? "success" : "warning"}>
                       {value.status === "Published" ? "Terbit" : "Draf"}
                     </Badge>
-                    <button className="flow-button" disabled={saving}>
+                    <button className="flow-button" disabled={saving || uploadingPhotos.length > 0}>
                       <Save size={16} />
                       {saving ? "Menyimpan…" : "Simpan & terbitkan"}
                     </button>
@@ -179,6 +228,7 @@ export default function AdminCmsPage() {
                     {draft.body || "Belum ada isi konten."}
                   </p>
                   {draft.image && <Image src={draft.image} unoptimized alt="Pratinjau visual" width={900} height={600} className="mt-6 max-h-80 w-full rounded-xl object-contain" />}
+                  {section === "Team" && <div className="mt-6"><PersonGrid count={companyProfile.team.length}>{companyProfile.team.map((member, index) => <PersonCard key={member.name} name={member.name} role={member.role} photo={teamPhotos[teamPhotoSection(index)]} />)}</PersonGrid></div>}
                 </div>
               </Panel>
             )}
@@ -188,6 +238,7 @@ export default function AdminCmsPage() {
                 <button
                   type="button"
                   className="flow-button secondary w-full"
+                  disabled={uploadingPhotos.length > 0}
                   onClick={() => setMode(mode === "edit" ? "preview" : "edit")}
                 >
                   {mode === "edit" ? (

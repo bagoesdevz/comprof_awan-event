@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { ArrowRight, CalendarDays, Check, ChevronDown, ExternalLink, GraduationCap, Headphones, MapPin, Target, Users, Video } from "lucide-react";
 import { BrandSlogan, BrandWaves } from "@/components/brand/brand-elements";
 import { EventAction } from "@/components/events/event-action";
+import { PersonCard, PersonGrid } from "@/components/ui/person-card";
 import { attendanceLabels, attendanceOptions, blockTitle, eventAttendanceMode, eventDate, eventDateTime, eventFaq, eventHeroContent, eventVisual, participationSteps, ticketState, type Attendance } from "@/lib/event-detail";
 import { eventTimeRange } from "@/lib/event-time";
 import { lifecycleLabels, money, type Block, type ManagedEvent } from "@/lib/platform-model";
@@ -54,19 +55,14 @@ export function EventHero({ event, block, id, participantCount }: SectionProps &
     </section>;
 }
 
-export function EventSpeakerSection({ event, id }: SectionProps) {
+export function EventSpeakerSection({ event, block, id }: SectionProps) {
   const profiles = eventSpeakerProfiles(event);
-  const hasExplicitModerator = profiles.some(speaker => /moderator/i.test(speaker.role));
-  const entries = profiles.map((speaker, index) => ({ speaker, participationRole: /moderator/i.test(speaker.role) || (!hasExplicitModerator && profiles.length > 1 && index === profiles.length - 1) ? "Moderator" : "Speaker" }));
   return <section id={id} className="brand-container event-detail-section">
-    <span className="brand-eyebrow">Speaker & moderator</span>
-    {profiles.length ? <div className="event-speaker-columns">{(["Speaker", "Moderator"] as const).map(group => <div className="event-speaker-column" key={group}>
-      <h2>{group === "Speaker" ? "Keynote Speaker" : "Moderator"}</h2>
-      <div className="event-speaker-list">{entries.filter(entry => entry.participationRole === group).map(({ speaker, participationRole }) => <article className="event-speaker" key={speaker.name}>
-          {speaker.photo ? <EventImage src={speaker.photo} alt={`Foto ilustrasi ${speaker.name}`} className="event-speaker-photo" /> : <div className="event-speaker-initials" aria-hidden="true">{speaker.name.replace(/^(dr\.|Ns\.|apt\.)\s*/i, "").split(" ").slice(0, 2).map(word => word[0]).join("")}</div>}
-          <div className="event-speaker-copy"><span className="event-speaker-participation">{participationRole}</span><h3>{speaker.name}</h3><p className="event-speaker-role">{speaker.role}</p><p className="event-speaker-bio">{speaker.bio}</p><div className="event-speaker-meta"><span>{event.category}</span><span>{event.programType}</span></div><p className="event-speaker-org">{speaker.organization}</p></div>
-        </article>)}</div>
-    </div>)}</div> : <p className="event-empty">Profil speaker dan moderator akan diumumkan oleh penyelenggara.</p>}
+    <div className="people-heading"><h2>{blockTitle(block, "Pemateri & moderator")}</h2>{block.body && <p>{block.body}</p>}</div>
+    {profiles.length ? <PersonGrid count={profiles.length}>{profiles.map((speaker, index) => <PersonCard
+      key={`${speaker.name}-${index}`} name={speaker.name} role={speaker.role} photo={speaker.photo}
+      organization={speaker.organization} bio={speaker.bio} badge={speaker.role || undefined}
+    />)}</PersonGrid> : <p className="event-empty">Profil pemateri dan moderator akan diumumkan oleh penyelenggara.</p>}
   </section>;
 }
 

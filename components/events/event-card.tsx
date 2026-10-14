@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { eventPublicPath } from "@/lib/event-sharing";
 import type { EventType, EventSummary, RegistrationStatus } from "@/lib/event-types";
 import { eventTimeRange } from "@/lib/event-time";
 
@@ -166,7 +167,7 @@ export function EventCard({ event, index }: EventCardProps) {
               </dd>
             </div>
             <Link
-              href={`/events/${event.slug}`}
+              href={eventPublicPath(event)}
               aria-label={`Lihat detail ${event.title}`}
               className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-content-title/15 text-content-title transition duration-300 hover:-rotate-45 hover:border-primary-600 hover:bg-primary-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-4 active:scale-95"
             >

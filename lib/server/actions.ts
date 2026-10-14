@@ -1,14 +1,20 @@
 import "server-only";
 import { z } from "zod";
+import { whatsappGroupLink } from "@/lib/event-sharing";
 import type {User} from "@supabase/supabase-js";
 import {type ManagedEvent,type Registration,emptyProgress,activityAllowed,eligible} from "@/lib/platform-model";
 import {record,records,findEvent,commit,requireUser,requireAdmin,liveEvent} from "./platform";
 import {HttpError} from "./http";
 import {issueCertificate} from "./certificates";
+import {ensureEventPublicLinks} from "./event-links";
 const registrationInput=z.object({type:z.literal("register"),eventSlug:z.string().max(120),ticketId:z.string().max(120),answers:z.record(z.string(),z.string().max(2000)).default({}),members:z.array(z.object({name:z.string().trim().min(2).max(160),email:z.string().trim().email().max(254)})).max(49).default([])});
 const activityInput=z.object({type:z.enum(["start-test","submit-test","attendance","feedback","check-in","revoke-certificate"]),id:z.string().max(254),eventSlug:z.string().optional(),test:z.enum(["pre-test","post-test"]).optional(),answers:z.record(z.string(),z.number().int().min(0).max(7)).optional(),feedback:z.object({overall:z.number().int().min(1).max(5),speaker:z.number().int().min(1).max(5),material:z.number().int().min(1).max(5),organization:z.number().int().min(1).max(5),comment:z.string().max(3000)}).optional()});
 export async function runAction(user:User|null,raw:unknown){
  const u=requireUser(user),email=u.email.toLowerCase();
+ if((raw as {type?:unknown})?.type==="ensure-event-links"){
+  z.object({type:z.literal("ensure-event-links")}).strict().parse(raw);
+  return ensureEventPublicLinks(u);
+ }
  if((raw as {type?:unknown})?.type==="register"){
   const input=registrationInput.parse(raw),er=await findEvent(input.eventSlug),event=liveEvent(er.data as unknown as ManagedEvent);
   if(!er.published||event.registrationStatus!=="OPEN"||event.lifecycle==="completed")throw new HttpError(409,"Pendaftaran event ditutup.");
@@ -31,7 +37,7 @@ export async function runAction(user:User|null,raw:unknown){
    {collection:"events",id:er.id,revision:er.revision,data:event as unknown as Record<string,unknown>,published:er.published},
    ...[r,...memberRegistrations].map(registration=>({collection:"registrations" as const,id:registration.id,revision:0,data:registration as unknown as Record<string,unknown>,owner_email:registration.email})),
   ]);
-  return {registration:r};
+  return {registration:r,whatsappGroupUrl:whatsappGroupLink(event.whatsappGroupUrl)};
  }
  const input=activityInput.parse(raw),rr=await record("registrations",input.id);
  if(!rr)throw new HttpError(404,"Pendaftaran tidak ditemukan.");

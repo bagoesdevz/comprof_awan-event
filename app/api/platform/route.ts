@@ -1,7 +1,10 @@
 import { z } from "zod";
+import { isTeamPhotoSection } from "@/lib/team-content";
 import { currentUser } from "@/lib/supabase/auth";
 import { collections } from "@/lib/platform-records";
-import { snapshot,record,commit,requireUser,requireAdmin,roleOf } from "@/lib/server/platform";
+import { snapshot,record,records,commit,requireUser,requireAdmin,roleOf } from "@/lib/server/platform";
+import { createEventPublicCode } from "@/lib/server/event-links";
+import { isEventPublicCode } from "@/lib/event-sharing";
 import { sameOrigin,readBody,fail,json,rateLimit,HttpError } from "@/lib/server/http";
 import { eventSchema,profileSchema,contentSchema,articleSchema,leadSchema,templateSchema,campaignSchema } from "@/lib/server/validation";
 export const dynamic="force-dynamic";
@@ -9,7 +12,7 @@ export async function GET(){try{return json(await snapshot(await currentUser()))
 const payload=z.object({changes:z.array(z.object({collection:z.enum(collections),id:z.string().min(1).max(254),revision:z.number().int().min(0),data:z.record(z.string(),z.unknown())})).min(1).max(100)});
 export async function PATCH(request:Request){
  try{sameOrigin(request);const user=requireUser(await currentUser());await rateLimit("write:"+user.id);const input=payload.parse(await readBody(request));
- const changes=[];
+ const changes=[];let usedEventCodes:Set<string>|undefined;
  for(const change of input.changes){
   const old=await record(change.collection,change.id);let data:Record<string,unknown>;let owner_email:string|null=null,published=false;
   if(old&&old.revision!==change.revision)throw new HttpError(409,"Data sudah berubah. Muat ulang sebelum menyimpan.");
@@ -24,7 +27,7 @@ export async function PATCH(request:Request){
    const schemas={events:eventSchema,cms:contentSchema,articles:articleSchema,leads:leadSchema,templates:templateSchema,campaigns:campaignSchema};
    if(!(change.collection in schemas))throw new HttpError(403,"Perubahan ini memerlukan tindakan khusus.");
    data=schemas[change.collection as keyof typeof schemas].parse(change.data);
-   if(change.collection==="cms"&&!["Home","About","Team","Services","Partners","FAQ","CTA","Footer"].includes(change.id))throw new HttpError(422,"Bagian konten tidak tersedia.");
+   if(change.collection==="cms"&&!["Home","About","Team","Services","Partners","FAQ","CTA","Footer"].includes(change.id)&&!isTeamPhotoSection(change.id))throw new HttpError(422,"Bagian konten tidak tersedia.");
    if(change.collection!=="cms"&&data.id!==change.id)throw new HttpError(422,"ID tidak cocok.");
    if(change.collection==="events"&&old){
     if(data.slug!==old.data.slug)throw new HttpError(422,"Slug event yang tersimpan tidak dapat diubah.");
@@ -34,6 +37,8 @@ export async function PATCH(request:Request){
     after.forEach(t=>{const prev=before.find(v=>v.id===t.id);t.quotaLeft=t.quota-(prev?prev.quota-prev.quotaLeft:0)});
    }
    if(change.collection==="events"){
+    if(!usedEventCodes)usedEventCodes=new Set((await records("events")).map(event=>event.data.publicCode).filter(isEventPublicCode));
+    data.publicCode=isEventPublicCode(old?.data.publicCode)?old.data.publicCode:createEventPublicCode(usedEventCodes);
     const tickets=data.tickets as Array<{quota:number;quotaLeft:number}>;
     if(!old)tickets.forEach(ticket=>{ticket.quotaLeft=ticket.quota;});
     data.capacity=tickets.reduce((total,ticket)=>total+ticket.quota,0);

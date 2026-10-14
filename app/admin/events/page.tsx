@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { eventPublicPath } from "@/lib/event-sharing";
 import Link from "next/link";
 import { useState } from "react";
 import { Plus, Pencil, Eye } from "lucide-react";
@@ -37,7 +38,7 @@ export default function Page() {
           </div>
           <div className="admin-actions items-center">
             <Link className="flow-button secondary" href={`/admin/events/${event.slug}`} aria-label={`Edit ${event.title}`}><Pencil size={16} aria-hidden="true" />Edit</Link>
-            <Link className="flow-button secondary" href={`/events/${event.slug}`} aria-label={`Lihat ${event.title}`}><Eye size={16} aria-hidden="true" />Lihat</Link>
+            <Link className="flow-button secondary" href={eventPublicPath(event)} aria-label={`Lihat ${event.title}`}><Eye size={16} aria-hidden="true" />Lihat</Link>
             <button disabled={saving} type="button" className="flow-button secondary" onClick={() => void update(draft => { const record = draft.events.find(item => item.id === event.id); if (record) record.publication = record.publication === "published" ? "draft" : "published"; })}>{event.publication === "published" ? "Jadikan draf" : "Tayangkan"}</button>
           </div>
         </article>;

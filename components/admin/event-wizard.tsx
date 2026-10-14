@@ -37,6 +37,8 @@ import {
 } from "@/lib/platform-model";
 import { eventHeroContent } from "@/lib/event-detail";
 import { eventTimeRange, fromWibDateTimeLocal, toWibDateTimeLocal } from "@/lib/event-time";
+import { whatsappGroupLink } from "@/lib/event-sharing";
+import { EventQrCode } from "@/components/admin/event-qr-code";
 
 type EventKind = "Webinar" | "Seminar" | "Pelatihan";
 type Ticket = ManagedEvent["tickets"][number];
@@ -163,7 +165,8 @@ export function EventWizard({initialSlug}:{initialSlug?:string}){
 }
 function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
   const { state, update } = usePlatform();
-  const base = state.events.find((event) => event.slug === initialSlug);
+  const createdEventId = useRef(crypto.randomUUID());
+  const base = state.events.find((event) => initialSlug ? event.slug === initialSlug : event.id === createdEventId.current);
   const baseHero = base?.blocks.find((block) => block.type === "Hero");
   const baseHeroContent = base && baseHero ? eventHeroContent(base, baseHero) : undefined;
   const initialKind = eventKind(base?.programType);
@@ -181,7 +184,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
     startAt: toWibDateTimeLocal(base?.startAt), endAt: toWibDateTimeLocal(base?.endAt), city: base?.city || "Online", venue: base?.venue || "Zoom", venueAddress: base?.venueAddress || "", capacity: String(base?.capacity || 100), waitlist: base?.waitlist ?? true,
     partner: base?.partner || "", coordinator: base?.coordinator || "", requirements: base?.requirements || "", learningOutcomes: base?.learningOutcomes.join("\n") || "", publication: base?.publication || "draft",
     meetingProvider: base?.meetingProvider || "Zoom", meetingUrl: base?.meetingUrl || "", meetingId: base?.meetingId || "", meetingPasscode: base?.meetingPasscode || "", accessOpensAt: toWibDateTimeLocal(base?.accessOpensAt),
-    reminder: base?.reminder || "H-1 dan 2 jam sebelum event", certificatePattern: base?.certificatePattern || "AWN-{year}-{sequence}", certificateTemplate: base?.certificateTemplate || "", certificateEnabled: base?.certificateEnabled ?? true, banner: base?.banner || "",
+    reminder: base?.reminder || "H-1 dan 2 jam sebelum event", certificatePattern: base?.certificatePattern || "AWN-{year}-{sequence}", certificateTemplate: base?.certificateTemplate || "", certificateEnabled: base?.certificateEnabled ?? true, banner: base?.banner || "", whatsappGroupUrl: base?.whatsappGroupUrl || "",
   }));
   const [learningMethods, setLearningMethods] = useState<string[]>(base?.learningMethods || ["Presentasi materi", "Diskusi interaktif"]);
   const [speakers, setSpeakers] = useState<Speaker[]>(base?.speakers.length ? base.speakers : [emptySpeaker()]);
@@ -211,7 +214,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
   }
 
   function buildEvent(publish = false): ManagedEvent {
-    const template = (base || state.events[0]) as ManagedEvent;
+    const template = { ...(base || state.events[0]), whatsappGroupUrl: form.whatsappGroupUrl.trim() } as ManagedEvent;
     const slug = (base?.slug || form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")) || "event-baru";
     const startAt = fromWibDateTimeLocal(form.startAt) || new Date().toISOString();
     const endAt = fromWibDateTimeLocal(form.endAt) || new Date(Date.parse(startAt) + 3600000).toISOString();
@@ -221,17 +224,18 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
       return { ...ticket, price: ticket.pricingMode === "free" ? 0 : ticket.price, startsAt: fromWibDateTimeLocal(ticket.startsAt || "") || undefined, endsAt: fromWibDateTimeLocal(ticket.endsAt || "") || undefined };
     });
     const quotaLeft = normalizedTickets.reduce((total, ticket) => total + ticket.quotaLeft, 0);
-    const event = manageEvent({ ...template, id: base?.id || `evt-${Date.now()}`, slug, title: form.title || `Draft ${kind || "event"}`, category: form.category || "Kategori belum diisi", type: form.type as ManagedEvent["type"], startAt, duration: eventTimeRange(startAt, endAt), city: form.city, venue: form.venue, venueAddress: form.venueAddress || undefined, mapLabel: form.venue || form.city, price: normalizedTickets[0]?.price || 0, quotaLeft, speaker: speakers.find((speaker) => speaker.name.trim())?.name || "Narasumber segera diumumkan", registrationStatus: "OPEN", summary: form.summary || form.description || "Ringkasan event belum diisi.", description: form.description || "Deskripsi event belum diisi.", audience: form.audience || "Sasaran peserta belum diisi.", speakers: speakers.filter((speaker) => speaker.name.trim()), learningOutcomes: lines(form.learningOutcomes), sessions: sessions.filter((session) => session.title.trim()), tickets: normalizedTickets });
+    const event = manageEvent({ ...template, id: base?.id || createdEventId.current, slug, title: form.title || `Draft ${kind || "event"}`, category: form.category || "Kategori belum diisi", type: form.type as ManagedEvent["type"], startAt, duration: eventTimeRange(startAt, endAt), city: form.city, venue: form.venue, venueAddress: form.venueAddress || undefined, mapLabel: form.venue || form.city, price: normalizedTickets[0]?.price || 0, quotaLeft, speaker: speakers.find((speaker) => speaker.name.trim())?.name || "Narasumber segera diumumkan", registrationStatus: "OPEN", summary: form.summary || form.description || "Ringkasan event belum diisi.", description: form.description || "Deskripsi event belum diisi.", audience: form.audience || "Sasaran peserta belum diisi.", speakers: speakers.filter((speaker) => speaker.name.trim()), learningOutcomes: lines(form.learningOutcomes), sessions: sessions.filter((session) => session.title.trim()), tickets: normalizedTickets });
     return Object.assign(event, { detailRevision: 2, programType: form.programType, publication: publish ? "published" : form.publication, lifecycle: "upcoming", endAt, capacity, quotaLeft, waitlist: form.waitlist, meetingProvider: form.meetingProvider as "Zoom" | "Google Meet", meetingUrl: form.meetingUrl, meetingId: form.meetingId, meetingPasscode: form.meetingPasscode, accessOpensAt: fromWibDateTimeLocal(form.accessOpensAt), objectives: form.objectives, learningMethods, partner: form.partner, coordinator: form.coordinator, requirements: form.requirements, blocks, preTest, postTest, certificateEnabled: form.certificateEnabled, certificatePattern: form.certificatePattern, certificateTemplate: form.certificateTemplate, certificatePlacement, reminder: form.reminder, banner: form.banner });
   }
 
   async function save(publish = false) {
+    if (form.whatsappGroupUrl.trim() && !whatsappGroupLink(form.whatsappGroupUrl)) { setNotice("Lengkapi tautan undangan grup dengan alamat https://chat.whatsapp.com/..."); setStep(1); return; }
     if (!valid) { setNotice("Lengkapi nama, bidang materi, jadwal, sasaran, tujuan, dan deskripsi program."); return; }
     if (publish && form.certificateEnabled && !form.certificateTemplate) { setNotice("Upload template sertifikat atau nonaktifkan sertifikat sebelum publish."); setStep(6); return; }
     const event = buildEvent(publish);
     const saved = await update((draft) => { const index = draft.events.findIndex((item) => item.slug === event.slug); if (index >= 0) draft.events[index] = event; else draft.events.unshift(event); });
     if (!saved) return;
-    setNotice(publish ? "Event dipublikasikan." : "Draft tersimpan.");
+    setNotice(publish ? "Event dipublikasikan." : event.publication === "published" ? "Perubahan event tersimpan." : "Draf tersimpan.");
   }
 
   function submit(event: FormEvent) { event.preventDefault(); if (step < steps.length - 1) setStep((current) => current + 1); else save(form.publication === "published"); }
@@ -267,6 +271,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
   </div>;
 
   const selectedBlock = blocks.find((block) => block.id === landingSection) || null;
+  const persistedEvent = base;
   return <div className="mx-auto max-w-[1280px]">
     <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><button type="button" onClick={() => { setStarted(false); setLandingSection(null); }} className="mb-4 inline-flex min-h-10 items-center gap-2 text-xs font-semibold text-primary-700"><ArrowLeft size={15} />Ganti jenis event</button><h1 className="text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Buat {kind.toLowerCase()}</h1><p className="mt-2 text-sm text-content-body">{form.title || "Draft baru"}</p></div><button type="button" className="flow-button secondary self-start sm:self-auto" ref={previewTrigger} onClick={() => setPreview(true)}><Eye size={16} />Pratinjau</button></header>
     {notice && <p role="status" className={`flow-alert mb-6 ${notice.includes("Lengkapi") || notice.includes("Upload") ? "warning" : "success"}`}>{notice}</p>}
@@ -278,6 +283,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
         {step === 0 && <div className="grid gap-5 sm:grid-cols-2"><Field label="Nama event *" className="sm:col-span-2"><input required value={form.title} onChange={(event) => setField("title", event.target.value)} placeholder={`Nama ${kind.toLowerCase()}`} /></Field><Field label="Jenis program"><input value={form.programType} readOnly /></Field><Field label="Format kehadiran *"><select value={form.type} onChange={(event) => setField("type", event.target.value as ManagedEvent["type"])}><option value="ONLINE">Online</option><option value="ONSITE">Tatap muka</option><option value="HYBRID">Hybrid</option></select></Field><Field label="Bidang materi *"><input required list="awan-event-materials" value={form.category} onChange={(event) => setField("category", event.target.value)} placeholder="Pilih atau tulis bidang materi" /><datalist id="awan-event-materials">{materialOptions.map((material) => <option value={material} key={material} />)}</datalist></Field><Field label="Sasaran peserta *"><textarea required rows={3} value={form.audience} onChange={(event) => setField("audience", event.target.value)} /></Field><Field label="Ringkasan publik" className="sm:col-span-2"><textarea rows={3} value={form.summary} onChange={(event) => setField("summary", event.target.value)} /></Field><Field label="Deskripsi program *" className="sm:col-span-2"><textarea required rows={5} value={form.description} onChange={(event) => setField("description", event.target.value)} /></Field><Field label="Tujuan program *" className="sm:col-span-2"><textarea required rows={4} value={form.objectives} onChange={(event) => setField("objectives", event.target.value)} /></Field></div>}
 
         {step === 1 && <div className="grid gap-5 sm:grid-cols-2"><Field label="Mulai *"><input required type="datetime-local" value={form.startAt} onChange={(event) => setField("startAt", event.target.value)} /></Field><Field label="Selesai"><input type="datetime-local" value={form.endAt} onChange={(event) => setField("endAt", event.target.value)} /></Field><Field label="Kapasitas peserta"><input type="number" min="1" value={form.capacity} onChange={(event) => { const value = event.target.value; setField("capacity", value); if (value && tickets.length === 1) setTickets((current) => current.map((ticket) => resizeTicket(ticket, Number(value)))); }} /></Field><Field label="Waitlist"><select value={String(form.waitlist)} onChange={(event) => setField("waitlist", event.target.value === "true")}><option value="true">Aktif</option><option value="false">Nonaktif</option></select></Field>
+          <div className="sm:col-span-2 grid gap-2"><Field label="Tautan grup WhatsApp (opsional)"><input type="url" value={form.whatsappGroupUrl} onChange={event => setField("whatsappGroupUrl", event.target.value)} placeholder="https://chat.whatsapp.com/..." aria-describedby="event-whatsapp-hint" /></Field><p id="event-whatsapp-hint" className="text-sm leading-6 text-content-muted">Ajakan bergabung muncul setelah peserta menyimpan pendaftaran. Kosongkan jika event tidak memiliki grup.</p></div>
           {form.type !== "ONSITE" && <section className="sm:col-span-2 rounded-2xl bg-surface-muted p-5"><div className="mb-5 flex items-center gap-3"><Laptop2 size={20} className="text-primary-700" /><h3 className="font-semibold">Akses online</h3></div><div className="grid gap-5 sm:grid-cols-2"><Field label="Platform"><select value={form.meetingProvider} onChange={(event) => setField("meetingProvider", event.target.value as "Zoom" | "Google Meet")}><option>Zoom</option><option>Google Meet</option></select></Field><Field label="Link meeting"><input type="url" value={form.meetingUrl} onChange={(event) => setField("meetingUrl", event.target.value)} placeholder="https://..." /></Field><Field label="Meeting ID"><input value={form.meetingId} onChange={(event) => setField("meetingId", event.target.value)} /></Field><Field label="Passcode"><input value={form.meetingPasscode} onChange={(event) => setField("meetingPasscode", event.target.value)} /></Field><Field label="Akses dibuka" className="sm:col-span-2"><input type="datetime-local" value={form.accessOpensAt} onChange={(event) => setField("accessOpensAt", event.target.value)} /></Field></div></section>}
           {form.type !== "ONLINE" && <section className="sm:col-span-2 rounded-2xl bg-surface-muted p-5"><div className="mb-5 flex items-center gap-3"><MapPinned size={20} className="text-primary-700" /><h3 className="font-semibold">Lokasi kegiatan</h3></div><div className="grid gap-5 sm:grid-cols-2"><Field label="Kota"><input value={form.city} onChange={(event) => setField("city", event.target.value)} /></Field><Field label="Venue"><input value={form.venue} onChange={(event) => setField("venue", event.target.value)} /></Field><Field label="Alamat lengkap" className="sm:col-span-2"><textarea rows={3} value={form.venueAddress} onChange={(event) => setField("venueAddress", event.target.value)} /></Field></div></section>}
           <Field label="Mitra / institusi"><input value={form.partner} onChange={(event) => setField("partner", event.target.value)} /></Field><Field label="Koordinator"><input value={form.coordinator} onChange={(event) => setField("coordinator", event.target.value)} /></Field><Field label="Kebutuhan teknis" className="sm:col-span-2"><textarea rows={3} value={form.requirements} onChange={(event) => setField("requirements", event.target.value)} /></Field></div>}
@@ -300,6 +306,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
         <div className="mt-8 flex flex-wrap justify-between gap-3 border-t border-primary-600/10 pt-6"><button type="button" disabled={step === 0} onClick={() => { setStep((current) => Math.max(0, current - 1)); setLandingSection(null); }} className="flow-button secondary"><ArrowLeft size={16} />Kembali</button><div className="flex flex-wrap gap-2"><button type="button" className="flow-button secondary" onClick={() => save(false)}><Save size={16} />Simpan draft</button><button type="submit" className="flow-button">{step === steps.length - 1 ? form.publication === "published" ? <><Send size={16} />Publish event</> : <><FileCheck2 size={16} />Simpan event</> : <>Lanjut<ArrowRight size={16} /></>}</button></div></div>
       </Panel>
     </form>
+    <EventQrCode event={persistedEvent} />
     <DialogPrimitive.Root open={preview} onOpenChange={setPreview}><DialogPrimitive.Portal><DialogPrimitive.Content aria-describedby={undefined} onCloseAutoFocus={(event) => { event.preventDefault(); previewTrigger.current?.focus(); }} className="fixed inset-0 z-50 overflow-y-auto bg-white"><div className="sticky top-0 z-50 flex min-h-16 items-center justify-between gap-4 border-b border-primary-600/10 bg-white px-4 sm:px-6"><div><DialogPrimitive.Title className="block text-sm font-semibold">Pratinjau landing page</DialogPrimitive.Title><span className="text-xs text-content-muted">{kind}</span></div><button type="button" onClick={() => setPreview(false)} className="flow-button secondary">Tutup</button></div><EventPresentation slug={buildEvent(false).slug} previewEvent={buildEvent(false)} /></DialogPrimitive.Content></DialogPrimitive.Portal></DialogPrimitive.Root>
   </div>;
 }

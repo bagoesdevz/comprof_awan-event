@@ -2,6 +2,7 @@ export type EventType = "ONLINE" | "ONSITE" | "HYBRID";
 export type RegistrationStatus = "OPEN" | "COMING_SOON" | "SOLD_OUT" | "CLOSED";
 
 export type EventSummary = {
+  publicCode?: string;
   programType?: string;
   id: string;
   slug: string;

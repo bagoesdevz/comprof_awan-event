@@ -1,15 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { usePlatform } from "@/components/platform/provider";
 import type { ManagedEvent } from "@/lib/platform-model";
-import { ticketState } from "@/lib/event-detail";
+import { eventDateTime, ticketState } from "@/lib/event-detail";
 
-export function EventAction({ event, ticketId, className = "brand-button", now = Date.now() }: { event: ManagedEvent; ticketId?: string; className?: string; now?: number }) {
+export function EventAction({ event, ticketId, className = "brand-button", now: suppliedNow }: { event: ManagedEvent; ticketId?: string; className?: string; now?: number }) {
   const { state } = usePlatform();
+  const [clock, setClock] = useState(Date.now);
+  useEffect(() => {
+    if (suppliedNow !== undefined) return;
+    const timer = window.setInterval(() => setClock(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [suppliedNow]);
+  const now = suppliedNow ?? clock;
   const ticket = event.tickets.find(item => item.id === ticketId);
-  const registration = state.session.loggedIn ? state.registrations.find(item => item.eventSlug === event.slug && item.email === state.session.email && !["cancelled", "refunded"].includes(item.payment)) : undefined;
+  const registration = state.session.loggedIn ? state.registrations.find(item => item.eventSlug === event.slug && item.email === state.session.email && !["cancelled", "expired", "refunded"].includes(item.payment)) : undefined;
   const loginOr = (path: string) => state.session.loggedIn ? path : "/login?next=" + encodeURIComponent(path);
   const registrationPath = `/events/${event.slug}/register` + (ticket ? `?ticket=${encodeURIComponent(ticket.id)}` : "");
   let href = loginOr(registrationPath);
@@ -32,6 +40,12 @@ export function EventAction({ event, ticketId, className = "brand-button", now =
         href = `/waitlist/${event.slug}` + (ticket ? `?ticket=${encodeURIComponent(ticket.id)}` : "");
         label = "Gabung daftar tunggu";
       } else disabled = statuses.includes("scheduled") ? "Pendaftaran segera dibuka" : statuses.includes("full") ? "Kuota penuh" : "Pendaftaran ditutup";
+      if (disabled && statuses.includes("scheduled")) {
+        const opening = (ticket ? [ticket] : event.tickets)
+          .filter(item => ticketState(event, item, now) === "scheduled" && item.startsAt && Date.parse(item.startsAt) > now)
+          .map(item => Date.parse(item.startsAt!)).sort((a, b) => a - b)[0];
+        if (opening !== undefined) disabled = `Dibuka ${eventDateTime(new Date(opening).toISOString())}`;
+      }
     }
     else if (ticket ? ticket.price === 0 : event.tickets.some(item => item.price === 0)) label = ticket ? "Daftar gratis" : "Lihat tiket";
   }

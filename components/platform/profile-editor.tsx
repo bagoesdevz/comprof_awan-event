@@ -9,20 +9,21 @@ import { blankProfile, defaultProfile, profileComplete, safeNext, type Profile }
 const genderOptions = [["male", "Laki-laki"], ["female", "Perempuan"], ["prefer_not_to_say", "Memilih tidak menjawab"]] as const;
 const sourceOptions = ["Instagram", "LinkedIn", "WhatsApp", "Rekomendasi teman atau kolega", "Pencarian Google", "Lainnya"] as const;
 
-export function ProfileEditor() {
+export function ProfileEditor({ registrationEventTitle, onComplete }: { registrationEventTitle?: string; onComplete?: () => void } = {}) {
   const { state, ready, update } = usePlatform();
   const router = useRouter();
   const [form, setForm] = useState<Profile>(defaultProfile);
   const [notice, setNotice] = useState("");
   const [saving, setSaving] = useState(false);
   const [required, setRequired] = useState(false);
+  const registration = registrationEventTitle !== undefined;
 
   useEffect(() => {
     if (ready) {
-      setRequired(new URLSearchParams(window.location.search).get("required") === "1");
+      setRequired(registration || new URLSearchParams(window.location.search).get("required") === "1");
       setForm({ ...blankProfile(state.session.email), ...(state.profiles[state.session.email] || {}) });
     }
-  }, [ready, state.session.email, state.profiles]);
+  }, [ready, state.session.email, state.profiles, registration]);
 
   function setField<Key extends keyof Profile>(key: Key, value: Profile[Key]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -37,6 +38,7 @@ export function ProfileEditor() {
     });
     setSaving(false);
     if (!saved) return;
+    if (registration) { onComplete?.(); return; }
     setNotice("Profil tersimpan. Anda siap mengikuti event Awan Event.");
     const next = new URLSearchParams(window.location.search).get("next");
     if (next) router.push(safeNext(next));
@@ -47,8 +49,8 @@ export function ProfileEditor() {
 
   return (
     <div className="profile-onboarding mx-auto max-w-4xl">
-      {required && !profileComplete(form) && <div className="profile-required-notice" role="status"><strong>Lengkapi profil Anda terlebih dahulu.</strong><span>Data ini digunakan untuk pendaftaran event, komunikasi, dan penerbitan sertifikat.</span></div>}
-      <div className="profile-onboarding-heading"><p className="profile-onboarding-kicker">Akun peserta</p><h1>Kenali diri Anda lebih baik.</h1><p>Lengkapi data singkat ini agar pengalaman event dan sertifikat Anda tercatat dengan tepat.</p></div>
+      {required && !profileComplete(form) && !registration && <div className="profile-required-notice" role="status"><strong>Lengkapi profil Anda terlebih dahulu.</strong><span>Data ini digunakan untuk pendaftaran event, komunikasi, dan penerbitan sertifikat.</span></div>}
+      <div className="profile-onboarding-heading"><p className="profile-onboarding-kicker">{registration ? "Data peserta" : "Akun peserta"}</p>{registration ? <h2>Lengkapi data pendaftaran</h2> : <h1>Kenali diri Anda lebih baik.</h1>}<p>{registration ? `Isi data peserta untuk ${registrationEventTitle}. Setelah disimpan, lanjutkan konfirmasi dan pilih tiket di halaman ini.` : "Lengkapi data singkat ini agar pengalaman event dan sertifikat Anda tercatat dengan tepat."}</p></div>
       {notice && <p role="status" className="flow-alert success mb-6">{notice}</p>}
       <Panel title="Informasi utama">
         <form onSubmit={submit} className="profile-onboarding-form">
@@ -61,10 +63,10 @@ export function ProfileEditor() {
             <Field label="Tanggal lahir *" hint={age !== null ? `Usia: ${age} tahun` : undefined}><input value={form.birthDate} type="date" required max={new Date().toISOString().slice(0, 10)} onChange={(event) => setField("birthDate", event.target.value)} /></Field>
             <Field label="Domisili *"><input value={form.city} autoComplete="address-level2" placeholder="Kota atau kabupaten" required onChange={(event) => setField("city", event.target.value)} /></Field>
             <Field label="Profesi *"><input value={form.profession} autoComplete="organization-title" required onChange={(event) => setField("profession", event.target.value)} /></Field>
-            <Field label="Info webinar dari *"><select value={form.source} required onChange={(event) => setField("source", event.target.value)}><option value="">Pilih sumber informasi</option>{sourceOptions.map((source) => <option key={source} value={source}>{source}</option>)}</select></Field>
+            <Field label={registration ? "Mengetahui event dari *" : "Info webinar dari *"}><select value={form.source} required onChange={(event) => setField("source", event.target.value)}><option value="">Pilih sumber informasi</option>{sourceOptions.map((source) => <option key={source} value={source}>{source}</option>)}</select></Field>
           </div>
           <details className="profile-extra-details"><summary>Data tambahan (opsional)</summary><div className="profile-onboarding-grid mt-5"><Field label="Institusi atau perusahaan"><input value={form.institution} onChange={(event) => setField("institution", event.target.value)} /></Field><Field label="Jabatan"><input value={form.position} onChange={(event) => setField("position", event.target.value)} /></Field><Field label="Provinsi"><input value={form.province} autoComplete="address-level1" onChange={(event) => setField("province", event.target.value)} /></Field><Field label="Alamat"><input value={form.address} autoComplete="street-address" onChange={(event) => setField("address", event.target.value)} /></Field><Field label="Bidang atau spesialisasi"><input value={form.specialization} onChange={(event) => setField("specialization", event.target.value)} /></Field></div></details>
-          <div className="profile-onboarding-actions"><p>Kolom bertanda * wajib diisi.</p><button className="flow-button" disabled={saving}>{saving ? "Menyimpan…" : "Simpan profil"}</button></div>
+          <div className="profile-onboarding-actions"><p>{registration ? "Kolom bertanda * wajib diisi. Menyimpan data belum mendaftarkan Anda ke event." : "Kolom bertanda * wajib diisi."}</p><button className="flow-button" disabled={saving}>{saving ? "Menyimpan…" : registration ? "Simpan data & lanjutkan" : "Simpan profil"}</button></div>
         </form>
       </Panel>
     </div>

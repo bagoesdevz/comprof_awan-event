@@ -7,6 +7,7 @@ import { Badge, Empty, Field, Panel } from "@/components/platform/ui";
 import { defaultProfile, money, profileComplete, type Registration } from "@/lib/platform-model";
 import { whatsappGroupLink } from "@/lib/event-sharing";
 import { RegistrationGroupDialog } from "@/components/registration/registration-group-dialog";
+import { ProfileEditor } from "@/components/platform/profile-editor";
 export function RegistrationWizard({eventSlug,ticketId}:{eventSlug:string;ticketId:string;ticketName?:string}){
  const {state,ready,action,saving}=usePlatform();const router=useRouter();const [step,setStep]=useState(0);const [selected,setSelected]=useState(ticketId);const [quantity,setQuantity]=useState(1);const [answers,setAnswers]=useState<Record<string,string>>({});const [members,setMembers]=useState<{name:string;email:string}[]>([]);const [error,setError]=useState("");
  const [completed,setCompleted]=useState<{registration:Registration;groupUrl:string}|null>(null);
@@ -16,10 +17,10 @@ export function RegistrationWizard({eventSlug,ticketId}:{eventSlug:string;ticket
  if(!event)return <Empty title="Event tidak ditemukan" href="/events"/>;
  const returnTo="/events/"+eventSlug+"/register"+(ticketId?"?ticket="+encodeURIComponent(ticketId):"");
  if(!state.session.loggedIn)return <Panel title="Masuk untuk mendaftar"><Link className="flow-button" href={"/login?next="+encodeURIComponent(returnTo)}>Masuk / buat akun</Link></Panel>;
- if(!profileComplete(profile))return <Panel title="Lengkapi profil Anda"><p className="mb-5 text-sm text-content-body">Nama, kontak, kota, provinsi, profesi, dan institusi diperlukan sebelum pendaftaran.</p><Link className="flow-button" href={"/dashboard/profile?next="+encodeURIComponent(returnTo)}>Lengkapi profil</Link></Panel>;
  if(completed)return <RegistrationGroupDialog registration={completed.registration} eventTitle={event.title} groupUrl={completed.groupUrl} onContinue={()=>router.push(destination(completed.registration))}/>;
  if(existing)return <Panel title="Pendaftaran Anda sudah tersimpan"><Badge tone={existing.payment==="paid"?"success":"warning"}>{existing.payment==="paid"?"Terkonfirmasi":"Belum lunas"}</Badge><p className="my-5 text-sm">{existing.id} · {existing.ticketName}</p><Link className="flow-button" href={existing.payment==="paid"?"/dashboard/events/"+eventSlug:`/events/${eventSlug}/payment?registration=${existing.id}&ticket=${existing.ticketId}`}>{existing.payment==="paid"?"Buka perjalanan event":"Lanjutkan pembayaran"}</Link></Panel>;
  if(event.registrationStatus!=="OPEN"||event.lifecycle!=="upcoming")return <Empty title={event.registrationStatus==="SOLD_OUT"?"Kuota event penuh":"Pendaftaran belum tersedia"} href={event.registrationStatus==="SOLD_OUT"?"/waitlist/"+eventSlug:"/events"} label={event.registrationStatus==="SOLD_OUT"?"Gabung waitlist":"Lihat event lain"}/>;
+ if(!profileComplete(profile))return <ProfileEditor registrationEventTitle={event.title}/>;
  const ticket=event.tickets.find(t=>t.id===selected)||event.tickets[0];
  if(!ticket)return <Empty title="Tiket belum tersedia" href="/events"/>;
  const ticketAvailable=(t:typeof ticket)=>t.quotaLeft>0&&t.status!=="inactive"&&(!t.startsAt||new Date(t.startsAt)<=new Date())&&(!t.endsAt||new Date(t.endsAt)>=new Date());

@@ -1,4 +1,4 @@
-import type { TicketOption } from "@/lib/event-types";
+import type { EventSummary, RegistrationStatus, TicketOption } from "@/lib/event-types";
 import type { Block, ManagedEvent } from "@/lib/platform-model";
 
 export type Attendance = "ONLINE" | "ONSITE";
@@ -12,13 +12,25 @@ export function eventAttendanceMode(event: ManagedEvent): Attendance {
 export const eventDate = (value: string) => new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(new Date(value));
 export const eventDateTime = (value: string) => new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" }).format(new Date(value)) + " WIB";
 
-export function ticketState(event: ManagedEvent, ticket: TicketOption, now: number) {
+type RegistrationEvent = Pick<EventSummary, "registrationStatus" | "quotaLeft"> & { lifecycle?: ManagedEvent["lifecycle"] };
+
+export function ticketState(event: RegistrationEvent, ticket: TicketOption, now: number) {
   if (event.lifecycle === "completed") return "completed";
   if (ticket.status === "inactive" || event.registrationStatus === "CLOSED") return "closed";
   if (event.registrationStatus === "COMING_SOON" || (ticket.startsAt && Date.parse(ticket.startsAt) > now)) return "scheduled";
   if (ticket.endsAt && Date.parse(ticket.endsAt) < now) return "expired";
   if (event.registrationStatus === "SOLD_OUT" || event.quotaLeft <= 0 || ticket.quotaLeft <= 0) return "full";
   return "available";
+}
+
+export function registrationStatusAt(event: RegistrationEvent & { tickets?: TicketOption[] }, now: number): RegistrationStatus {
+  if (event.lifecycle === "completed") return "CLOSED";
+  if (!event.tickets) return event.registrationStatus;
+  const statuses = event.tickets.map(ticket => ticketState(event, ticket, now));
+  if (statuses.includes("available")) return "OPEN";
+  if (statuses.includes("scheduled")) return "COMING_SOON";
+  if (statuses.includes("full")) return "SOLD_OUT";
+  return "CLOSED";
 }
 
 export function attendanceOptions(event: ManagedEvent): Attendance[] {

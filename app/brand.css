@@ -135,6 +135,7 @@ svg { flex-shrink: 0; }
 .profile-onboarding-heading { margin-bottom: 28px; }
 .profile-onboarding-kicker { color: var(--brand); font-size: 11px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
 .profile-onboarding-heading h1 { max-width: 620px; margin-top: 12px; font-size: clamp(32px,4.5vw,54px); font-weight: 700; line-height: 1.05; letter-spacing: -.055em; }
+.profile-onboarding-heading h2 { max-width: 620px; margin-top: 12px; font-size: clamp(24px,3vw,32px); font-weight: 700; line-height: 1.2; letter-spacing: -.035em; }
 .profile-onboarding-heading > p:last-child { max-width: 600px; margin-top: 14px; color: var(--brand-body); font-size: 14px; line-height: 1.75; }
 .profile-onboarding-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
 .profile-onboarding-form .flow-field small { display: block; margin-top: 6px; }

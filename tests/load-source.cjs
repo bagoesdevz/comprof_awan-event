@@ -5,7 +5,7 @@ const ts = require('typescript');
 function loadSource(filename, stubs = {}) {
   const resolved = path.resolve(__dirname, '..', filename);
   const source = ts.transpileModule(fs.readFileSync(resolved, 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
   const module = { exports: {} };
   const importModule = name => {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { eventPublicPath } from "@/lib/event-sharing";
-import type { EventType, EventSummary, RegistrationStatus } from "@/lib/event-types";
+import type { EventType, EventSummary, RegistrationStatus, TicketOption } from "@/lib/event-types";
+import { registrationStatusAt } from "@/lib/event-detail";
 import { eventTimeRange } from "@/lib/event-time";
 
 const typeLabel: Record<EventType, string> = {
@@ -103,12 +104,13 @@ function EventVisual({ event, index }: EventCardProps) {
 }
 
 export type EventCardProps = {
-  event: EventSummary;
+  event: EventSummary & { tickets?: TicketOption[]; lifecycle?: "upcoming" | "ongoing" | "completed" };
   index: number;
 };
 
 export function EventCard({ event, index }: EventCardProps) {
   const limitedQuota = event.quotaLeft <= 25;
+  const registrationStatus = registrationStatusAt(event, Date.now());
 
   return (
     <article className="group grid gap-7 border-t border-content-title/20 py-8 lg:grid-cols-[minmax(350px,.82fr)_minmax(0,1.18fr)] lg:gap-12 lg:py-11">
@@ -127,8 +129,8 @@ export function EventCard({ event, index }: EventCardProps) {
             <span>{event.category}</span>
             <span aria-hidden="true" className="h-1 w-1 rounded-full bg-accent" />
             <span>{event.credits > 0 ? `${event.credits} kredit` : "Sertifikat tersedia"}</span>
-            <span className={event.registrationStatus === "OPEN" ? "text-[#087A55]" : event.registrationStatus === "SOLD_OUT" ? "text-[#B42318]" : "text-[#A76108]"}>
-              {registrationStatusLabel[event.registrationStatus]}
+            <span className={registrationStatus === "OPEN" ? "text-[#087A55]" : registrationStatus === "SOLD_OUT" ? "text-[#B42318]" : "text-[#A76108]"}>
+              {registrationStatusLabel[registrationStatus]}
             </span>
           </div>
 

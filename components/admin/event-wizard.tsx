@@ -35,7 +35,7 @@ import {
   type ManagedEvent,
   type Question,
 } from "@/lib/platform-model";
-import { eventHeroContent } from "@/lib/event-detail";
+import { eventDateTime, eventHeroContent } from "@/lib/event-detail";
 import { eventTimeRange, fromWibDateTimeLocal, toWibDateTimeLocal } from "@/lib/event-time";
 import { whatsappGroupLink } from "@/lib/event-sharing";
 import { EventQrCode } from "@/components/admin/event-qr-code";
@@ -287,6 +287,21 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
           {form.type !== "ONSITE" && <section className="sm:col-span-2 rounded-2xl bg-surface-muted p-5"><div className="mb-5 flex items-center gap-3"><Laptop2 size={20} className="text-primary-700" /><h3 className="font-semibold">Akses online</h3></div><div className="grid gap-5 sm:grid-cols-2"><Field label="Platform"><select value={form.meetingProvider} onChange={(event) => setField("meetingProvider", event.target.value as "Zoom" | "Google Meet")}><option>Zoom</option><option>Google Meet</option></select></Field><Field label="Link meeting"><input type="url" value={form.meetingUrl} onChange={(event) => setField("meetingUrl", event.target.value)} placeholder="https://..." /></Field><Field label="Meeting ID"><input value={form.meetingId} onChange={(event) => setField("meetingId", event.target.value)} /></Field><Field label="Passcode"><input value={form.meetingPasscode} onChange={(event) => setField("meetingPasscode", event.target.value)} /></Field><Field label="Akses dibuka" className="sm:col-span-2"><input type="datetime-local" value={form.accessOpensAt} onChange={(event) => setField("accessOpensAt", event.target.value)} /></Field></div></section>}
           {form.type !== "ONLINE" && <section className="sm:col-span-2 rounded-2xl bg-surface-muted p-5"><div className="mb-5 flex items-center gap-3"><MapPinned size={20} className="text-primary-700" /><h3 className="font-semibold">Lokasi kegiatan</h3></div><div className="grid gap-5 sm:grid-cols-2"><Field label="Kota"><input value={form.city} onChange={(event) => setField("city", event.target.value)} /></Field><Field label="Venue"><input value={form.venue} onChange={(event) => setField("venue", event.target.value)} /></Field><Field label="Alamat lengkap" className="sm:col-span-2"><textarea rows={3} value={form.venueAddress} onChange={(event) => setField("venueAddress", event.target.value)} /></Field></div></section>}
           <Field label="Mitra / institusi"><input value={form.partner} onChange={(event) => setField("partner", event.target.value)} /></Field><Field label="Koordinator"><input value={form.coordinator} onChange={(event) => setField("coordinator", event.target.value)} /></Field><Field label="Kebutuhan teknis" className="sm:col-span-2"><textarea rows={3} value={form.requirements} onChange={(event) => setField("requirements", event.target.value)} /></Field></div>}
+
+        {step === 4 && <section className="rounded-2xl bg-surface-muted p-5" aria-label="Penjelasan jadwal pendaftaran">
+          <h3 className="font-semibold">Jadwal pendaftaran berbeda dari jadwal acara</h3>
+          <p className="mt-2 text-sm text-content-muted">Semua waktu dalam WIB. Kosongkan tanggal mulai untuk membuka pendaftaran setelah perubahan disimpan. Tanggal berakhir tetap membatasi pendaftaran.</p>
+          <div className="mt-4 grid gap-4">{tickets.map((ticket, index) => {
+            const opening = fromWibDateTimeLocal(ticket.startsAt || "");
+            return <div key={ticket.id} className="flex flex-wrap items-center justify-between gap-3 border-t border-content-title/10 pt-4">
+              <p className="min-w-0 flex-1 text-sm"><strong className="block">{ticket.name}</strong><span>{opening ? `Mulai ${eventDateTime(opening)}` : "Tanpa batas tanggal mulai"}</span></p>
+              {opening && <button type="button" className="flow-button secondary" aria-label={`Buka pendaftaran ${ticket.name} sekarang`} onClick={() => {
+                setTickets(current => current.map((item, itemIndex) => itemIndex === index ? { ...item, startsAt: "" } : item));
+                setNotice(`Tanggal mulai pendaftaran ${ticket.name} dihapus. Simpan perubahan untuk menerapkan; periksa tanggal berakhir dan kuota tiket.`);
+              }}>Buka sekarang</button>}
+            </div>;
+          })}</div>
+        </section>}
 
         {step === 2 && <div className="grid gap-8"><Field label="Capaian pembelajaran"><textarea rows={5} value={form.learningOutcomes} onChange={(event) => setField("learningOutcomes", event.target.value)} placeholder="Satu capaian per baris" /></Field><fieldset><legend className="text-sm font-semibold">Metode pembelajaran</legend><div className="mt-4 grid gap-3 sm:grid-cols-2">{methodOptions.map((method) => <label key={method} className="flex min-h-12 items-center gap-3 rounded-xl border border-primary-600/10 px-4 text-sm"><input type="checkbox" checked={learningMethods.includes(method)} onChange={() => setLearningMethods((current) => current.includes(method) ? current.filter((item) => item !== method) : [...current, method])} />{method}</label>)}</div></fieldset>
           <SpeakerEditor speakers={speakers} setSpeakers={setSpeakers} onNotice={setNotice} />

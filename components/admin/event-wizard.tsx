@@ -290,7 +290,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
 
         {step === 4 && <section className="rounded-2xl bg-surface-muted p-5" aria-label="Penjelasan jadwal pendaftaran">
           <h3 className="font-semibold">Jadwal pendaftaran berbeda dari jadwal acara</h3>
-          <p className="mt-2 text-sm text-content-muted">Semua waktu dalam WIB. Kosongkan tanggal mulai untuk membuka pendaftaran setelah perubahan disimpan. Tanggal berakhir tetap membatasi pendaftaran.</p>
+          <p className="mt-2 text-sm text-content-muted">Semua waktu dalam WIB. Kosongkan tanggal mulai untuk membuka pendaftaran setelah perubahan disimpan. Tanggal berakhir menentukan batas pendaftaran, termasuk saat acara berlangsung atau sudah selesai. Jika kosong, pendaftaran ditutup saat acara selesai.</p>
           <div className="mt-4 grid gap-4">{tickets.map((ticket, index) => {
             const opening = fromWibDateTimeLocal(ticket.startsAt || "");
             return <div key={ticket.id} className="flex flex-wrap items-center justify-between gap-3 border-t border-content-title/10 pt-4">

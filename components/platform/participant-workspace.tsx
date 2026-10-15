@@ -7,12 +7,14 @@ import { ArrowRight, Award, Bell, CalendarDays } from "lucide-react";
 import { usePlatform } from "./provider";
 import { Badge, Empty, PageHeading, Panel, exportCsv } from "./ui";
 import { defaultProfile, eligible, lifecycleLabels, money, nextAction, paymentLabels, requiredActivities, type ManagedEvent, type Registration } from "@/lib/platform-model";
-import { eventVisual } from "@/lib/event-detail";
+import { eventVisual, registrationStatusAt } from "@/lib/event-detail";
 import { eventPublicPath } from "@/lib/event-sharing";
+import { EventAction } from "@/components/events/event-action";
 import { EligibilityPanel } from "@/components/dashboard/eligibility-panel";
 
 function RecommendationCard({ event }: { event: ManagedEvent }) {
   const visual = eventVisual(event);
+  const status = registrationStatusAt(event, Date.now());
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-content-title/10 bg-white shadow-[0_12px_34px_-24px_rgba(33,16,82,.34)] transition-colors hover:border-primary-400/60">
@@ -37,7 +39,8 @@ function RecommendationCard({ event }: { event: ManagedEvent }) {
         {!visual && <div className="mb-4 flex flex-wrap gap-2"><Badge>{event.programType}</Badge><Badge>{event.type === "ONLINE" ? "Online" : event.type === "ONSITE" ? "Offline" : "Hybrid"}</Badge></div>}
         <h3 className="text-xl font-semibold leading-tight tracking-[-.025em]">{event.title}</h3>
         <p className="mb-5 mt-3 text-sm leading-6 text-content-muted">{event.category} · Mulai {new Date(event.startAt).toLocaleDateString("id-ID")} · {money(event.price)}</p>
-        <Link className="flow-button" href={eventPublicPath(event)}>Pelajari program</Link>
+        <p className="mb-4 text-sm text-content-muted">{{OPEN:"Pendaftaran dibuka",COMING_SOON:"Pendaftaran belum dibuka",SOLD_OUT:"Kuota penuh",CLOSED:"Pendaftaran ditutup"}[status]}</p>
+        <div className="flex flex-wrap gap-3"><EventAction event={event} className="flow-button"/><Link className="flow-button secondary" href={eventPublicPath(event)}>Detail event</Link></div>
       </div>
     </article>
   );
@@ -54,11 +57,11 @@ export function ParticipantWorkspace({ view = "dashboard", slug }: { view?: stri
   const action = registration && event ? nextAction(registration, event) : null;
   const notifications = state.notices.filter(notice => notice.email === state.session.email);
   const completedRegistrations = registrations.filter(item => state.events.find(eventItem => eventItem.slug === item.eventSlug)?.lifecycle === "completed");
-  const recommendations = state.events.filter(item => item.publication === "published" && item.lifecycle === "upcoming" && !registrations.some(itemRegistration => itemRegistration.eventSlug === item.slug)).sort((a, b) => Number(b.category === profile.specialization) - Number(a.category === profile.specialization));
+  const recommendations = state.events.filter(item => item.publication === "published" && !registrations.some(itemRegistration => itemRegistration.eventSlug === item.slug && !["cancelled","expired","refunded"].includes(itemRegistration.payment))).sort((a, b) => Number(b.category === profile.specialization) - Number(a.category === profile.specialization) || Date.parse(b.startAt)-Date.parse(a.startAt));
 
   function eventRow(item: Registration) {
     const eventItem = state.events.find(eventValue => eventValue.slug === item.eventSlug);
-    if (!eventItem) return null;
+    if (!eventItem) return <article key={item.id} className="flow-panel"><h2 className="text-xl font-semibold">{item.ticketName}</h2><Badge>{paymentLabels[item.payment]}</Badge><p className="my-4 text-sm">Pendaftaran {item.id} tetap tersimpan. Detail event belum tersedia; coba muat ulang.</p><button className="flow-button secondary" onClick={()=>void refresh()}>Muat ulang event</button></article>;
     const next = nextAction(item, eventItem);
     const requirements = requiredActivities(eventItem);
     return <article key={item.id} className="flow-panel"><div className="flex flex-wrap gap-2"><Badge>{eventItem.programType}</Badge><Badge>{item.attendance === "ONLINE" ? "Online" : "Offline"}</Badge><Badge tone={item.payment === "paid" ? "success" : "warning"}>{paymentLabels[item.payment]}</Badge></div><h2 className="mt-5 text-2xl font-semibold leading-tight tracking-tight">{eventItem.title}</h2><p className="my-4 text-sm text-content-muted">{new Date(eventItem.startAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} · {item.ticketName}</p><div className="flex flex-wrap items-center justify-between gap-4 border-t pt-5"><Link className="flow-button" href={`/dashboard/events/${eventItem.slug}`}>Buka event</Link><span className="text-xs text-content-muted">{next.label} · {requirements.filter(key => item.progress[key]).length}/{requirements.length} aktivitas</span></div></article>;
@@ -83,7 +86,7 @@ export function ParticipantWorkspace({ view = "dashboard", slug }: { view?: stri
     </div>;
   }
 
-  if (!ready) return <p role="status">Menyiapkan dashboard…</p>;
+  if (!ready && !error) return <p role="status">Menyiapkan dashboard…</p>;
   if (error) return <Panel title="Dashboard belum dapat dimuat"><p role="alert">{error}</p><button className="flow-button secondary mt-4" onClick={() => void refresh()}>Coba lagi</button></Panel>;
   if (slug && (!registration || !event)) return <Empty title="Anda belum terdaftar di event ini" href={`/events/${slug}`} label="Lihat detail dan daftar" />;
   if (view === "notifications") return <div><PageHeading eyebrow="Dashboard / Notifikasi" title="Notifikasi" description="" action={<button className="flow-button secondary" onClick={() => update(stateValue => stateValue.notices.forEach(notice => { if (notice.email === stateValue.session.email) notice.read = true; }))}>Tandai semua dibaca</button>} /><div className="flow-tabs">{["all", "unread"].map(value => <button key={value} aria-pressed={filter === value} onClick={() => setFilter(value)}>{value === "all" ? "Semua" : "Belum dibaca"}</button>)}</div><div className="grid gap-3">{notifications.filter(notice => filter !== "unread" || !notice.read).map(notice => <Link key={notice.id} href={notice.href} onClick={() => update(stateValue => { const current = stateValue.notices.find(item => item.id === notice.id); if (current) current.read = true; })} className={`flow-panel flex gap-4 ${!notice.read ? "border-primary-400" : ""}`}><Bell className="shrink-0 text-primary-600" size={22} /><div><strong>{notice.title}</strong><p className="mt-2 text-sm text-content-muted">{notice.body}</p><small className="mt-3 block text-content-muted">{new Date(notice.createdAt).toLocaleString("id-ID")}</small></div>{!notice.read && <Badge>Baru</Badge>}</Link>)}</div>{!notifications.some(notice => filter !== "unread" || !notice.read) && <Empty title="Semua sudah terbaca" description="Pengingat baru akan muncul di sini." />}</div>;

@@ -12,20 +12,21 @@ export function eventAttendanceMode(event: ManagedEvent): Attendance {
 export const eventDate = (value: string) => new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(new Date(value));
 export const eventDateTime = (value: string) => new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Jakarta" }).format(new Date(value)) + " WIB";
 
-type RegistrationEvent = Pick<EventSummary, "registrationStatus" | "quotaLeft"> & { lifecycle?: ManagedEvent["lifecycle"] };
+type RegistrationEvent = Pick<EventSummary, "registrationStatus" | "quotaLeft" | "endAt"> & { lifecycle?: ManagedEvent["lifecycle"]; publication?: ManagedEvent["publication"] };
 
 export function ticketState(event: RegistrationEvent, ticket: TicketOption, now: number) {
-  if (event.lifecycle === "completed") return "completed";
-  if (ticket.status === "inactive" || event.registrationStatus === "CLOSED") return "closed";
+  if (event.publication === "draft" || ticket.status === "inactive" || event.registrationStatus === "CLOSED") return "closed";
+  const closesAt = ticket.endsAt || event.endAt;
+  if (closesAt && Date.parse(closesAt) <= now) return "expired";
+  if (!closesAt && event.lifecycle === "completed") return "completed";
   if (event.registrationStatus === "COMING_SOON" || (ticket.startsAt && Date.parse(ticket.startsAt) > now)) return "scheduled";
-  if (ticket.endsAt && Date.parse(ticket.endsAt) < now) return "expired";
   if (event.registrationStatus === "SOLD_OUT" || event.quotaLeft <= 0 || ticket.quotaLeft <= 0) return "full";
   return "available";
 }
 
 export function registrationStatusAt(event: RegistrationEvent & { tickets?: TicketOption[] }, now: number): RegistrationStatus {
-  if (event.lifecycle === "completed") return "CLOSED";
-  if (!event.tickets) return event.registrationStatus;
+  if (event.publication === "draft") return "CLOSED";
+  if (!event.tickets) return event.endAt && Date.parse(event.endAt) <= now ? "CLOSED" : event.registrationStatus;
   const statuses = event.tickets.map(ticket => ticketState(event, ticket, now));
   if (statuses.includes("available")) return "OPEN";
   if (statuses.includes("scheduled")) return "COMING_SOON";

@@ -1,29 +1,37 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { usePlatform } from "@/components/platform/provider";
 import { Badge, Empty, Field, Panel } from "@/components/platform/ui";
 import { defaultProfile, money, profileComplete, type Registration } from "@/lib/platform-model";
 import { whatsappGroupLink } from "@/lib/event-sharing";
 import { RegistrationGroupDialog } from "@/components/registration/registration-group-dialog";
 import { ProfileEditor } from "@/components/platform/profile-editor";
+import { registrationStatusAt, ticketState, eventDateTime } from "@/lib/event-detail";
 export function RegistrationWizard({eventSlug,ticketId}:{eventSlug:string;ticketId:string;ticketName?:string}){
- const {state,ready,action,saving}=usePlatform();const router=useRouter();const [step,setStep]=useState(0);const [selected,setSelected]=useState(ticketId);const [quantity,setQuantity]=useState(1);const [answers,setAnswers]=useState<Record<string,string>>({});const [members,setMembers]=useState<{name:string;email:string}[]>([]);const [error,setError]=useState("");
+ const {state,ready,action,saving,error:platformError,refresh}=usePlatform();const router=useRouter();const [step,setStep]=useState(0);const [selected,setSelected]=useState(ticketId);const [quantity,setQuantity]=useState(1);const [answers,setAnswers]=useState<Record<string,string>>({});const [members,setMembers]=useState<{name:string;email:string}[]>([]);const [error,setError]=useState("");
+ const [now,setNow]=useState(Date.now);
+ useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer);},[]);
  const [completed,setCompleted]=useState<{registration:Registration;groupUrl:string}|null>(null);
  const destination=(r:Registration)=>r.payment==="paid"?"/dashboard/events/"+eventSlug:"/events/"+eventSlug+"/payment?registration="+encodeURIComponent(r.id);
  const event=state.events.find(e=>e.slug===eventSlug);const profile=state.profiles[state.session.email]||defaultProfile;const existing=state.registrations.find(r=>r.eventSlug===eventSlug&&r.email===state.session.email&&!["cancelled","refunded","expired"].includes(r.payment));
+ if(!ready&&platformError)return <Panel title="Pendaftaran belum dapat dimuat"><p role="alert">{platformError}</p><button className="flow-button mt-4" onClick={()=>void refresh()}>Coba lagi</button></Panel>;
  if(!ready)return <p role="status">Menyiapkan pendaftaran…</p>;
- if(!event)return <Empty title="Event tidak ditemukan" href="/events"/>;
+ if(!event||event.publication!=="published")return <Panel title="Event belum tersedia"><p className="mb-4 text-sm">Event belum dipublikasikan atau datanya belum diperbarui. Coba muat ulang untuk memeriksa kembali.</p><button className="flow-button" onClick={()=>void refresh()}>Muat ulang event</button></Panel>;
  const returnTo="/events/"+eventSlug+"/register"+(ticketId?"?ticket="+encodeURIComponent(ticketId):"");
  if(!state.session.loggedIn)return <Panel title="Masuk untuk mendaftar"><Link className="flow-button" href={"/login?next="+encodeURIComponent(returnTo)}>Masuk / buat akun</Link></Panel>;
  if(completed)return <RegistrationGroupDialog registration={completed.registration} eventTitle={event.title} groupUrl={completed.groupUrl} onContinue={()=>router.push(destination(completed.registration))}/>;
  if(existing)return <Panel title="Pendaftaran Anda sudah tersimpan"><Badge tone={existing.payment==="paid"?"success":"warning"}>{existing.payment==="paid"?"Terkonfirmasi":"Belum lunas"}</Badge><p className="my-5 text-sm">{existing.id} · {existing.ticketName}</p><Link className="flow-button" href={existing.payment==="paid"?"/dashboard/events/"+eventSlug:`/events/${eventSlug}/payment?registration=${existing.id}&ticket=${existing.ticketId}`}>{existing.payment==="paid"?"Buka perjalanan event":"Lanjutkan pembayaran"}</Link></Panel>;
- if(event.registrationStatus!=="OPEN"||event.lifecycle!=="upcoming")return <Empty title={event.registrationStatus==="SOLD_OUT"?"Kuota event penuh":"Pendaftaran belum tersedia"} href={event.registrationStatus==="SOLD_OUT"?"/waitlist/"+eventSlug:"/events"} label={event.registrationStatus==="SOLD_OUT"?"Gabung waitlist":"Lihat event lain"}/>;
+ const status=registrationStatusAt(event,now);
+ if(status!=="OPEN"){
+  const opening=event.tickets.filter(t=>ticketState(event,t,now)==="scheduled"&&t.startsAt&&Date.parse(t.startsAt)>now).map(t=>Date.parse(t.startsAt!)).sort((a,b)=>a-b)[0];
+  return <Empty title={status==="SOLD_OUT"?"Kuota event penuh":status==="COMING_SOON"?"Pendaftaran belum dibuka":"Pendaftaran ditutup"} description={status==="COMING_SOON"&&opening?`Pendaftaran dibuka ${eventDateTime(new Date(opening).toISOString())}.`:"Pendaftaran mengikuti jadwal dan kuota yang ditetapkan penyelenggara."} href={status==="SOLD_OUT"&&event.waitlist?"/waitlist/"+eventSlug:undefined} label="Gabung daftar tunggu"/>;
+ }
  if(!profileComplete(profile))return <ProfileEditor registrationEventTitle={event.title}/>;
- const ticket=event.tickets.find(t=>t.id===selected)||event.tickets[0];
+ const ticket=event.tickets.find(t=>t.id===selected)||event.tickets.find(t=>ticketState(event,t,now)==="available")||event.tickets[0];
  if(!ticket)return <Empty title="Tiket belum tersedia" href="/events"/>;
- const ticketAvailable=(t:typeof ticket)=>t.quotaLeft>0&&t.status!=="inactive"&&(!t.startsAt||new Date(t.startsAt)<=new Date())&&(!t.endsAt||new Date(t.endsAt)>=new Date());
+ const ticketAvailable=(t:typeof ticket)=>ticketState(event,t,now)==="available";
  async function submit(e:FormEvent){
  e.preventDefault();setError("");if(step<2){setStep(step+1);return;}
  if(!event||!ticket||!ticketAvailable(ticket)){setError("Tiket tidak tersedia.");return;}

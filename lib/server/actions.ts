@@ -7,6 +7,7 @@ import {record,records,findEvent,commit,requireUser,requireAdmin,liveEvent} from
 import {HttpError} from "./http";
 import {issueCertificate} from "./certificates";
 import {ensureEventPublicLinks} from "./event-links";
+import {ticketState} from "@/lib/event-detail";
 const registrationInput=z.object({type:z.literal("register"),eventSlug:z.string().max(120),ticketId:z.string().max(120),answers:z.record(z.string(),z.string().max(2000)).default({}),members:z.array(z.object({name:z.string().trim().min(2).max(160),email:z.string().trim().email().max(254)})).max(49).default([])});
 const activityInput=z.object({type:z.enum(["start-test","submit-test","attendance","feedback","check-in","revoke-certificate"]),id:z.string().max(254),eventSlug:z.string().optional(),test:z.enum(["pre-test","post-test"]).optional(),answers:z.record(z.string(),z.number().int().min(0).max(7)).optional(),feedback:z.object({overall:z.number().int().min(1).max(5),speaker:z.number().int().min(1).max(5),material:z.number().int().min(1).max(5),organization:z.number().int().min(1).max(5),comment:z.string().max(3000)}).optional()});
 export async function runAction(user:User|null,raw:unknown){
@@ -17,14 +18,14 @@ export async function runAction(user:User|null,raw:unknown){
  }
  if((raw as {type?:unknown})?.type==="register"){
   const input=registrationInput.parse(raw),er=await findEvent(input.eventSlug),event=liveEvent(er.data as unknown as ManagedEvent);
-  if(!er.published||event.registrationStatus!=="OPEN"||event.lifecycle==="completed")throw new HttpError(409,"Pendaftaran event ditutup.");
+  if(!er.published||event.publication!=="published"||event.registrationStatus!=="OPEN")throw new HttpError(409,"Pendaftaran event ditutup.");
   const existingRegs=await records("registrations",email);
   const activeReg=existingRegs.find(row=>{const reg=row.data as unknown as Registration;return reg.eventSlug===event.slug&&!["cancelled","expired","refunded"].includes(reg.payment);});
   if(activeReg)throw new HttpError(409,"Anda sudah memiliki pendaftaran aktif untuk event ini.");
  const pr=await record("profiles",email);if(!pr)throw new HttpError(422,"Lengkapi profil sebelum mendaftar.");
  const p=pr.data;if(!p.name||!p.phone||!p.gender||!p.birthPlace||!p.birthDate||!p.city||!p.profession||!p.source)throw new HttpError(422,"Lengkapi profil sebelum mendaftar.");
   const ticket=event.tickets.find(t=>t.id===input.ticketId);const quantity=1+input.members.length;
-  if(!ticket||ticket.status==="inactive"||ticket.quotaLeft<quantity||quantity>(ticket.quantityLimit||5)||(ticket.startsAt&&Date.now()<Date.parse(ticket.startsAt))||(ticket.endsAt&&Date.now()>Date.parse(ticket.endsAt)))throw new HttpError(409,"Tiket tidak tersedia.");
+  if(!ticket||ticketState(event,ticket,Date.now())!=="available"||ticket.quotaLeft<quantity||quantity>(ticket.quantityLimit||5))throw new HttpError(409,"Tiket tidak tersedia.");
   const emails=[email,...input.members.map(m=>m.email.toLowerCase())];if(new Set(emails).size!==emails.length)throw new HttpError(422,"Email setiap peserta harus berbeda.");
   for(const field of event.customFields)if(field.required&&!input.answers[field.id]?.trim())throw new HttpError(422,"Isi "+field.label+".");
   const now=new Date().toISOString(),r:Registration={id:"AWN-"+crypto.randomUUID().replaceAll("-","").slice(0,16).toUpperCase(),eventSlug:event.slug,email,name:String(p.name),phone:String(p.phone),ticketId:ticket.id,ticketName:ticket.name,attendance:ticket.attendance,quantity,amount:ticket.price*quantity,payment:ticket.price===0?"paid":"pending",createdAt:now,...(ticket.price===0?{paidAt:now,method:"Gratis"}:{}),fee:0,refund:0,answers:input.answers,members:input.members,progress:emptyProgress(),attempts:{"pre-test":0,"post-test":0},scores:{}};

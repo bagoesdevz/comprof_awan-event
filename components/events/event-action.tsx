@@ -24,13 +24,9 @@ export function EventAction({ event, ticketId, className = "brand-button", now: 
   let label = "Daftar sekarang";
   let disabled = "";
 
-  if (event.lifecycle === "completed") disabled = "Event selesai";
-  else if (registration) {
+  if (registration) {
     href = registration.payment === "paid" ? `/dashboard/events/${event.slug}` : `/events/${event.slug}/payment?registration=${registration.id}&ticket=${registration.ticketId}`;
     label = registration.payment === "paid" ? event.lifecycle === "ongoing" ? "Masuk ke event" : "Buka event saya" : "Lanjutkan pembayaran";
-  } else if (event.lifecycle === "ongoing") {
-    href = loginOr(`/dashboard/events/${event.slug}`);
-    label = "Masuk ke event";
   } else if (ticketId && !ticket) disabled = "Tiket tidak tersedia";
   else {
     const statuses = ticket ? [ticketState(event, ticket, now)] : event.tickets.map(item => ticketState(event, item, now));

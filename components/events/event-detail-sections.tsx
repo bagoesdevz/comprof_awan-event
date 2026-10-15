@@ -163,5 +163,5 @@ export function EventFaqSection({ event, block, id, attendance, onAttendanceChan
 }
 
 export function EventFinalCta({ event, block, id }: SectionProps) {
-  return <section id={id} className="brand-container event-detail-section event-final-wrap"><div className="event-final-cta"><BrandWaves /><div><h2>{blockTitle(block, event.lifecycle === "completed" ? "Temukan kesempatan belajar berikutnya." : "Siap untuk langkah berikutnya?")}</h2><p>{block.body || "Jadikan setiap pengalaman belajar bagian dari perjalanan profesional Anda."}</p></div>{event.lifecycle === "completed" ? <Link href="/events" className="brand-button">Jelajahi event<ArrowRight size={16} aria-hidden="true" /></Link> : <EventAction event={event} />}</div></section>;
+  return <section id={id} className="brand-container event-detail-section event-final-wrap"><div className="event-final-cta"><BrandWaves /><div><h2>{blockTitle(block, "Pilih langkah Anda berikutnya.")}</h2><p>{block.body || "Periksa jadwal dan ketersediaan tiket untuk mengikuti program ini."}</p></div><EventAction event={event} /></div></section>;
 }

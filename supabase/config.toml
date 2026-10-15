@@ -1,0 +1,12 @@
+project_id = "awan-event"
+
+[auth]
+site_url = "https://awanevent.com"
+additional_redirect_urls = [
+  "https://awanevent.com/auth/callback",
+  "https://awanevent.com/auth/callback?type=signup",
+  "https://awanevent.com/auth/callback?type=email",
+  "https://awanevent.com/auth/callback?type=recovery",
+  "https://awanevent.com/auth/callback?type=invite",
+  "https://awanevent.com/auth/callback?next=/reset-password"
+]

@@ -51,3 +51,13 @@ Refund parsial dan pembayaran sukses setelah pesanan ditutup membutuhkan rekonsi
 Cron dibatasi batch dan waktu. Urutan pemeriksaan pembayaran bergilir berdasarkan pemeriksaan terakhir. Waitlist mencatat urutan estimasi; pendaftaran bersamaan belum menjamin nomor posisi eksklusif. Notifikasi waitlist masih dikelola tim.
 
 Build dan test lokal belum membuktikan konfigurasi domain, database, maupun integrasi provider live benar.
+
+## Email akun, 15 Oktober 2026
+
+Site URL Supabase project `wgjijdkmxafnskpnjlqn` sebelumnya `http://localhost:3000` dan daftar redirect kosong. Konfigurasi `supabase/config.toml` kini memakai `https://awanevent.com` dan callback dengan tujuan signup, email, recovery, invite, serta format reset lama. Dua properti URL sudah diterapkan lewat Supabase CLI; diff setelah push menunjukkan nol update tersisa. Konfirmasi email dan MFA yang ada tetap aktif.
+
+Konfirmasi yang berhasil membuka `/login?confirmed=1`. Pemulihan yang berhasil mempertahankan sesi terverifikasi dan membuka `/reset-password` dengan input kata sandi baru. Setelah kata sandi tersimpan, sesi lokal ditutup dan peserta diarahkan ke `/login?reset=success`. Tautan kedaluwarsa menyediakan permintaan tautan baru, sedangkan sesi yang gagal diperiksa karena koneksi dapat dicoba lagi.
+
+Template email bawaan tetap dipakai. Supabase menolak perubahan template pada paket gratis dengan penyedia email bawaan, sehingga perubahan template tidak diterapkan. Alur PKCE tetap digunakan: minta dan buka tautan pada browser yang sama. Jika browser berbeda, minta tautan baru dari browser tersebut. Email lama yang sudah menuju localhost atau kedaluwarsa tidak dapat dipulihkan; minta email baru dari domain utama.
+
+Perilaku komponen dan callback diuji dengan fixture lokal tanpa mengirim email atau mengganti kata sandi akun nyata. Uji roundtrip email produksi dengan akun pemilik masih diperlukan. Lihat `anti-slop/auth-email-2026-10-15.md` untuk bukti dan batas verifikasi. Referensi konfigurasi: [Supabase Redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls).

@@ -3,9 +3,17 @@ import { createClient } from "@supabase/supabase-js";
 import { isEventPublicCode } from "@/lib/event-sharing";
 import { publicEventLinkStatus } from "@/lib/public-event-link-status";
 import { publicEventUnavailable } from "@/lib/public-event-unavailable";
+import { AUTH_SITE_URL } from "@/lib/auth-redirect";
 import { NextResponse,type NextRequest } from "next/server";
 export async function middleware(request:NextRequest){
  let response=NextResponse.next({request});
+ if(request.nextUrl.pathname==="/"){
+  if(request.nextUrl.searchParams.get("error")==="access_denied"||request.nextUrl.searchParams.get("error_code")==="otp_expired"){
+   const redirect=NextResponse.redirect(new URL("/login?error=confirmation",AUTH_SITE_URL),303);
+   redirect.headers.set("Cache-Control","private, no-store");redirect.headers.set("Referrer-Policy","no-referrer");return redirect;
+  }
+  return response;
+ }
  if(request.nextUrl.pathname.startsWith("/e/")){
   const code=request.nextUrl.pathname.slice(3);
   const unavailable=publicEventUnavailable;
@@ -31,4 +39,4 @@ export async function middleware(request:NextRequest){
  if(protectedPage||request.nextUrl.pathname.startsWith("/api/platform"))response.headers.set("Cache-Control","private, no-store");
  return response;
 }
-export const config={matcher:["/admin/:path*","/dashboard/:path*","/api/platform/:path*","/auth/:path*","/e/:path*"]};
+export const config={matcher:["/","/admin/:path*","/dashboard/:path*","/api/platform/:path*","/auth/:path*","/e/:path*"]};

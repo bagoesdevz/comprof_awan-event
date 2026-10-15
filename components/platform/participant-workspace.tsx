@@ -11,6 +11,7 @@ import { eventVisual, registrationStatusAt } from "@/lib/event-detail";
 import { eventPublicPath } from "@/lib/event-sharing";
 import { EventAction } from "@/components/events/event-action";
 import { EligibilityPanel } from "@/components/dashboard/eligibility-panel";
+import { EventGroupAccess } from "@/components/dashboard/event-group-access";
 
 function RecommendationCard({ event }: { event: ManagedEvent }) {
   const visual = eventVisual(event);
@@ -64,7 +65,15 @@ export function ParticipantWorkspace({ view = "dashboard", slug }: { view?: stri
     if (!eventItem) return <article key={item.id} className="flow-panel"><h2 className="text-xl font-semibold">{item.ticketName}</h2><Badge>{paymentLabels[item.payment]}</Badge><p className="my-4 text-sm">Pendaftaran {item.id} tetap tersimpan. Detail event belum tersedia; coba muat ulang.</p><button className="flow-button secondary" onClick={()=>void refresh()}>Muat ulang event</button></article>;
     const next = nextAction(item, eventItem);
     const requirements = requiredActivities(eventItem);
-    return <article key={item.id} className="flow-panel"><div className="flex flex-wrap gap-2"><Badge>{eventItem.programType}</Badge><Badge>{item.attendance === "ONLINE" ? "Online" : "Offline"}</Badge><Badge tone={item.payment === "paid" ? "success" : "warning"}>{paymentLabels[item.payment]}</Badge></div><h2 className="mt-5 text-2xl font-semibold leading-tight tracking-tight">{eventItem.title}</h2><p className="my-4 text-sm text-content-muted">{new Date(eventItem.startAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} · {item.ticketName}</p><div className="flex flex-wrap items-center justify-between gap-4 border-t pt-5"><Link className="flow-button" href={`/dashboard/events/${eventItem.slug}`}>Buka event</Link><span className="text-xs text-content-muted">{next.label} · {requirements.filter(key => item.progress[key]).length}/{requirements.length} aktivitas</span></div></article>;
+    return <article key={item.id} className="flow-panel">
+      <div className="flex flex-wrap gap-2"><Badge>{eventItem.programType}</Badge><Badge>{item.attendance === "ONLINE" ? "Online" : "Offline"}</Badge><Badge tone={item.payment === "paid" ? "success" : "warning"}>{paymentLabels[item.payment]}</Badge></div>
+      <h2 className="mt-5 text-2xl font-semibold leading-tight tracking-tight">{eventItem.title}</h2>
+      <p className="my-4 text-sm text-content-muted">{new Date(eventItem.startAt).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })} · {item.ticketName}</p>
+      <div className="flex flex-wrap items-center justify-between gap-4 border-t pt-5">
+        <div className="flex flex-wrap gap-3"><Link className="flow-button" href={`/dashboard/events/${eventItem.slug}`}>Buka event</Link><EventGroupAccess slug={eventItem.slug} compact /></div>
+        <span className="text-xs text-content-muted">{next.label} · {requirements.filter(key => item.progress[key]).length}/{requirements.length} aktivitas</span>
+      </div>
+    </article>;
   }
 
   function dashboard() {

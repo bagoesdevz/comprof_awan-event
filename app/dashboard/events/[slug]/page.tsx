@@ -3,5 +3,5 @@ import { EventGroupAccess } from "@/components/dashboard/event-group-access";
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const route = await params;
-  return <><ParticipantWorkspace slug={route.slug} /><EventGroupAccess slug={route.slug} /></>;
+  return <div className="mx-auto grid max-w-6xl gap-6"><EventGroupAccess slug={route.slug} /><ParticipantWorkspace slug={route.slug} /></div>;
 }

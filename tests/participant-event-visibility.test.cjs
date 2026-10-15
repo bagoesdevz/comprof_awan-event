@@ -15,6 +15,8 @@ function render(payment){
  const Link=({href,children,...props})=>React.createElement('a',{href,...props},children);
  const stubs={'next/link':{default:Link},'next/image':{default:()=>null},'./provider':platform,'@/components/platform/provider':platform,'@/components/dashboard/eligibility-panel':{EligibilityPanel:()=>null}};
  stubs['./ui']=load('components/platform/ui.tsx',stubs);
+ stubs['@/components/platform/ui']=stubs['./ui'];
+ stubs['@/components/dashboard/event-group-access']=load('components/dashboard/event-group-access.tsx',stubs);
  stubs['@/components/events/event-action']=load('components/events/event-action.tsx',stubs);
  const {ParticipantWorkspace}=load('components/platform/participant-workspace.tsx',stubs);
  return renderToStaticMarkup(React.createElement(ParticipantWorkspace,{view:'recommendations'}));

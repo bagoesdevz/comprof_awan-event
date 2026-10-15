@@ -9,12 +9,14 @@ const { exampleEvent } = load('lib/example-event.ts');
 function render(options={}) {
   const state=initialState();state.session={loggedIn:options.loggedIn!==false,email:'participant@example.invalid',role:'participant'};
   const event={...structuredClone(exampleEvent),registrationStatus:options.status||'OPEN',lifecycle:options.lifecycle||'upcoming',endAt:'2099-01-01T00:00:00Z'};if(options.explicitDeadline)event.tickets[0].endsAt='2099-01-01T00:00:00Z';state.events=options.missing?[]:[event];
+  if(options.group)event.whatsappGroupUrl='https://chat.whatsapp.com/FixtureInviteForTest123';
   state.profiles[state.session.email]=blankProfile(state.session.email);
   if(options.existing)state.registrations=[{eventSlug:event.slug,email:state.session.email,payment:'paid',id:'TEST',ticketName:'Tiket pengujian'}];
   const platform={usePlatform:()=>({state,ready:options.ready!==false,error:options.error||'',refresh:async()=>state,update:async()=>true,action:async()=>null,saving:false})};
   const Link=({href,children,...props})=>React.createElement('a',{href,...props},children);
   const stubs={'next/link':{default:Link},'next/navigation':{useRouter:()=>({push:()=>{throw new Error('Unexpected navigation')}})},'@/components/platform/provider':platform,'./provider':platform};
   const ui=load('components/platform/ui.tsx',stubs);stubs['./ui']=ui;stubs['@/components/platform/ui']=ui;
+  stubs['@/components/dashboard/event-group-access']=load('components/dashboard/event-group-access.tsx',stubs);
   stubs['@/components/platform/profile-editor']=load('components/platform/profile-editor.tsx',stubs);
   stubs['@/components/registration/registration-group-dialog']={RegistrationGroupDialog:()=>null};
   const {RegistrationWizard}=load('components/registration/registration-wizard.tsx',stubs);
@@ -29,6 +31,8 @@ test('signed-in participant with an incomplete profile receives a real form on t
 
 test('existing enrollment remains accessible even if the participant profile is incomplete',()=>{
   const html=render({existing:true});assert.match(html,/Pendaftaran Anda sudah tersimpan/);assert.doesNotMatch(html,/Simpan data/);
+  assert.match(html,/Tautan grup belum ditambahkan/);
+  assert.match(render({existing:true,group:true}),/href="https:\/\/chat.whatsapp.com\/FixtureInviteForTest123"/);
 });
 
 test('inline profile form preserves sign-in and closed-event guards',()=>{

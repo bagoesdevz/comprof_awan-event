@@ -3,6 +3,14 @@ const nextConfig = {
   reactStrictMode: true,
   distDir: process.env.VERCEL === "1" ? ".next" : ".next-production",
   poweredByHeader: false,
+  async redirects() {
+    return [{
+      source: "/:path*",
+      has: [{ type: "host", value: "awan-event\\.vercel\\.app" }],
+      destination: "https://awanevent.com/:path*",
+      permanent: true,
+    }];
+  },
   async headers() {
     return [{ source: "/:path*", headers: [
       { key: "X-Content-Type-Options", value: "nosniff" },

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { CompanyStory, ContactCta, ServicesSection, TrustBar } from "@/components/landing/company-story";
 import { MotionObserver } from "@/components/landing/motion-observer";
 import { LearningHero } from "@/components/landing/learning-hero";
@@ -15,7 +14,7 @@ export default function HomePage() {
       <TrustBar />
       <section id="event-list" className="brand-section featured-programs">
         <div className="brand-container">
-          <div className="brand-section-heading"><div data-reveal><h2>Event mendatang</h2></div><div><Link href="/events" className="brand-text-link">Lihat semua event <ArrowRight size={16} aria-hidden="true" /></Link></div></div>
+          <div className="brand-section-heading"><div data-reveal><h2>Event mendatang</h2></div><div><Link href="/events" className="brand-text-link">Lihat semua event</Link></div></div>
           <FeaturedPrograms />
         </div>
       </section>

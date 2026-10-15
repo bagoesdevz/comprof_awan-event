@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { type TouchEvent, useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
@@ -99,11 +98,11 @@ export function GalleryLightbox({ open, onOpenChange, title, description, images
 
             {imageCount > 1 && (
               <>
-                <button type="button" onClick={showPreviousImage} className="absolute left-3 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 cursor-pointer place-items-center rounded-full border border-primary-100 bg-white/[.92] text-primary-600 shadow-[0_10px_28px_-14px_rgba(91,60,196,.42)] backdrop-blur transition hover:bg-primary-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 sm:left-5" aria-label="Foto sebelumnya">
-                  <ChevronLeft className="h-6 w-6" aria-hidden="true" />
+                <button type="button" onClick={showPreviousImage} className="absolute left-3 top-1/2 z-10 grid min-h-12 -translate-y-1/2 cursor-pointer place-items-center rounded-xl border border-primary-100 bg-white/[.92] px-3 text-xs font-semibold text-primary-600 shadow-[0_10px_28px_-14px_rgba(91,60,196,.42)] backdrop-blur transition hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 sm:left-5" aria-label="Foto sebelumnya">
+                  Sebelumnya
                 </button>
-                <button type="button" onClick={showNextImage} className="absolute right-3 top-1/2 z-10 grid h-12 w-12 -translate-y-1/2 cursor-pointer place-items-center rounded-full border border-primary-100 bg-white/[.92] text-primary-600 shadow-[0_10px_28px_-14px_rgba(91,60,196,.42)] backdrop-blur transition hover:bg-primary-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 sm:right-5" aria-label="Foto berikutnya">
-                  <ChevronRight className="h-6 w-6" aria-hidden="true" />
+                <button type="button" onClick={showNextImage} className="absolute right-3 top-1/2 z-10 grid min-h-12 -translate-y-1/2 cursor-pointer place-items-center rounded-xl border border-primary-100 bg-white/[.92] px-3 text-xs font-semibold text-primary-600 shadow-[0_10px_28px_-14px_rgba(91,60,196,.42)] backdrop-blur transition hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 sm:right-5" aria-label="Foto berikutnya">
+                  Berikutnya
                 </button>
               </>
             )}

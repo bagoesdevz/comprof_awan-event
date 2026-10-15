@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowRight,
   Award,
   BookOpenCheck,
   Building2,
@@ -148,7 +147,7 @@ export function CompanyProfilePage() {
             <span className="brand-eyebrow mt-7 block">Kerja sama dan kemitraan</span>
             <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em]">Bangun program yang sesuai kebutuhan organisasi.</h2>
             <ul className="mt-7 grid gap-3">{companyProfile.partnerships.map((item) => <li key={item} className="flex gap-3 text-sm text-content-body"><Check className="mt-0.5 h-4 w-4 shrink-0 text-primary-600" aria-hidden="true" />{item}</li>)}</ul>
-            <Link href="/programs/request" className="brand-button mt-8">Ajukan kerja sama <ArrowRight size={16} aria-hidden="true" /></Link>
+            <Link href="/programs/request" className="brand-button mt-8">Ajukan kerja sama</Link>
           </div>
         </div>
       </section>

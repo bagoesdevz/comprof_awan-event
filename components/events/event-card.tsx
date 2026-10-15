@@ -60,14 +60,6 @@ const priceFormatter = new Intl.NumberFormat("id-ID", {
   maximumFractionDigits: 0,
 });
 
-function ArrowIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[1.7]">
-      <path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 function EventVisual({ event, index }: EventCardProps) {
   const eventDate = new Date(event.startAt);
 
@@ -171,9 +163,9 @@ export function EventCard({ event, index }: EventCardProps) {
             <Link
               href={eventPublicPath(event)}
               aria-label={`Lihat detail ${event.title}`}
-              className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-content-title/15 text-content-title transition duration-300 hover:-rotate-45 hover:border-primary-600 hover:bg-primary-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-4 active:scale-95"
+              className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full border border-content-title/15 px-5 text-sm font-semibold text-content-title transition-colors hover:border-primary-600 hover:bg-primary-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-4"
             >
-              <ArrowIcon />
+              Detail
             </Link>
           </div>
         </dl>

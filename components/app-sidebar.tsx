@@ -4,13 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ArrowUpRight,
   Award,
   BarChart3,
   BookOpen,
   BriefcaseBusiness,
   CalendarDays,
-  ChevronRight,
+  Plus,
   ClipboardCheck,
   CreditCard,
   Home,
@@ -200,7 +199,7 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
                     className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-left text-xs font-semibold text-content-body outline-none transition hover:bg-primary-100/70 hover:text-primary-800 focus-visible:ring-2 focus-visible:ring-primary-600 data-[state=open]:text-primary-800"
                   >
                     <span className="min-w-0 flex-1 truncate">{group.label}</span>
-                    <ChevronRight className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" aria-hidden="true" />
+                    <Plus className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-45" aria-hidden="true" />
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-[sidebar-collapse-up_160ms_ease-out] data-[state=open]:animate-[sidebar-collapse-down_180ms_ease-out]">
@@ -218,7 +217,7 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Lihat website">
               <Link href="/" onClick={closeMobile}>
-                {area === "participant" ? <Home aria-hidden="true" /> : <ArrowUpRight aria-hidden="true" />}
+                <Home aria-hidden="true" />
                 <span>{area === "participant" ? "Kembali ke beranda" : "Lihat website"}</span>
               </Link>
             </SidebarMenuButton>

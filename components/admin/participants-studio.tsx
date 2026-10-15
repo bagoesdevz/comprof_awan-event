@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowRight,
   CalendarDays,
   CheckCircle2,
   Download,
@@ -258,7 +257,6 @@ export function ParticipantsStudio() {
                   aria-label={`Lihat detail ${registration.name}`}
                 >
                   Detail
-                  <ArrowRight size={15} aria-hidden="true" />
                 </button>
               </li>
             );
@@ -351,7 +349,6 @@ export function ParticipantsStudio() {
               <footer>
                 <Link href={`/admin/events/${selectedEvent.slug}`}>
                   Buka event
-                  <ArrowRight size={16} aria-hidden="true" />
                 </Link>
               </footer>
             )}

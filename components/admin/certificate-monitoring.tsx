@@ -2,7 +2,6 @@
 
 import { useMemo, useRef, useState, useEffect } from "react";
 import {
-  ArrowRight,
   Award,
   CheckCircle2,
   Clock3,
@@ -300,7 +299,7 @@ export function CertificateMonitoring() {
                             aria-label={`Detail ${cert.id}`}
                             onClick={(e) => { triggerRef.current = e.currentTarget; setSelectedId(cert.id); }}
                           >
-                            Detail <ArrowRight size={14} aria-hidden="true" />
+                            Detail
                           </button>
                         </div>
                       </td>

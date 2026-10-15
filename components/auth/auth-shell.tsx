@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 type AuthShellProps = {
   title: string;
@@ -14,7 +13,6 @@ export function AuthShell({ title, description, children }: AuthShellProps) {
       <div className="auth-minimal-orbit auth-minimal-orbit--top" aria-hidden="true" />
       <div className="auth-minimal-orbit auth-minimal-orbit--bottom" aria-hidden="true" />
       <Link href="/" className="auth-minimal-home">
-        <ArrowLeft size={15} aria-hidden="true" />
         Beranda
       </Link>
       <section className="auth-minimal-shell" aria-labelledby="auth-title">

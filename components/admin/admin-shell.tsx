@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Search, ShieldCheck, X } from "lucide-react";
+import { Search, ShieldCheck, X } from "lucide-react";
 import { AppSidebar, getSidebarNavigation } from "@/components/app-sidebar";
 import { BrandLogo } from "@/components/brand/brand-elements";
 import { usePlatform } from "@/components/platform/provider";
@@ -94,7 +94,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 <p className="px-3 py-2 text-xs font-medium text-content-muted">Menu yang sesuai</p>
                 {searchResults.length ? searchResults.map((item) => (
                   <Link href={item.href} key={item.href} onClick={() => setQuery("")} className="flex min-h-11 items-center justify-between gap-3 rounded-xl px-3 text-sm font-medium transition hover:bg-primary-100">
-                    {item.label}<ArrowUpRight size={14} aria-hidden="true" />
+                    {item.label}
                   </Link>
                 )) : <span className="block px-3 py-4 text-xs text-content-muted">Menu tidak ditemukan. Coba kata lain.</span>}
               </div>
@@ -106,7 +106,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </button>
 
           <Link href="/" className="hidden min-h-11 shrink-0 items-center gap-2 rounded-2xl px-3 text-xs font-semibold text-content-body transition hover:bg-primary-100 hover:text-primary-800 xl:flex">
-            Lihat website<ArrowUpRight size={15} aria-hidden="true" />
+            Lihat website
           </Link>
           <span className="admin-role-label" title={roleLabel}>
             <ShieldCheck size={15} aria-hidden="true" />

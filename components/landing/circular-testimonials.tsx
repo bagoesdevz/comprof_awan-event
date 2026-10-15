@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 
 type Testimonial = {
@@ -136,8 +136,8 @@ export function CircularTestimonials({ testimonials }: { testimonials: Testimoni
         {count > 1 && (
           <div className="circular-testimonials__controls">
             <div className="circular-testimonials__arrows">
-              <button type="button" aria-label="Testimoni sebelumnya" aria-controls={contentId} onClick={() => navigate(-1)}><ArrowLeft size={20} aria-hidden="true" /></button>
-              <button type="button" aria-label="Testimoni berikutnya" aria-controls={contentId} onClick={() => navigate(1)}><ArrowRight size={20} aria-hidden="true" /></button>
+              <button type="button" aria-label="Testimoni sebelumnya" aria-controls={contentId} onClick={() => navigate(-1)}>Sebelumnya</button>
+              <button type="button" aria-label="Testimoni berikutnya" aria-controls={contentId} onClick={() => navigate(1)}>Berikutnya</button>
             </div>
             {!reducedMotion && (
               <button className="circular-testimonials__playback" type="button" onClick={() => setPaused(value => !value)} aria-label={paused ? "Lanjutkan pergantian otomatis" : "Jeda pergantian otomatis"}>

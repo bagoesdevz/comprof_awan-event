@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
 import { usePlatform } from "@/components/platform/provider";
 import type { ManagedEvent } from "@/lib/platform-model";
 import { eventDateTime, ticketState } from "@/lib/event-detail";
@@ -47,6 +46,6 @@ export function EventAction({ event, ticketId, className = "brand-button", now: 
   }
 
   return disabled ? <button type="button" disabled className={className}>{disabled}</button> : (
-    <Link className={className} href={href} aria-label={ticket ? `${label} · ${ticket.name}` : undefined}>{label}<ArrowRight size={16} aria-hidden="true" /></Link>
+    <Link className={className} href={href} aria-label={ticket ? `${label} · ${ticket.name}` : undefined}>{label}</Link>
   );
 }

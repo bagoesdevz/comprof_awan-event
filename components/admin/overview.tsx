@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, CalendarDays, CreditCard, FilePenLine, Users } from "lucide-react";
+import { CalendarDays, CreditCard, FilePenLine, Users } from "lucide-react";
 import { usePlatform } from "@/components/platform/provider";
 import { Badge, Empty, Field, PageHeading, Panel, exportCsv } from "@/components/platform/ui";
 import { money, paymentLabels, type PaymentStatus } from "@/lib/platform-model";
@@ -53,7 +53,7 @@ export function AdminOverview({ reports = false }: { reports?: boolean }) {
     {!reports && <section className="admin-task-strip" aria-label="Antrean operasional">
       <Link href="/admin/events"><FilePenLine size={20} aria-hidden="true" /><span>Event dalam draf</span><strong>{drafts}</strong></Link>
       <Link href="/admin/payments"><CreditCard size={20} aria-hidden="true" /><span>Menunggu pembayaran</span><strong>{pending}</strong></Link>
-      <Link href="/admin/operations/participants"><Users size={20} aria-hidden="true" /><span>Kelola peserta</span><ArrowRight size={18} aria-hidden="true" /></Link>
+      <Link href="/admin/operations/participants"><Users size={20} aria-hidden="true" /><span>Kelola peserta</span></Link>
     </section>}
 
     <div className="admin-overview-grid">

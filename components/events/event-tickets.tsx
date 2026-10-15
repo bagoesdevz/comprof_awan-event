@@ -8,14 +8,6 @@ const priceFormatter = new Intl.NumberFormat("id-ID", {
   maximumFractionDigits: 0,
 });
 
-function ArrowIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-5 w-5 fill-none stroke-current stroke-[1.7]">
-      <path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 function CheckIcon() {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4 fill-none stroke-current stroke-[1.7]">
@@ -89,19 +81,17 @@ export function EventTickets({ tickets, eventSlug, registrationStatus }: EventTi
                     <Link
                       href={{ pathname: `/events/${eventSlug}/register`, query: { ticket: ticket.id } }}
                       aria-label={`Daftar dengan ${ticket.name}`}
-                      className="mt-auto flex min-h-14 items-center justify-between gap-3 rounded-full bg-primary-950 py-2 pl-5 pr-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-4 active:scale-[0.98]"
+                      className="mt-auto flex min-h-14 items-center justify-center rounded-full bg-primary-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-4"
                     >
                       <span className="whitespace-nowrap">{actionLabel[registrationStatus]}</span>
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-600"><ArrowIcon /></span>
                     </Link>
                   ) : registrationStatus === "SOLD_OUT" || ticket.quotaLeft === 0 ? (
-                    <Link href={{ pathname: `/waitlist/${eventSlug}`, query: { ticket: ticket.id } }} className="mt-auto flex min-h-14 items-center justify-between gap-3 rounded-full bg-primary-950 py-2 pl-5 pr-2 text-sm font-semibold text-white transition hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-4">
-                      <span>Masuk waitlist</span><span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-800"><ArrowIcon /></span>
+                    <Link href={{ pathname: `/waitlist/${eventSlug}`, query: { ticket: ticket.id } }} className="mt-auto flex min-h-14 items-center justify-center rounded-full bg-primary-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-4">
+                      <span>Masuk waitlist</span>
                     </Link>
                   ) : (
-                    <button disabled className="mt-auto flex min-h-14 cursor-not-allowed items-center justify-between gap-3 rounded-full bg-primary-950 py-2 pl-5 pr-2 text-sm font-semibold text-white opacity-55">
+                    <button disabled className="mt-auto flex min-h-14 cursor-not-allowed items-center justify-center rounded-full bg-primary-950 px-5 py-3 text-sm font-semibold text-white opacity-55">
                       <span>{ticket.quotaLeft === 0 ? actionLabel.SOLD_OUT : actionLabel[registrationStatus]}</span>
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary-800"><ArrowIcon /></span>
                     </button>
                   )}
                 </article>

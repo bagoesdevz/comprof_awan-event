@@ -40,9 +40,9 @@
 .circular-testimonials__quote-mark { display: block; height: 32px; color: #c0a8ed; font-family: Georgia, serif; font-size: 64px; line-height: 1; }
 .circular-testimonials__quote { margin-top: 12px; font-family: var(--font-jakarta), sans-serif; font-size: clamp(19px, 1.8vw, 24px); font-weight: 500; line-height: 1.75; letter-spacing: -.025em; color: var(--brand-deep); text-wrap: pretty; }
 .circular-testimonials__word { display: inline-block; animation: testimonial-word-in 450ms ease both; animation-delay: var(--word-delay); }
-.circular-testimonials__controls { display: flex; align-items: center; gap: 24px; margin-top: 28px; }
+.circular-testimonials__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; margin-top: 28px; }
 .circular-testimonials__arrows { display: flex; gap: 10px; }
-.circular-testimonials__arrows button { display: grid; place-items: center; width: 46px; height: 46px; border: 1px solid #ded5ee; border-radius: 50%; color: var(--brand); background: #f0ebfa; transition: background 200ms ease, color 200ms ease, transform 200ms ease; }
+.circular-testimonials__arrows button { display: grid; place-items: center; min-height: 46px; padding: 10px 16px; font-size: 13px; font-weight: 600; border: 1px solid #ded5ee; border-radius: 12px; color: var(--brand); background: #f0ebfa; transition: background 200ms ease, color 200ms ease; }
 .circular-testimonials__arrows button:hover { color: #fff; background: var(--brand); border-color: var(--brand); }
 .circular-testimonials__arrows button:active { transform: scale(.95); }
 .circular-testimonials__playback { display: flex; align-items: center; gap: 7px; min-height: 44px; color: var(--brand-body); font-size: 11px; transition: color 200ms ease; }

@@ -1,6 +1,6 @@
 "use client";
 import { useState, type FormEvent } from "react";
-import { ArrowLeft, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { usePlatform } from "@/components/platform/provider";
 import { readImage } from "@/components/platform/assets";
 import { Badge, Field, PageHeading, Panel } from "@/components/platform/ui";
@@ -73,7 +73,7 @@ export function ArticleEditor({
         description={draft.title || "Tulis konten untuk website Awan Event."}
         action={
           <button type="button" className="flow-button secondary" onClick={onDone}>
-            <ArrowLeft size={16} /> Kembali
+            Kembali
           </button>
         }
       />

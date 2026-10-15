@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
-import { ArrowRight, CalendarDays, Check, ChevronDown, ExternalLink, GraduationCap, Headphones, MapPin, Target, Users, Video } from "lucide-react";
+import { CalendarDays, Check, GraduationCap, Headphones, MapPin, Plus, Target, Users, Video } from "lucide-react";
 import { BrandSlogan, BrandWaves } from "@/components/brand/brand-elements";
 import { EventAction } from "@/components/events/event-action";
 import { PersonCard, PersonGrid } from "@/components/ui/person-card";
@@ -103,7 +103,7 @@ export function EventAccessSection({ event, block, id, attendance, onAttendanceC
     <EventSectionHeading eyebrow="Akses & alur kehadiran" title={blockTitle(block, online ? "Bergabung dari mana saja." : "Sampai bertemu di lokasi kegiatan.")}>{selectable ? "Pilih cara hadir untuk melihat petunjuk yang sesuai dengan tiket Anda." : online ? `Akses sesi tersedia melalui ${platform}.` : "Kegiatan berlangsung tatap muka di lokasi yang tercantum."}</EventSectionHeading>
     <AttendanceSelector event={event} attendance={attendance} onAttendanceChange={onAttendanceChange} label="Petunjuk kehadiran" />
     <div className="event-access-grid" data-attendance={mode}>
-      <div className="event-access-place"><span className="brand-icon">{online ? <Video size={26} aria-hidden="true" /> : <MapPin size={26} aria-hidden="true" />}</span><span className="brand-eyebrow">{online ? "Akses online" : "Lokasi tatap muka"}</span><h3>{online ? platform : location || "Lokasi segera diumumkan"}</h3><p>{online ? `Lengkapi pendaftaran${event.preTest.enabled ? " dan pre-test" : ""}. Buka akses sesi melalui dashboard saat kegiatan dimulai.` : event.venueAddress || event.city}</p>{!online && location && <a className="brand-text-link" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([location, event.venueAddress, event.city].filter(Boolean).join(" "))}`} target="_blank" rel="noreferrer">Buka Google Maps<ExternalLink size={15} aria-hidden="true" /></a>}<p className="event-section-note">{online ? "Siapkan perangkat, koneksi internet, dan audio yang memadai." : "Siapkan tiket QR dan identitas sesuai data pendaftaran untuk check-in."}</p></div>
+      <div className="event-access-place"><span className="brand-icon">{online ? <Video size={26} aria-hidden="true" /> : <MapPin size={26} aria-hidden="true" />}</span><span className="brand-eyebrow">{online ? "Akses online" : "Lokasi tatap muka"}</span><h3>{online ? platform : location || "Lokasi segera diumumkan"}</h3><p>{online ? `Lengkapi pendaftaran${event.preTest.enabled ? " dan pre-test" : ""}. Buka akses sesi melalui dashboard saat kegiatan dimulai.` : event.venueAddress || event.city}</p>{!online && location && <a className="brand-text-link" href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([location, event.venueAddress, event.city].filter(Boolean).join(" "))}`} target="_blank" rel="noreferrer">Buka Google Maps</a>}<p className="event-section-note">{online ? "Siapkan perangkat, koneksi internet, dan audio yang memadai." : "Siapkan tiket QR dan identitas sesuai data pendaftaran untuk check-in."}</p></div>
       <ol className="event-journey">{participationSteps(event, mode).map(step => <li key={step.title}><span className="event-journey-dot" aria-hidden="true" /><div><h3>{step.title}</h3><p>{step.text}</p></div></li>)}</ol>
     </div>
   </section>;
@@ -127,9 +127,24 @@ export function EventPricingSection({ event, id, attendance, onAttendanceChange,
               <strong>{Math.max(0, ticket.quotaLeft).toLocaleString("id-ID")}</strong>
               <small>dari {ticket.quota.toLocaleString("id-ID")}</small>
             </div>
-            {(ticket.startsAt || ticket.endsAt) && <p className="event-ticket-period">{ticket.startsAt && <>Mulai {eventDateTime(ticket.startsAt)}<br /></>}{ticket.endsAt && <>Sampai {eventDateTime(ticket.endsAt)}</>}</p>}
           </div>
-          <div className="event-ticket-benefits"><ul>{ticket.benefits.map(benefit => <li key={benefit}><Check size={17} aria-hidden="true" /><span>{benefit}</span></li>)}</ul></div>
+          <div className="event-ticket-schedule">
+            <section aria-label={`Jadwal pendaftaran ${ticket.name}`}>
+              <h4>Jadwal pendaftaran</h4>
+              <dl className="event-ticket-timeline">
+                <div><dt>Pendaftaran dibuka</dt><dd>{ticket.startsAt ? <time dateTime={ticket.startsAt}>{eventDateTime(ticket.startsAt)}</time> : "Sejak event dipublikasikan"}</dd></div>
+                <div><dt>Pendaftaran ditutup</dt><dd><time dateTime={ticket.endsAt || event.endAt}>{eventDateTime(ticket.endsAt || event.endAt)}</time></dd></div>
+              </dl>
+            </section>
+            <section aria-label={`Pelaksanaan event ${ticket.name}`}>
+              <h4>Pelaksanaan event</h4>
+              <dl className="event-ticket-timeline">
+                <div><dt>Acara dimulai</dt><dd><time dateTime={event.startAt}>{eventDateTime(event.startAt)}</time></dd></div>
+                <div><dt>Acara selesai</dt><dd><time dateTime={event.endAt}>{eventDateTime(event.endAt)}</time></dd></div>
+              </dl>
+            </section>
+          </div>
+          {!!ticket.benefits.length && <div className="event-ticket-benefits"><ul>{ticket.benefits.map(benefit => <li key={benefit}><Check size={17} aria-hidden="true" /><span>{benefit}</span></li>)}</ul></div>}
           <div className="event-ticket-footer">
             {ticket.quantityLimit && <p className="event-section-note">Maksimal {ticket.quantityLimit} tiket per pemesanan.</p>}
             <EventAction event={event} ticketId={ticket.id} now={now} />
@@ -158,7 +173,7 @@ export function EventFaqSection({ event, block, id, attendance, onAttendanceChan
   return <section id={id} className="brand-container event-detail-section">
     <EventSectionHeading eyebrow="Informasi peserta" title={blockTitle(block, "Pertanyaan yang sering diajukan.")} />
     <AttendanceSelector event={event} attendance={attendance} onAttendanceChange={onAttendanceChange} label="FAQ berdasarkan kehadiran" />
-    <div className="event-faq-grid"><div className="event-faq-list">{faqs.map(({ question, answer }) => <details key={question}><summary>{question}<ChevronDown size={17} aria-hidden="true" /></summary><p>{answer}</p></details>)}{block.body && block.body !== "Sertifikat tersedia setelah pre-test, kehadiran, post-test, dan feedback selesai." && <details><summary>Informasi tambahan penyelenggara<ChevronDown size={17} aria-hidden="true" /></summary><p>{block.body}</p></details>}</div><aside className="event-help"><Headphones size={30} strokeWidth={1.5} aria-hidden="true" /><h3>Butuh bantuan?</h3><p>Tim Awan Event siap membantu Anda memahami pendaftaran dan persiapan kegiatan.</p><Link className="brand-button brand-button--outline" href="/contact">Hubungi kami<ArrowRight size={16} aria-hidden="true" /></Link></aside></div>
+    <div className="event-faq-grid"><div className="event-faq-list">{faqs.map(({ question, answer }) => <details key={question}><summary>{question}<Plus size={17} aria-hidden="true" /></summary><p>{answer}</p></details>)}{block.body && block.body !== "Sertifikat tersedia setelah pre-test, kehadiran, post-test, dan feedback selesai." && <details><summary>Informasi tambahan penyelenggara<Plus size={17} aria-hidden="true" /></summary><p>{block.body}</p></details>}</div><aside className="event-help"><Headphones size={30} strokeWidth={1.5} aria-hidden="true" /><h3>Butuh bantuan?</h3><p>Tim Awan Event siap membantu Anda memahami pendaftaran dan persiapan kegiatan.</p><Link className="brand-button brand-button--outline" href="/contact">Hubungi kami</Link></aside></div>
   </section>;
 }
 

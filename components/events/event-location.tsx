@@ -6,14 +6,6 @@ type EventLocationProps = {
   venueAddress?: string;
 };
 
-function ArrowIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4 fill-none stroke-current stroke-[1.7]">
-      <path d="M5 15 15 5M7 5h8v8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 function MapArtwork() {
   return (
     <div className="relative min-h-[280px] overflow-hidden rounded-[28px_28px_7px_28px] bg-primary-900 text-white sm:min-h-[360px]" aria-hidden="true">
@@ -73,7 +65,7 @@ export function EventLocation({ type, venueName, venueAddress }: EventLocationPr
                 <p className="mt-4 max-w-lg text-sm leading-6 text-content-body">{venueAddress}</p>
                 <p className="mt-4 max-w-lg text-xs leading-5 text-content-muted">Instruksi kedatangan lengkap dikirim bersama e-tiket dan pengingat H-1.</p>
                 <a href={mapUrl} target="_blank" rel="noreferrer" className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-full border border-primary-600/20 px-5 text-sm font-semibold text-primary-600 transition hover:-translate-y-0.5 hover:bg-primary-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-4 active:scale-[0.98]">
-                  Buka Google Maps <ArrowIcon />
+                  Buka Google Maps
                 </a>
               </div>
             </article>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { usePlatform } from "./provider";
 import { Empty } from "./ui";
 import { attendanceOptions, blockTitle, eventAttendanceMode, presentationBlocks, type Attendance } from "@/lib/event-detail";
@@ -16,7 +16,7 @@ function ExtraBlock({ event, block, id }: { event: ManagedEvent; block: Block; i
   if (!block.body && !block.image && ["Partner", "Testimonial", "Image", "Video", "Gallery"].includes(block.type)) return null;
   return <section id={id} className="brand-container event-detail-section"><EventSectionHeading eyebrow={event.programType} title={block.title} />
     {block.image && <EventImage src={block.image} alt={block.title} className="event-content-image" />}
-    {block.type === "Video" && /^https:\/\//.test(block.body) ? <a className="brand-button brand-button--outline" href={block.body} target="_blank" rel="noreferrer">Tonton video<ArrowRight size={16} aria-hidden="true" /></a> : block.type === "Testimonial" ? <blockquote className="event-block-copy">{block.body}</blockquote> : <p className="event-block-copy">{block.body}</p>}
+    {block.type === "Video" && /^https:\/\//.test(block.body) ? <a className="brand-button brand-button--outline" href={block.body} target="_blank" rel="noreferrer">Tonton video</a> : block.type === "Testimonial" ? <blockquote className="event-block-copy">{block.body}</blockquote> : <p className="event-block-copy">{block.body}</p>}
   </section>;
 }
 

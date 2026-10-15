@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Award, Building2, GraduationCap, Heart, Laptop, MapPin, Radio, ShieldCheck, Users } from "lucide-react";
+import { Award, Building2, GraduationCap, Heart, Laptop, MapPin, Radio, ShieldCheck, Users } from "lucide-react";
 import { BrandWaves } from "@/components/brand/brand-elements";
 import { HorizontalAvatarsCTA } from "@/components/ui/horizontal-avatars-cta";
 import { usePlatform } from "@/components/platform/provider";
@@ -190,7 +190,7 @@ export function ServicesSection() {
                 <h3>{title}</h3>
                 <p>{copy}</p>
                 <Link href={index === 3 ? "/programs/request" : "/events"} className="brand-text-link">
-                  {index === 3 ? "Ajukan program institusi" : "Lihat event terkait"} <ArrowRight size={15} aria-hidden="true" />
+                  {index === 3 ? "Ajukan program institusi" : "Lihat event terkait"}
                 </Link>
               </article>
             );

@@ -17,7 +17,7 @@ export const eventSchema=z.object({
  capacity:z.number().int().min(1),price:z.number().int().min(0),credits:z.number().int().min(0),
  duration:short,city:short,venue:short,speaker:short,quotaLeft:z.number().int().min(0),
  registrationStatus:z.enum(["OPEN","COMING_SOON","SOLD_OUT","CLOSED"]),waitlist:z.boolean(),
- speakers:z.array(z.object({name:short,role:short,organization:short,bio:text,photo:image.optional()})).max(50),
+ speakers:z.array(z.object({name:short,role:short,organization:short,bio:text,photo:image.optional(),heroFeatured:z.boolean().optional()})).max(50).refine(speakers=>speakers.filter(speaker=>speaker.heroFeatured).length<=1,"Pilih satu pemateri utama untuk hero."),
  tickets:z.array(z.object({id:short.min(1),name:short.min(1),attendance:z.enum(["ONLINE","ONSITE"]),price:z.number().int().min(0),quota:z.number().int().min(1),quotaLeft:z.number().int().min(0),benefits:z.array(short),startsAt:timestamp.optional(),endsAt:timestamp.optional(),quantityLimit:z.number().int().min(1).max(50).optional(),status:z.enum(["active","inactive"]).optional(),pricingMode:z.enum(["free","paid"]).optional()}).refine(t=>t.pricingMode!=="free"||t.price===0,"Tiket gratis harus bernilai nol.")).max(30),
  blocks:z.array(z.object({id:short,type:short,title:short,body:text,visible:z.boolean(),image:image.optional()})).max(50),
  preTest:assessment,postTest:assessment,meetingProvider:z.enum(["Zoom","Google Meet"]),

@@ -3,13 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
-import { CalendarDays, Check, GraduationCap, Headphones, MapPin, Plus, Target, Users, Video } from "lucide-react";
-import { BrandSlogan, BrandWaves } from "@/components/brand/brand-elements";
+import { CalendarDays, Check, Headphones, MapPin, Plus, Target, Users, Video } from "lucide-react";
+import { BrandWaves } from "@/components/brand/brand-elements";
+import { HeroSpeaker } from "@/components/events/hero-speaker";
+import { EventLifecycleBadge } from "@/components/events/event-lifecycle-badge";
 import { EventAction } from "@/components/events/event-action";
 import { PersonCard, PersonGrid } from "@/components/ui/person-card";
-import { attendanceLabels, attendanceOptions, blockTitle, eventAttendanceMode, eventDate, eventDateTime, eventFaq, eventHeroContent, eventVisual, participationSteps, ticketState, type Attendance } from "@/lib/event-detail";
+import { attendanceLabels, attendanceOptions, blockTitle, eventAttendanceMode, eventDate, eventDateTime, eventFaq, eventHeroContent, eventHeroSpeaker, eventVisual, participationSteps, ticketState, type Attendance } from "@/lib/event-detail";
 import { eventTimeRange } from "@/lib/event-time";
-import { lifecycleLabels, money, type Block, type ManagedEvent } from "@/lib/platform-model";
+import { money, type Block, type ManagedEvent } from "@/lib/platform-model";
 
 type SectionProps = { event: ManagedEvent; block: Block; id: string };
 type AttendanceProps = { attendance: Attendance; onAttendanceChange: (attendance: Attendance) => void };
@@ -30,12 +32,13 @@ export function EventImage({ src, alt, className = "", priority = false }: { src
 
 export function EventHero({ event, block, id, participantCount }: SectionProps & { participantCount: number }) {
   const { title, summary, visual } = eventHeroContent(event, block);
+  const speaker = eventHeroSpeaker(event);
   const joined = Math.max(0, participantCount);
   return <section id={id} className="event-detail-hero">
       <BrandWaves className="event-hero-waves" />
       <div className="brand-container event-hero-grid">
         <div className="event-hero-copy">
-          <div className="event-labels"><span className="event-tag">{event.programType}</span><span className="event-format">{attendanceLabels[event.type]}</span><span className="event-lifecycle" data-status={event.lifecycle}>{lifecycleLabels[event.lifecycle]}</span></div>
+          <div className="event-labels"><span className="event-tag">{event.programType}</span><span className="event-format">{attendanceLabels[event.type]}</span><EventLifecycleBadge event={event} /></div>
           <h1>{title}</h1>
           <p className="event-hero-summary">{summary}</p>
           <dl className="event-hero-meta">
@@ -48,8 +51,7 @@ export function EventHero({ event, block, id, participantCount }: SectionProps &
           </div>
         </div>
         <div className="event-hero-visual">
-          <div className="event-hero-visual-heading"><span className="brand-eyebrow">Awan Event · {event.programType}</span><BrandSlogan /></div>
-          {visual ? <EventImage src={visual.src} alt={visual.illustrative ? `Ilustrasi pembelajaran untuk ${event.title}` : `Poster ${event.title}`} className={visual.illustrative ? "event-hero-photo" : "event-hero-photo event-hero-photo--poster"} priority /> : <div className="event-hero-placeholder"><BrandWaves /><GraduationCap size={56} strokeWidth={1.3} aria-hidden="true" /><span>{event.programType}</span><strong>Ruang untuk belajar.<br />Kesempatan untuk bertumbuh.</strong></div>}
+          {speaker ? <HeroSpeaker speaker={speaker} /> : visual ? <EventImage src={visual.src} alt={`Poster ${event.title}`} className="event-hero-photo event-hero-photo--poster" priority /> : <div className="event-hero-placeholder"><BrandWaves /><span>{event.programType}</span><strong>Narasumber akan diumumkan</strong></div>}
         </div>
       </div>
     </section>;

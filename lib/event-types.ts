@@ -49,6 +49,7 @@ export type TicketOption = {
 
 export type EventSpeaker = {
   photo?: string;
+  heroFeatured?: boolean;
   name: string;
   role: string;
   organization: string;

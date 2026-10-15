@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { createContext, FormEvent, useContext, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import Image from "next/image";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
   BookOpenCheck,
@@ -30,7 +31,7 @@ import {
   type ManagedEvent,
   type Question,
 } from "@/lib/platform-model";
-import { eventDateTime, eventHeroContent } from "@/lib/event-detail";
+import { eventDateTime, eventHeroContent, eventHeroSpeaker } from "@/lib/event-detail";
 import { eventTimeRange, fromWibDateTimeLocal, toWibDateTimeLocal } from "@/lib/event-time";
 import { whatsappGroupLink } from "@/lib/event-sharing";
 import { EventQrCode } from "@/components/admin/event-qr-code";
@@ -39,6 +40,7 @@ type EventKind = "Webinar" | "Seminar" | "Pelatihan";
 type Ticket = ManagedEvent["tickets"][number];
 type Speaker = ManagedEvent["speakers"][number];
 type Session = ManagedEvent["sessions"][number];
+const SpeakerUploadContext = createContext({ pending: false, setPending: (_pending: boolean) => {} });
 
 const steps = [
   "Informasi program",
@@ -128,7 +130,11 @@ function AssessmentEditor({ value, onChange, kind }: { value: Assessment; onChan
   </div>;
 }
 
-function SpeakerEditor({ speakers, setSpeakers, onNotice }: { speakers: Speaker[]; setSpeakers: Dispatch<SetStateAction<Speaker[]>>; onNotice: (message: string) => void }) {
+export function SpeakerEditor({ speakers, setSpeakers, onNotice }: { speakers: Speaker[]; setSpeakers: Dispatch<SetStateAction<Speaker[]>>; onNotice: (message: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
+  const { pending, setPending: onUploadChange } = useContext(SpeakerUploadContext);
+  const featured = eventHeroSpeaker({ speakers, speaker: "" });
   function add(role: "Pemateri" | "Moderator") {
     setSpeakers((current) => [...current, { ...emptySpeaker(), role }]);
   }
@@ -137,19 +143,36 @@ function SpeakerEditor({ speakers, setSpeakers, onNotice }: { speakers: Speaker[
     setSpeakers((current) => current.map((speaker, itemIndex) => itemIndex === index ? { ...speaker, ...change } : speaker));
   }
 
-  return <section className="rounded-2xl bg-surface-muted p-4 sm:p-5">
+  return <fieldset disabled={uploading || pending} aria-busy={uploading || pending} aria-label="Pemateri dan moderator" className="min-w-0 rounded-2xl bg-surface-muted p-4 sm:p-5">
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div><h4 className="font-semibold">Pemateri dan moderator</h4><p className="mt-1 text-xs text-content-muted">{speakers.length} pengisi acara</p></div>
       <div className="flex flex-wrap gap-2"><button type="button" className="flow-button secondary" onClick={() => add("Pemateri")}><Plus size={15} />Tambah pemateri</button><button type="button" className="flow-button secondary" onClick={() => add("Moderator")}><Plus size={15} />Tambah moderator</button></div>
     </div>
+    {uploadError && <p role="alert" className="flow-alert danger mt-4">{uploadError}</p>}
     <div className="mt-5 grid gap-4">{speakers.map((speaker, index) => {
       const moderator = /moderator/i.test(speaker.role);
       return <article key={index} className="rounded-2xl bg-white p-4 sm:p-5">
         <div className="flex items-center justify-between gap-4"><div><span className={`rounded-full px-3 py-1.5 text-[10px] font-semibold ${moderator ? "bg-[#EFF6FF] text-[#3156B8]" : "bg-primary-100 text-primary-800"}`}>{moderator ? "Moderator" : "Pemateri"}</span><strong className="ml-3 text-sm">{speaker.name || `${moderator ? "Moderator" : "Pemateri"} ${index + 1}`}</strong></div><button type="button" aria-label={`Hapus ${moderator ? "moderator" : "pemateri"} ${index + 1}`} className="grid h-10 w-10 place-items-center rounded-full text-[#B42318] hover:bg-[#FEF2F2]" onClick={() => setSpeakers((current) => current.filter((_, itemIndex) => itemIndex !== index))}><Trash2 size={16} /></button></div>
-        <div className="mt-5 grid gap-4 sm:grid-cols-2"><Field label="Nama"><input value={speaker.name} onChange={(event) => updateSpeaker(index, { name: event.target.value })} /></Field><Field label="Peran"><input list="speaker-role-options" value={speaker.role} onChange={(event) => updateSpeaker(index, { role: event.target.value })} /></Field><Field label="Institusi"><input value={speaker.organization} onChange={(event) => updateSpeaker(index, { organization: event.target.value })} /></Field><Field label="Foto"><input type="file" accept="image/png,image/jpeg,image/webp" onChange={async (event) => { const file = event.target.files?.[0]; if (!file) return; try { updateSpeaker(index, { photo: await readImage(file) }); } catch (error) { onNotice((error as Error).message); } }} /></Field><Field label="Profil singkat" className="sm:col-span-2"><textarea rows={3} value={speaker.bio} onChange={(event) => updateSpeaker(index, { bio: event.target.value })} /></Field></div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <Field label="Nama"><input value={speaker.name} onChange={(event) => updateSpeaker(index, { name: event.target.value })} /></Field>
+          <Field label="Peran / profesi" hint="Ditampilkan di bawah nama pada hero dan kartu pemateri."><input list="speaker-role-options" value={speaker.role} onChange={(event) => updateSpeaker(index, { role: event.target.value })} /></Field>
+          <Field label="Institusi"><input value={speaker.organization} onChange={(event) => updateSpeaker(index, { organization: event.target.value })} /></Field>
+          <Field label="Foto pemateri" hint="PNG, JPG atau WebP, maksimal 5 MB. PNG transparan paling sesuai untuk hero."><input type="file" accept="image/png,image/jpeg,image/webp" onChange={async (event) => {
+            const input = event.currentTarget, file = input.files?.[0]; if (!file) return;
+            setUploadError(""); setUploading(true); onUploadChange(true);
+            try { updateSpeaker(index, { photo: await readImage(file) }); onNotice("Foto pemateri terunggah. Simpan event untuk menerapkan perubahan."); }
+            catch (error) { setUploadError((error as Error).message); }
+            finally { setUploading(false); onUploadChange(false); input.value = ""; }
+          }} /></Field>
+          <div className="speaker-photo-editor sm:col-span-2">
+            <div className="speaker-photo-preview">{speaker.photo ? <Image src={speaker.photo} alt={`Foto ${speaker.name || `pemateri ${index + 1}`}`} fill unoptimized sizes="96px" /> : <span>Belum ada foto</span>}</div>
+            <div className="min-w-0"><label className="flex min-h-11 items-center gap-3 text-sm font-semibold"><input type="radio" name="hero-speaker" checked={featured === speaker} onChange={() => setSpeakers(current => current.map((item, itemIndex) => ({ ...item, heroFeatured: itemIndex === index })))} />Tampilkan di hero</label><p className="text-xs leading-6 text-content-muted">Satu pemateri menjadi wajah utama event. Semua pemateri tetap tampil di bagian Pemateri.</p>{speaker.photo && <button type="button" className="min-h-11 text-sm font-semibold text-[#B42318]" onClick={() => updateSpeaker(index, { photo: "" })}>Hapus foto</button>}</div>
+          </div>
+          <Field label="Profil singkat" className="sm:col-span-2"><textarea rows={3} value={speaker.bio} onChange={(event) => updateSpeaker(index, { bio: event.target.value })} /></Field>
+        </div>
       </article>;
-    })}</div><datalist id="speaker-role-options"><option value="Pemateri" /><option value="Keynote Speaker" /><option value="Trainer" /><option value="Moderator" /></datalist>
-  </section>;
+    })}</div>{uploading && <p role="status" className="mt-4 text-sm">Mengunggah foto pemateri…</p>}<datalist id="speaker-role-options"><option value="Pemateri" /><option value="Keynote Speaker" /><option value="Trainer" /><option value="Moderator" /></datalist>
+  </fieldset>;
 }
 
 export function EventWizard({initialSlug}:{initialSlug?:string}){
@@ -183,6 +206,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
   }));
   const [learningMethods, setLearningMethods] = useState<string[]>(base?.learningMethods || ["Presentasi materi", "Diskusi interaktif"]);
   const [speakers, setSpeakers] = useState<Speaker[]>(base?.speakers.length ? base.speakers : [emptySpeaker()]);
+  const [speakerUploading, setSpeakerUploading] = useState(false);
   const [sessions, setSessions] = useState<Session[]>(base?.sessions.length ? base.sessions : [emptySession()]);
   const [tickets, setTickets] = useState<Ticket[]>(() => base?.tickets.map((source, index) => {
     const ticket = base.tickets.length === 1 && index === 0 ? resizeTicket(source, base.capacity) : source;
@@ -224,6 +248,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
   }
 
   async function save(publish = false) {
+    if (speakerUploading) { setNotice("Tunggu sampai unggahan foto pemateri selesai, lalu simpan event."); return; }
     if (form.whatsappGroupUrl.trim() && !whatsappGroupLink(form.whatsappGroupUrl)) { setNotice("Lengkapi tautan undangan grup dengan alamat https://chat.whatsapp.com/..."); setStep(1); return; }
     if (form.endAt && (!fromWibDateTimeLocal(form.endAt) || Date.parse(fromWibDateTimeLocal(form.endAt)) <= Date.parse(fromWibDateTimeLocal(form.startAt)))) { setNotice("Tanggal dan waktu pelaksanaan selesai harus setelah pelaksanaan dimulai."); setStep(1); return; }
     if (tickets.some(ticket => ticket.startsAt && ticket.endsAt && Date.parse(fromWibDateTimeLocal(ticket.endsAt)) <= Date.parse(fromWibDateTimeLocal(ticket.startsAt)))) { setNotice("Tanggal dan waktu pendaftaran ditutup harus setelah pendaftaran dibuka."); setStep(1); return; }
@@ -269,7 +294,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
 
   const selectedBlock = blocks.find((block) => block.id === landingSection) || null;
   const persistedEvent = base;
-  return <div className="mx-auto max-w-[1280px]">
+  return <SpeakerUploadContext.Provider value={{ pending: speakerUploading, setPending: setSpeakerUploading }}><div className="mx-auto max-w-[1280px]">
     <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><button type="button" onClick={() => { setStarted(false); setLandingSection(null); }} className="mb-4 inline-flex min-h-10 items-center gap-2 text-xs font-semibold text-primary-700">Ganti jenis event</button><h1 className="text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Buat {kind.toLowerCase()}</h1><p className="mt-2 text-sm text-content-body">{form.title || "Draft baru"}</p></div><button type="button" className="flow-button secondary self-start sm:self-auto" ref={previewTrigger} onClick={() => setPreview(true)}><Eye size={16} />Pratinjau</button></header>
     {notice && <p role="status" className={`flow-alert mb-6 ${notice.includes("Lengkapi") || notice.includes("Upload") ? "warning" : "success"}`}>{notice}</p>}
     <form onSubmit={submit} className="grid min-w-0 gap-6 xl:grid-cols-[240px_minmax(0,1fr)]">
@@ -340,5 +365,5 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
     </form>
     <EventQrCode event={persistedEvent} />
     <DialogPrimitive.Root open={preview} onOpenChange={setPreview}><DialogPrimitive.Portal><DialogPrimitive.Content aria-describedby={undefined} onCloseAutoFocus={(event) => { event.preventDefault(); previewTrigger.current?.focus(); }} className="fixed inset-0 z-50 overflow-y-auto bg-white"><div className="sticky top-0 z-50 flex min-h-16 items-center justify-between gap-4 border-b border-primary-600/10 bg-white px-4 sm:px-6"><div><DialogPrimitive.Title className="block text-sm font-semibold">Pratinjau landing page</DialogPrimitive.Title><span className="text-xs text-content-muted">{kind}</span></div><button type="button" onClick={() => setPreview(false)} className="flow-button secondary">Tutup</button></div><EventPresentation slug={buildEvent(false).slug} previewEvent={buildEvent(false)} /></DialogPrimitive.Content></DialogPrimitive.Portal></DialogPrimitive.Root>
-  </div>;
+  </div></SpeakerUploadContext.Provider>;
 }

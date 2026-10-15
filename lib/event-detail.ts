@@ -97,6 +97,20 @@ export function eventHeroContent(event: ManagedEvent, block: Block) {
   };
 }
 
+export function eventHeroSpeaker(event: Pick<ManagedEvent, "speakers" | "speaker">) {
+  const named = event.speakers.filter(speaker => speaker.name.trim());
+  return named.find(speaker => speaker.heroFeatured)
+    || named.find(speaker => !/moderator/i.test(speaker.role))
+    || named[0]
+    || (event.speaker.trim() ? { name: event.speaker, role: "Narasumber", organization: "", bio: "" } : undefined);
+}
+
+export function eventLifecycleAt(event: Pick<ManagedEvent, "startAt" | "endAt" | "lifecycle">, now: number): ManagedEvent["lifecycle"] {
+  const start = Date.parse(event.startAt), end = Date.parse(event.endAt);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return event.lifecycle;
+  return now < start ? "upcoming" : now < end ? "ongoing" : "completed";
+}
+
 export function eventVisual(event: ManagedEvent, block?: Block) {
   const uploaded = block?.image || event.banner;
   if (uploaded) return { src: uploaded, illustrative: false };

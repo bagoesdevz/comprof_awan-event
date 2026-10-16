@@ -105,6 +105,20 @@ export function eventHeroSpeaker(event: Pick<ManagedEvent, "speakers" | "speaker
     || (event.speaker.trim() ? { name: event.speaker, role: "Narasumber", organization: "", bio: "" } : undefined);
 }
 
+export function eventHeroTitleParts(title: string) {
+  const words = title.trim().split(/\s+/).filter(Boolean);
+  const stacked = words.length >= 7;
+  const leadCount = stacked ? Math.floor(words.length / 4) : Math.max(0, words.length - 2);
+  if (words.length < 3) return { lead: words.join(" "), highlight: "", tail: "", stacked: false };
+  const highlightCount = stacked ? Math.floor(words.length / 4) : 2;
+  return {
+    lead: words.slice(0, leadCount).join(" "),
+    highlight: words.slice(leadCount, leadCount + highlightCount).join(" "),
+    tail: words.slice(leadCount + highlightCount).join(" "),
+    stacked,
+  };
+}
+
 export function eventLifecycleAt(event: Pick<ManagedEvent, "startAt" | "endAt" | "lifecycle">, now: number): ManagedEvent["lifecycle"] {
   const start = Date.parse(event.startAt), end = Date.parse(event.endAt);
   if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return event.lifecycle;

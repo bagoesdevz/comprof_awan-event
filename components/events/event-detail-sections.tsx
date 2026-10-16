@@ -8,7 +8,7 @@ import { BrandWaves } from "@/components/brand/brand-elements";
 import { EventLifecycleBadge } from "@/components/events/event-lifecycle-badge";
 import { EventAction } from "@/components/events/event-action";
 import { PersonCard, PersonGrid } from "@/components/ui/person-card";
-import { attendanceLabels, attendanceOptions, blockTitle, eventAttendanceMode, eventDate, eventDateTime, eventFaq, eventHeroContent, eventHeroSpeaker, eventVisual, participationSteps, ticketState, type Attendance } from "@/lib/event-detail";
+import { attendanceLabels, attendanceOptions, blockTitle, eventAttendanceMode, eventDate, eventDateTime, eventFaq, eventHeroContent, eventHeroSpeaker, eventHeroTitleParts, eventVisual, participationSteps, ticketState, type Attendance } from "@/lib/event-detail";
 import { eventTimeRange } from "@/lib/event-time";
 import { money, type Block, type ManagedEvent } from "@/lib/platform-model";
 
@@ -31,14 +31,15 @@ export function EventImage({ src, alt, className = "", priority = false }: { src
 
 export function EventHero({ event, block, id, participantCount }: SectionProps & { participantCount: number }) {
   const { title, summary } = eventHeroContent(event, block);
+  const titleParts = eventHeroTitleParts(title);
   const speaker = eventHeroSpeaker(event);
   const joined = Math.max(0, participantCount);
   return <section id={id} className="event-detail-hero">
-      <div className="event-hero-backdrop" aria-hidden="true"><BrandWaves className="event-hero-waves" /></div>
+      <div className="event-hero-backdrop" aria-hidden="true"><Image src="/event-hero-clouds.webp" alt="" fill priority sizes="100vw" className="event-hero-clouds" /></div>
       <div className="brand-container event-hero-content">
         <div className="event-hero-copy">
           <div className="event-labels"><span className="event-tag">{event.programType}</span><span className="event-format">{attendanceLabels[event.type]}</span><EventLifecycleBadge event={event} /></div>
-          <h1>{title}</h1>
+          <h1 className={titleParts.stacked ? "event-hero-title--stacked" : undefined}><span className="event-hero-title-line">{titleParts.lead}</span>{titleParts.highlight && <> <span className="event-hero-title-line event-hero-title-accent">{titleParts.highlight}</span></>}{titleParts.tail && <> <span className="event-hero-title-line">{titleParts.tail}</span></>}</h1>
           <p className="event-hero-summary">{summary}</p>
           {speaker && <p className="event-hero-presenter"><span>Bersama</span><strong>{speaker.name}</strong>{speaker.role && <span>{speaker.role}</span>}</p>}
           <dl className="event-hero-meta">

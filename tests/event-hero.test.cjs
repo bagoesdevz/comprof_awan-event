@@ -1,8 +1,17 @@
 const test=require('node:test'),assert=require('node:assert/strict'),load=require('./load-source.cjs');
-const {eventHeroSpeaker,eventLifecycleAt}=load('lib/event-detail.ts');
+const {eventHeroSpeaker,eventLifecycleAt,eventHeroTitleParts}=load('lib/event-detail.ts');
 const {eventSchema}=load('lib/server/validation.ts');
 const {exampleEvent}=load('lib/example-event.ts');
 const speaker=(name,role,extra={})=>({name,role,organization:'',bio:'',...extra});
+
+test('hero title styling preserves every word for empty, short, long and custom event names',()=>{
+ for(const title of ['', 'Seminar', 'Pelatihan Klinis', 'Workshop Komunikasi Tenaga Kesehatan', 'Webinar Pembekalan Kesehatan Reproduksi menuju Pernikahan bagi Gen Z', '  Acara\n dengan   spasi berlebih  ', 'JudulTanpaSpasi'.repeat(20)]){
+  const parts=eventHeroTitleParts(title);
+  assert.equal([parts.lead,parts.highlight,parts.tail].filter(Boolean).join(' '),title.trim().split(/\s+/).filter(Boolean).join(' '));
+ }
+ const reference=eventHeroTitleParts('Webinar Pembekalan Kesehatan Reproduksi menuju Pernikahan bagi Gen Z');
+ assert.equal(reference.highlight,'Kesehatan Reproduksi');
+});
 
 test('hero follows the selected speaker, otherwise prefers a named presenter over the moderator',()=>{
  const moderator=speaker('Moderator pengujian','Moderator'),first=speaker('Pemateri satu','Dokter'),second=speaker('Pemateri dua','Psikolog',{photo:'/foto-pengujian.png',heroFeatured:true});

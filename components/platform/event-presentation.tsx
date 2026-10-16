@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ChevronRight } from "lucide-react";
 import { usePlatform } from "./provider";
 import { Empty } from "./ui";
 import { attendanceOptions, blockTitle, eventAttendanceMode, presentationBlocks, type Attendance } from "@/lib/event-detail";
@@ -49,7 +47,6 @@ function EventDetail({ event, participantCount }: { event: ManagedEvent; partici
   const template = event.programType.toLowerCase().includes("webinar") ? "webinar" : event.programType.toLowerCase().includes("seminar") ? "seminar" : event.programType.toLowerCase().includes("pelatihan") || event.programType.toLowerCase().includes("workshop") ? "pelatihan" : "default";
 
   return <div className={`event-detail-page event-template-${template}`}>
-    <nav className="brand-container event-breadcrumb" aria-label="Breadcrumb"><Link href="/">Beranda</Link><ChevronRight size={13} aria-hidden="true" /><Link href="/events">Event</Link><ChevronRight size={13} aria-hidden="true" /><span aria-current="page">{event.title}</span></nav>
     {!hasHero && <header className="brand-container event-no-hero"><span className="brand-eyebrow">{event.programType}</span><h1>{event.title}</h1></header>}
     {orderedSections.map(({ block, id }) => {
       const props = { event, block, id };

@@ -6,6 +6,8 @@ Jalankan `npm ci`, lalu `npm run dev`. Pemeriksaan: `npm test`, `npm run lint`, 
 
 Lihat [instruksi rilis](PRODUCTION-RELEASE.md) sebelum memperbarui deployment.
 
+**Hapus event** hanya tersedia untuk Super admin pada daftar **Admin → Event**. Konfirmasi memindahkan event ke **Sampah**, menghilangkannya dari daftar aktif dan halaman publik. Super admin dapat memilih **Pulihkan sebagai draf**; pendaftaran tetap tertutup sampai pengaturan ditinjau. Event yang sudah memiliki pendaftaran dilindungi dari penghapusan; gunakan **Jadikan draf** untuk menghentikan publikasi. Otorisasi juga diperiksa server, dan PATCH umum tidak dapat menghapus atau memulihkan record Sampah. Tidak ada penghapusan permanen atau migrasi SQL.
+
 Cover kartu event di beranda dan dashboard peserta diatur pada **Event → Edit event → Landing page → Cover kartu event**, dengan pratinjau dan hapus. Simpan event setelah unggah. **Konten website → Pembuka → Gambar pembuka beranda** mengatur gambar hero beranda secara terpisah. Tidak ada input gambar pada bagian Pembuka detail event; cover lama masih terbaca sampai editor menyatukannya pada penyimpanan berikutnya.
 
 Perubahan event/CMS/artikel yang berhasil disimpan mengirim sinyal Supabase Realtime tanpa data record. Halaman publik membaca snapshot terbaru melalui API dengan hak akses yang sama; reconnect/online/kembali ke tab dan pemeriksaan cadangan 15 detik menangani sinyal terlewat. Tidak perlu deployment ulang untuk mengganti gambar. Editor event menjaga versi formulir saat pengetikan, sedangkan CMS menjaga tulisan belum disimpan dan meminta muat versi terbaru jika editor lain menyimpan konten yang sama.

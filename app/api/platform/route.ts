@@ -24,6 +24,7 @@ export async function PATCH(request:Request){
    data={...old.data,read:change.data.read===true};owner_email=old.owner_email;
   }else{
    requireAdmin(user,["cms","articles","templates","campaigns"].includes(change.collection));
+   if(change.collection==="events"&&(old?.data.deletedAt||Object.hasOwn(change.data,"deletedAt")||Object.hasOwn(change.data,"deletedBy")))throw new HttpError(403,"Gunakan tindakan Sampah khusus Super admin untuk menghapus atau memulihkan event.");
    const schemas={events:eventSchema,cms:contentSchema,articles:articleSchema,leads:leadSchema,templates:templateSchema,campaigns:campaignSchema};
    if(!(change.collection in schemas))throw new HttpError(403,"Perubahan ini memerlukan tindakan khusus.");
    data=schemas[change.collection as keyof typeof schemas].parse(change.data);

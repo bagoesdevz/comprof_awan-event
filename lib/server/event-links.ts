@@ -15,7 +15,7 @@ export async function ensureEventPublicLinks(user: User | null) {
   requireAdmin(user);
   const events = await records("events");
   const used = new Set(events.map(event => event.data.publicCode).filter(isEventPublicCode));
-  const missing = events.filter(event => !isEventPublicCode(event.data.publicCode));
+  const missing = events.filter(event => !event.data.deletedAt && !isEventPublicCode(event.data.publicCode));
   for (let index = 0; index < missing.length; index += 100) {
     await commit(missing.slice(index, index + 100).map(event => ({
       collection: "events", id: event.id, revision: event.revision, published: event.published, owner_email: event.owner_email,

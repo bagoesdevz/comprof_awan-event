@@ -21,13 +21,17 @@ export async function record(collection:string,id:string){
  const {data,error}=await getServiceSupabaseClient().from("platform_records").select("*").eq("collection",collection).eq("id",id).maybeSingle();
  if(error)throw new Error(error.message);return data as unknown as RecordRow|null;
 }
-export async function findEvent(slug:string){const {data,error}=await getServiceSupabaseClient().from("platform_records").select("*").eq("collection","events").eq("data->>slug",slug).maybeSingle();if(error)throw new Error(error.message);if(!data)throw new HttpError(404,"Event tidak ditemukan.");return data as unknown as RecordRow;}
+export async function findEvent(slug:string){const {data,error}=await getServiceSupabaseClient().from("platform_records").select("*").eq("collection","events").eq("data->>slug",slug).maybeSingle();if(error)throw new Error(error.message);if(!data||(data.data as Record<string,unknown>).deletedAt)throw new HttpError(404,"Event tidak ditemukan.");return data as unknown as RecordRow;}
+export async function hasEventRegistrations(slug:string){
+ const {data,error}=await getServiceSupabaseClient().from("platform_records").select("id").eq("collection","registrations").eq("data->>eventSlug",slug).limit(1);
+ if(error)throw new Error(error.message);return !!data?.length;
+}
 export async function findPublicEvent(code:string){
  if(!isEventPublicCode(code))throw new HttpError(404,"Event tidak ditemukan.");
  const {data,error}=await getServiceSupabaseClient().from("platform_records").select("data").eq("collection","events").eq("published",true).eq("data->>publicCode",code).maybeSingle();
  if(error)throw new Error("Event query failed");
  const event=data?.data as unknown as ManagedEvent|undefined;
- if(!event||event.publication!=="published")throw new HttpError(404,"Event tidak ditemukan.");
+ if(!event||event.deletedAt||event.publication!=="published")throw new HttpError(404,"Event tidak ditemukan.");
  return event;
 }
 export function liveEvent(event:ManagedEvent):ManagedEvent{
@@ -64,6 +68,7 @@ export async function snapshot(user:User|null){
  ...(admin?[records("leads"),records("waitlist"),records("templates"),records("campaigns")]:[])
  ]);
  for(const row of groups.flat()){
+  if(row.collection==="events"&&row.data.deletedAt){if(roleOf(user)==="super")state.eventTrash.push(row.data as unknown as ManagedEvent);continue;}
   revisions[row.collection+":"+row.id]=row.revision;
   if(row.collection==="cms")state.cms[row.id]=row.data as PlatformState["cms"][string];
   else if(row.collection==="profiles")state.profiles[row.id]=row.data as unknown as PlatformState["profiles"][string];

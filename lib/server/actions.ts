@@ -8,10 +8,12 @@ import {HttpError} from "./http";
 import {issueCertificate} from "./certificates";
 import {ensureEventPublicLinks} from "./event-links";
 import {ticketState} from "@/lib/event-detail";
+import {changeEventTrash} from "./event-trash";
 const registrationInput=z.object({type:z.literal("register"),eventSlug:z.string().max(120),ticketId:z.string().max(120),answers:z.record(z.string(),z.string().max(2000)).default({}),members:z.array(z.object({name:z.string().trim().min(2).max(160),email:z.string().trim().email().max(254)})).max(49).default([])});
 const activityInput=z.object({type:z.enum(["start-test","submit-test","attendance","feedback","check-in","revoke-certificate"]),id:z.string().max(254),eventSlug:z.string().optional(),test:z.enum(["pre-test","post-test"]).optional(),answers:z.record(z.string(),z.number().int().min(0).max(7)).optional(),feedback:z.object({overall:z.number().int().min(1).max(5),speaker:z.number().int().min(1).max(5),material:z.number().int().min(1).max(5),organization:z.number().int().min(1).max(5),comment:z.string().max(3000)}).optional()});
 export async function runAction(user:User|null,raw:unknown){
  const u=requireUser(user),email=u.email.toLowerCase();
+ if(["delete-event","restore-event"].includes(String((raw as {type?:unknown})?.type)))return changeEventTrash(u,raw);
  if((raw as {type?:unknown})?.type==="ensure-event-links"){
   z.object({type:z.literal("ensure-event-links")}).strict().parse(raw);
   return ensureEventPublicLinks(u);

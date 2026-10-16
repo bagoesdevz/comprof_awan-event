@@ -3,9 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
-import { CalendarDays, Check, Headphones, MapPin, Plus, Target, Users, Video } from "lucide-react";
+import { Check, Headphones, MapPin, Plus, Target, Video } from "lucide-react";
 import { BrandWaves } from "@/components/brand/brand-elements";
-import { HeroSpeaker } from "@/components/events/hero-speaker";
 import { EventLifecycleBadge } from "@/components/events/event-lifecycle-badge";
 import { EventAction } from "@/components/events/event-action";
 import { PersonCard, PersonGrid } from "@/components/ui/person-card";
@@ -31,27 +30,24 @@ export function EventImage({ src, alt, className = "", priority = false }: { src
 }
 
 export function EventHero({ event, block, id, participantCount }: SectionProps & { participantCount: number }) {
-  const { title, summary, visual } = eventHeroContent(event, block);
+  const { title, summary } = eventHeroContent(event, block);
   const speaker = eventHeroSpeaker(event);
   const joined = Math.max(0, participantCount);
   return <section id={id} className="event-detail-hero">
-      <BrandWaves className="event-hero-waves" />
-      <div className="brand-container event-hero-grid">
+      <div className="event-hero-backdrop" aria-hidden="true"><BrandWaves className="event-hero-waves" /></div>
+      <div className="brand-container event-hero-content">
         <div className="event-hero-copy">
           <div className="event-labels"><span className="event-tag">{event.programType}</span><span className="event-format">{attendanceLabels[event.type]}</span><EventLifecycleBadge event={event} /></div>
           <h1>{title}</h1>
           <p className="event-hero-summary">{summary}</p>
+          {speaker && <p className="event-hero-presenter"><span>Bersama</span><strong>{speaker.name}</strong>{speaker.role && <span>{speaker.role}</span>}</p>}
           <dl className="event-hero-meta">
-            <div><span className="event-hero-meta-icon"><CalendarDays aria-hidden="true" size={22} /></span><div><dt>Tanggal & waktu</dt><dd>{eventDate(event.startAt)}<small>{eventTimeRange(event.startAt, event.endAt)}</small></dd></div></div>
-            <div><span className="event-hero-meta-icon">{event.type === "ONLINE" ? <Video aria-hidden="true" size={22} /> : <MapPin aria-hidden="true" size={22} />}</span><div><dt>{event.type === "ONLINE" ? "Platform" : "Lokasi kegiatan"}</dt><dd>{event.type === "ONLINE" ? `Online melalui ${event.meetingProvider}` : event.mapLabel || event.venue}<small>{event.type === "HYBRID" ? `Tersedia juga online melalui ${event.meetingProvider}` : event.type === "ONLINE" ? "Akses melalui dashboard peserta" : event.city}</small></dd></div></div>
+            <div><dt>Tanggal & waktu</dt><dd>{eventDate(event.startAt)}<small>{eventTimeRange(event.startAt, event.endAt)}</small></dd></div>
+            <div><dt>{event.type === "ONLINE" ? "Platform" : "Lokasi kegiatan"}</dt><dd>{event.type === "ONLINE" ? `Online melalui ${event.meetingProvider}` : event.mapLabel || event.venue}<small>{event.type === "HYBRID" ? `Tersedia juga online melalui ${event.meetingProvider}` : event.type === "ONLINE" ? "Akses melalui dashboard peserta" : event.city}</small></dd></div>
           </dl>
           <div className="event-participant-proof">
-            <div className="event-participant-avatars" aria-hidden="true"><span><Users size={18} /></span></div>
             <p><strong>{joined.toLocaleString("id-ID")} peserta</strong><span>terdaftar di event ini</span></p>
           </div>
-        </div>
-        <div className="event-hero-visual">
-          {speaker ? <HeroSpeaker speaker={speaker} /> : visual ? <EventImage src={visual.src} alt={`Poster ${event.title}`} className="event-hero-photo event-hero-photo--poster" priority /> : <div className="event-hero-placeholder"><BrandWaves /><span>{event.programType}</span><strong>Narasumber akan diumumkan</strong></div>}
         </div>
       </div>
     </section>;

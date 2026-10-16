@@ -1,30 +1,75 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Award, ShieldCheck, ShieldX } from "lucide-react";
 import { usePlatform } from "./provider";
-import { Badge, Empty, Panel } from "./ui";
-import { eligible, type Registration } from "@/lib/platform-model";
+import { Badge, Empty, Field, Panel } from "./ui";
+import { eligible, certificateNameVerified, certificateRecipientName, type Registration } from "@/lib/platform-model";
+
+function CertificateNameForm({ registration }: { registration: Registration }) {
+  const { action, saving, error } = usePlatform();
+  const [name, setName] = useState(registration.name);
+  const [confirmed, setConfirmed] = useState(false);
+  const [failed, setFailed] = useState(false);
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (saving || !confirmed) return;
+    setFailed(false);
+    const result = await action({ type: "confirm-certificate-name", id: registration.id, name, confirmed: true });
+    if (!result) setFailed(true);
+  }
+  return <form onSubmit={submit} className="mt-6 grid gap-5">
+    <Field label="Nama pada sertifikat" hint="Perbaiki ejaan atau gelar bila diperlukan. Perubahan ini hanya berlaku untuk sertifikat event ini.">
+      <input name="certificateName" autoComplete="name" value={name} onChange={event => { setName(event.target.value); setConfirmed(false); setFailed(false); }} required minLength={2} maxLength={160} disabled={saving} />
+    </Field>
+    <p className="text-sm leading-6 text-content-muted">Pastikan nama sudah benar. Nama tidak dapat diedit dari halaman ini setelah dikonfirmasi.</p>
+    <label className="flex min-h-11 items-start gap-3 text-sm leading-6"><input className="mt-1 h-4 w-4 shrink-0" type="checkbox" checked={confirmed} onChange={event => { setConfirmed(event.target.checked); setFailed(false); }} required disabled={saving} /><span>Nama di atas sudah benar untuk dicetak pada sertifikat.</span></label>
+    {failed && <p role="alert" className="flow-alert danger">{error || "Nama belum dapat dikonfirmasi. Silakan coba lagi."}</p>}
+    <button type="submit" className="flow-button w-fit" disabled={saving || !confirmed || name.trim().length < 2}>{saving ? "Menyimpan…" : "Konfirmasi nama"}</button>
+  </form>;
+}
 
 export function CertificatePanel({ registration }: { registration: Registration }) {
-  const { state } = usePlatform();
+  const { state, refresh } = usePlatform();
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState("");
   const event = state.events.find((e) => e.slug === registration.eventSlug);
   const cert = registration.certificate;
   if (!event?.certificateEnabled && !cert) return <Panel title={event?.title ?? registration.eventSlug}><p className="text-sm text-content-muted">Event ini tidak menyediakan sertifikat.</p></Panel>;
 
-  function download() {
-    if (!cert || cert.status !== "valid") return;
-    // Download dilakukan server-side — template, escape, dan eligibility diperiksa ulang di server
-    window.open(`/api/certificates/${cert.token}/download`, "_blank", "noopener");
+  const verified = certificateNameVerified(registration);
+  if (event && event.certificateEnabled && eligible(registration, event) && !verified && cert?.status !== "revoked") return <Panel>
+    <h2 className="text-2xl font-semibold">Verifikasi nama sertifikat</h2>
+    <p className="mt-2 break-words text-sm leading-6 text-content-muted">Evaluasi kegiatan sudah tersimpan. Periksa nama untuk {event.title} sebelum mengunduh sertifikat.</p>
+    <CertificateNameForm key={registration.id} registration={registration} />
+  </Panel>;
+
+  async function download() {
+    if (!cert || !canDownload || downloading) return;
+    setDownloading(true); setDownloadError("");
+    try {
+      const response = await fetch(`/api/certificates/${cert.token}/download`, { cache: "no-store", signal: AbortSignal.timeout(30000) });
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(typeof body.error === "string" ? body.error : body.error?.message || "Sertifikat belum dapat diunduh.");
+      }
+      if (!response.headers.get("Content-Type")?.includes("image/svg+xml")) throw new Error("File sertifikat belum tersedia. Silakan coba lagi.");
+      const url = URL.createObjectURL(await response.blob());
+      const anchor = document.createElement("a"); anchor.href = url; anchor.download = cert.number.replace(/[\\/:*?"<>|]/g, "_") + ".svg"; anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (cause) { setDownloadError(cause instanceof Error && !["TimeoutError", "TypeError"].includes(cause.name) ? cause.message : "Sertifikat belum dapat diunduh. Periksa koneksi dan coba lagi."); }
+    finally { setDownloading(false); }
   }
 
-  const canDownload = !!cert && cert.status === "valid" && !!event && eligible(registration, event);
+  const canDownload = !!cert && cert.status === "valid" && verified && !!event?.certificateEnabled && eligible(registration, event);
 
   return (
     <Panel>
       <Award size={34} className="text-primary-600" />
-      <h2 className="mt-5 text-2xl font-semibold">{event?.title ?? registration.eventSlug}</h2>
-      <p className="my-3 text-sm text-content-muted">{registration.name}</p>
+      <h2 className="mt-5 break-words text-2xl font-semibold">{event?.title ?? registration.eventSlug}</h2>
+      <p className="my-3 break-words text-sm text-content-muted">{certificateRecipientName(registration)}</p>
+      {verified && <p role="status" className="mb-4 text-sm text-content-muted">Nama sertifikat sudah terverifikasi.</p>}
+      {downloadError && <p className="flow-alert danger mb-4" role="alert">{downloadError}</p>}
       {cert ? (
         <>
           <Badge tone={cert.status === "valid" ? "success" : "danger"}>
@@ -33,29 +78,30 @@ export function CertificatePanel({ registration }: { registration: Registration 
           <p className="mt-4 break-all font-mono text-xs">{cert.number}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <button
-              disabled={!canDownload}
+              disabled={!canDownload || downloading}
               className="flow-button"
               onClick={download}
               title={canDownload ? "Unduh sertifikat SVG" : cert.status === "revoked" ? "Sertifikat dicabut" : "Persyaratan belum terpenuhi"}
             >
-              Unduh sertifikat
+              {downloading ? "Menyiapkan unduhan…" : "Unduh sertifikat"}
             </button>
             <Link className="flow-button secondary" href={`/verify/${cert.token}`}>
-              Verifikasi
+              Lihat verifikasi publik
             </Link>
           </div>
         </>
       ) : (
         <>
-          <Badge tone="warning">{event && eligible(registration, event) ? "Belum terbit" : "Belum memenuhi syarat"}</Badge>
+          <Badge tone="warning">{event && eligible(registration, event) ? "Sedang disiapkan" : "Belum memenuhi syarat"}</Badge>
           <p className="my-4 text-sm leading-6 text-content-muted">
-            {event && eligible(registration, event) ? "Persyaratan terpenuhi. Sertifikat belum terbit." : "Lengkapi aktivitas yang diwajibkan untuk memperoleh sertifikat."}
+            {event && eligible(registration, event) ? "Nama sudah dikonfirmasi. Sertifikat belum tersedia; periksa kembali setelah disiapkan oleh penyelenggara." : "Lengkapi aktivitas yang diwajibkan untuk memperoleh sertifikat."}
           </p>
           {event && (
             <Link className="flow-button secondary" href={`/dashboard/events/${event.slug}`}>
               Lihat aktivitas
             </Link>
           )}
+          {verified && <button type="button" className="flow-button secondary mt-3" onClick={() => void refresh()}>Muat ulang sertifikat</button>}
         </>
       )}
     </Panel>

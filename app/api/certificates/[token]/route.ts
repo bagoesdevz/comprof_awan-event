@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServiceSupabaseClient, SupabaseConfigurationError } from "@/lib/supabase/server";
 import type { ManagedEvent, Registration } from "@/lib/platform-model";
+import { certificateRecipientName } from "@/lib/platform-model";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
       {
         data: {
           certificateNumber: cert.number,
-          participantName: reg.name,
+          participantName: certificateRecipientName(reg),
           eventTitle: event?.title ?? reg.eventSlug,
           eventStartDate: event?.startAt ?? null,
           eventEndDate: event?.endAt ?? null,

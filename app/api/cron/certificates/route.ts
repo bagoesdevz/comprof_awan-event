@@ -5,7 +5,7 @@ import { issueCertificate } from "@/lib/server/certificates";
 import { sendCertificateEmail } from "@/lib/email/certificate-delivery";
 import { fail, json, HttpError } from "@/lib/server/http";
 import type { Registration, ManagedEvent } from "@/lib/platform-model";
-import { eligible } from "@/lib/platform-model";
+import { eligible, certificateNameVerified, certificateRecipientName } from "@/lib/platform-model";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
         const event = eventRow.data as unknown as ManagedEvent;
         const issued = issueCertificate(registration,event);
         const certificate = registration.certificate;
-        if (!certificate || certificate.status !== "valid" || !eligible(registration,event)) continue;
+        if (!certificate || certificate.status !== "valid" || !eligible(registration,event) || !certificateNameVerified(registration)) continue;
         const send = !certificate.emailSentAt && (!certificate.emailClaimUntil || Date.parse(certificate.emailClaimUntil) <= Date.now());
         if (!issued && !send) continue;
         if (send) certificate.emailClaimUntil = new Date(Date.now()+10*60000).toISOString();
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
         if (!send) continue;
         const origin = new URL(request.url).origin;
         const delivered = await sendCertificateEmail({
-          recipientEmail:registration.email,recipientName:registration.name,webinarTitle:event.title,
+          recipientEmail:registration.email,recipientName:certificateRecipientName(registration),webinarTitle:event.title,
           certificateNumber:certificate.number,issuedAt:certificate.issuedAt,
           downloadUrl:new URL("/dashboard/certificates",origin).href,
           verificationUrl:new URL(`/verify/${certificate.token}`,origin).href,

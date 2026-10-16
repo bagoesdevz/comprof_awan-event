@@ -8,10 +8,13 @@ test('certificate issuance requires published ended event and all configured act
  const registration={id:'AWN-ABCD1234',payment:'paid',progress:{attendance:true,feedback:true,'pre-test':false}};
  assert.equal(issueCertificate(registration,event),false);
  registration.progress['pre-test']=true;
+ assert.equal(issueCertificate(registration,event),false);
+ registration.certificateName={name:'Nama terverifikasi',verifiedAt:'2020-01-01T00:00:00Z'};
  assert.equal(issueCertificate(registration,{...event,publication:'draft'}),false);
  assert.equal(issueCertificate(registration,{...event,endAt:'invalid'}),false);
  assert.equal(issueCertificate(registration,{...event,endAt:'2099-01-01T00:00:00Z'}),false);
  assert.equal(issueCertificate(registration,event),true);
+ assert.equal(registration.certificate.recipientName,'Nama terverifikasi');
  const token=registration.certificate.token;
  assert.equal(issueCertificate(registration,event),false);
  assert.equal(registration.certificate.token,token);

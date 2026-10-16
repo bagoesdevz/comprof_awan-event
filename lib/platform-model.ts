@@ -32,7 +32,8 @@ export type Registration = {
   answers:Record<string,string>; members:{name:string;email:string}[]; progress:Record<Activity,boolean>;
   attempts:Record<"pre-test"|"post-test",number>; scores:Partial<Record<"pre-test"|"post-test",number>>;
   feedback?:{overall:number;speaker:number;material:number;organization:number;comment:string};
-  attendanceAt?:string; testStartedAt?:Partial<Record<"pre-test"|"post-test",string>>; certificate?:{number:string;token:string;issuedAt:string;status:"valid"|"revoked";emailSentAt?:string;emailMessageId?:string;emailClaimUntil?:string;emailError?:string;downloadCount?:number;lastDownloadedAt?:string};
+  certificateName?:{name:string;verifiedAt:string};
+  attendanceAt?:string; testStartedAt?:Partial<Record<"pre-test"|"post-test",string>>; certificate?:{number:string;token:string;issuedAt:string;status:"valid"|"revoked";recipientName?:string;emailSentAt?:string;emailMessageId?:string;emailClaimUntil?:string;emailError?:string;downloadCount?:number;lastDownloadedAt?:string};
 };
 export type Lead = {id:string;name:string;email:string;phone:string;institution:string;kind:string;message:string;status:string;pic:string;followUp:string;notes:string;history:string[]};
 export type WaitEntry = {id:string;name:string;email:string;phone:string;eventSlug:string;ticketId:string;position:number;joinedAt:string;status:"waiting"|"notified"|"withdrawn"};
@@ -68,6 +69,8 @@ export function initialState():PlatformState{return {
  version:1,session:{loggedIn:false,email:"",role:"participant"},profiles:{},events:[],registrations:[],participantCounts:{},notices:[],leads:[],waitlist:[],templates:[],campaigns:[],cms:{},articles:[]
 };}
 export function eligible(r:Registration,e?:ManagedEvent){return r.payment==="paid"&&(!e?.preTest.enabled||r.progress["pre-test"])&&r.progress.attendance&&(!e?.postTest.enabled||r.progress["post-test"])&&r.progress.feedback;}
+export function certificateNameVerified(r:Registration){const value=r.certificateName;return !!value&&typeof value.name==="string"&&value.name.trim().length>=2&&value.name.length<=160&&Number.isFinite(Date.parse(value.verifiedAt));}
+export function certificateRecipientName(r:Registration){return r.certificate?.recipientName||r.certificateName?.name||r.name;}
 export function requiredActivities(e:ManagedEvent):Activity[]{
  return [...(e.preTest.enabled?["pre-test" as const]:[]),"attendance",...(e.postTest.enabled?["post-test" as const]:[]),"feedback"];
 }
@@ -78,6 +81,7 @@ export function nextAction(r:Registration,e:ManagedEvent){
  if(e.postTest.enabled&&!r.progress["post-test"])return {label:e.lifecycle==="completed"?"Kerjakan post-test":"Kembali ke event",href:`/dashboard/events/${e.slug}/${e.lifecycle==="completed"?"post-test":"webinar"}`,note:"Post-test terbuka setelah sesi berakhir."};
  if(!r.progress.feedback)return {label:"Isi evaluasi acara",href:`/dashboard/events/${e.slug}/feedback`,note:"Berikan penilaian terhadap materi dan penyelenggaraan event."};
  if(!e.certificateEnabled)return {label:"Lihat riwayat event",href:"/dashboard/history",note:"Aktivitas selesai. Event ini tidak menyediakan sertifikat."};
+ if(r.certificate?.status!=="revoked"&&!certificateNameVerified(r))return {label:"Verifikasi nama sertifikat",href:`/dashboard/events/${e.slug}/feedback`,note:"Periksa ejaan nama dan gelar sebelum sertifikat diterbitkan."};
  if(!r.certificate)return {label:"Periksa sertifikat",href:"/dashboard/certificates",note:"Persyaratan terpenuhi. Sertifikat belum terbit."};
  return {label:"Lihat sertifikat",href:"/dashboard/certificates",note:r.certificate.status==="revoked"?"Sertifikat dicabut. Hubungi tim melalui halaman kontak untuk bantuan.":"Sertifikat sudah terbit."};
 }
@@ -92,10 +96,10 @@ export function notify(s:PlatformState,email:string,title:string,body:string,hre
 export function issueEligible(s:PlatformState){
  s.registrations.forEach(r=>{
   const e=s.events.find(e=>e.slug===r.eventSlug);if(!e)return;
-  if(!e.certificateEnabled||!eligible(r,e)||r.certificate)return;
+  if(!e.certificateEnabled||!eligible(r,e)||!certificateNameVerified(r)||r.certificate)return;
   const token=crypto.randomUUID();
   const seq=String(s.registrations.filter(r=>r.certificate).length+1).padStart(5,"0");
-  r.certificate={number:e.certificatePattern.replaceAll("{year}",String(new Date().getFullYear())).replaceAll("{sequence}",seq),token,issuedAt:new Date().toISOString(),status:"valid"};
+  r.certificate={number:e.certificatePattern.replaceAll("{year}",String(new Date().getFullYear())).replaceAll("{sequence}",seq),token,issuedAt:new Date().toISOString(),status:"valid",recipientName:r.certificateName!.name};
   notify(s,r.email,"Sertifikat siap","Selamat, semua persyaratan "+e.title+" telah terpenuhi.","/dashboard/certificates");
  });
 }

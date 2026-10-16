@@ -2,7 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { whatsappGroupLink } from "@/lib/event-sharing";
 import type {User} from "@supabase/supabase-js";
-import {type ManagedEvent,type Registration,emptyProgress,activityAllowed,eligible} from "@/lib/platform-model";
+import {type ManagedEvent,type Registration,emptyProgress,activityAllowed,eligible,certificateNameVerified} from "@/lib/platform-model";
 import {record,records,findEvent,commit,requireUser,requireAdmin,liveEvent} from "./platform";
 import {HttpError} from "./http";
 import {issueCertificate} from "./certificates";
@@ -15,6 +15,25 @@ export async function runAction(user:User|null,raw:unknown){
  if((raw as {type?:unknown})?.type==="ensure-event-links"){
   z.object({type:z.literal("ensure-event-links")}).strict().parse(raw);
   return ensureEventPublicLinks(u);
+ }
+ if((raw as {type?:unknown})?.type==="confirm-certificate-name"){
+  const input=z.object({type:z.literal("confirm-certificate-name"),id:z.string().min(1).max(254),name:z.string().trim().min(2).max(160).regex(/^[^\p{Cc}\p{Cf}]+$/u,"Nama tidak boleh mengandung karakter kontrol."),confirmed:z.literal(true)}).strict().parse(raw);
+  const row=await record("registrations",input.id);
+  if(!row)throw new HttpError(404,"Pendaftaran tidak ditemukan.");
+  if(row.owner_email!==email)throw new HttpError(403,"Pendaftaran tidak diizinkan.");
+  const registration=structuredClone(row.data) as unknown as Registration;
+  const eventRow=await findEvent(registration.eventSlug),event=liveEvent(eventRow.data as unknown as ManagedEvent);
+  if(event.publication!=="published"||!event.certificateEnabled||event.lifecycle!=="completed"||!eligible(registration,event))throw new HttpError(409,"Selesaikan persyaratan kegiatan dan evaluasi sebelum memverifikasi nama.");
+  if(registration.certificate?.status==="revoked")throw new HttpError(409,"Sertifikat dicabut. Hubungi tim melalui halaman kontak.");
+  if(certificateNameVerified(registration)){
+   if(registration.certificateName!.name!==input.name)throw new HttpError(409,"Nama sertifikat sudah dikonfirmasi dan tidak dapat diubah di sini.");
+   return {registration,message:"Nama sertifikat sudah terverifikasi."};
+  }
+  registration.certificateName={name:input.name,verifiedAt:new Date().toISOString()};
+  if(registration.certificate)registration.certificate.recipientName=input.name;
+  else issueCertificate(registration,event);
+  await commit([{collection:"registrations",id:row.id,revision:row.revision,data:registration as unknown as Record<string,unknown>,owner_email:row.owner_email}]);
+  return {registration,message:"Nama sertifikat berhasil diverifikasi."};
  }
  if((raw as {type?:unknown})?.type==="register"){
   const input=registrationInput.parse(raw),er=await findEvent(input.eventSlug),event=liveEvent(er.data as unknown as ManagedEvent);

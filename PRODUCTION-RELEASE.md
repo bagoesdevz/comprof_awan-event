@@ -1,5 +1,11 @@
 # Rilis Awan Event
 
+## Verifikasi nama sertifikat, 16 Oktober 2026
+
+Migrasi `202610160001_certificate_name_verification.sql` telah diterapkan pada proyek tertaut `wgjijdkmxafnskpnjlqn` lewat `supabase db query --linked --file`, lalu versi tersebut dicatat applied dengan `migration repair`. Pemeriksaan fungsi dan riwayat berhasil; jumlah pendaftaran/sertifikat tetap sama. Migrasi hanya mengganti pemilihan kandidat sertifikat dengan syarat konfirmasi nama, tanpa backfill atau penerbitan/pengiriman sertifikat. Hak eksekusi tetap khusus service_role. Riwayat baseline lama tidak diubah atau dijalankan ulang.
+
+Setelah evaluasi, peserta mengonfirmasi ejaan nama dan gelar. Penerbitan, antrean email serta unduhan kini memeriksa konfirmasi tersebut; nama dicatat terpisah dari profil/pendaftaran dan disalin ke snapshot sertifikat. Sertifikat lama dapat dikonfirmasi satu kali dengan nomor dan token tetap. Tidak ada konfirmasi nama, penerbitan atau email peserta produksi yang dilakukan dalam pengujian. Lihat `anti-slop/certificate-name-verification-2026-10-16.md` untuk bukti.
+
 Status 13 Oktober 2026: domain aktif `https://awanevent.com` merespons HTTP 200. Bundle publik terhubung ke project Supabase `wgjijdkmxafnskpnjlqn` (`https://wgjijdkmxafnskpnjlqn.supabase.co`), sesuai target pengguna. Migrasi `202610130001` berhasil diterapkan dan dicatat dalam riwayat remote. Konfigurasi provider belum diverifikasi.
 
 Verifikasi setelah migrasi: jumlah data tetap satu event, satu profil, dan satu pendaftaran. Keempat RPC baru tersedia hanya untuk `service_role`; `anon` dan `authenticated` tidak memiliki hak eksekusi. RLS aktif, index waitlist tersedia, dan aggregate peserta mengembalikan satu peserta. Tidak ada kandidat pembayaran/sertifikat saat pemeriksaan. Tidak ada pembayaran atau email yang dipicu.

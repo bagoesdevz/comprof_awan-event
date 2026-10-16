@@ -6,7 +6,7 @@ import { currentUser } from "@/lib/supabase/auth";
 import { requireUser, roleOf, record, commit } from "@/lib/server/platform";
 import { fail, HttpError } from "@/lib/server/http";
 import { z } from "zod";
-import { eligible } from "@/lib/platform-model";
+import { eligible, certificateNameVerified, certificateRecipientName } from "@/lib/platform-model";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +64,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
     if (!eligible(reg, event)) {
       return NextResponse.json({ error: "Sertifikat belum memenuhi syarat." }, { status: 403 });
     }
+    if (!certificateNameVerified(reg)) throw new HttpError(409, "Verifikasi nama sertifikat terlebih dahulu di dashboard.");
+    const recipientName = certificateRecipientName(reg);
 
     const point = z.object({x:z.number().min(0).max(100),y:z.number().min(0).max(100),size:z.number().min(8).max(120),color:z.string().regex(/^#[0-9a-f]{6}$/i)});
     const placement = z.object({name:point,number:point}).parse(event.certificatePlacement);
@@ -75,14 +77,15 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
       `<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="990" viewBox="0 0 1400 990">`,
       `  <rect width="1400" height="990" fill="#FFFFFF"/>`,
       `  ${imageTag}`,
-      `  <text x="${placement.name.x * 14}" y="${placement.name.y * 9.9}" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="${placement.name.size}" fill="${xmlEscape(placement.name.color)}">${xmlEscape(reg.name)}</text>`,
+      `  <text x="${placement.name.x * 14}" y="${placement.name.y * 9.9}" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="${placement.name.size}" fill="${xmlEscape(placement.name.color)}">${xmlEscape(recipientName)}</text>`,
       `  <text x="${placement.number.x * 14}" y="${placement.number.y * 9.9}" text-anchor="middle" font-family="Arial, sans-serif" font-size="${placement.number.size}" fill="${xmlEscape(placement.number.color)}">${xmlEscape(cert.number)}</text>`,
       `</svg>`,
     ].join("\n");
 
     const fresh = await record("registrations",data.id);
     const current = fresh?.data as unknown as Registration | undefined;
-    if (!fresh || !current?.certificate || current.certificate.status !== "valid" || !eligible(current,event)) throw new HttpError(403,"Sertifikat tidak dapat diunduh.");
+    if (!fresh || !current?.certificate || current.certificate.token !== token || current.certificate.status !== "valid" || !eligible(current,event) || !certificateNameVerified(current)) throw new HttpError(403,"Sertifikat tidak dapat diunduh.");
+    if (certificateRecipientName(current) !== recipientName) throw new HttpError(409,"Data sertifikat berubah. Muat ulang halaman sebelum mengunduh.");
     current.certificate.downloadCount = (current.certificate.downloadCount || 0) + 1;
     current.certificate.lastDownloadedAt = new Date().toISOString();
     await commit([{collection:"registrations",id:fresh.id,revision:fresh.revision,owner_email:fresh.owner_email,data:current as unknown as Record<string,unknown>}]);

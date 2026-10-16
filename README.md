@@ -6,6 +6,8 @@ Jalankan `npm ci`, lalu `npm run dev`. Pemeriksaan: `npm test`, `npm run lint`, 
 
 Lihat [instruksi rilis](PRODUCTION-RELEASE.md) sebelum memperbarui deployment.
 
+Form profil peserta mempertahankan kolom yang sedang diedit saat pembaruan data otomatis atau kembali ke tab. Penyimpanan menggabungkan hanya kolom yang diubah ke profil terbaru; gagal simpan tidak mengosongkan form. Pendaftaran baru berlanjut setelah **Simpan data & lanjutkan** berhasil, meskipun profil menjadi lengkap dari perangkat lain. Pergantian akun membersihkan draft sebelumnya dan email selalu mengikuti sesi akun.
+
 **Hapus event** hanya tersedia untuk Super admin pada daftar **Admin → Event**. Konfirmasi memindahkan event ke **Sampah**, menghilangkannya dari daftar aktif dan halaman publik. Super admin dapat memilih **Pulihkan sebagai draf**; pendaftaran tetap tertutup sampai pengaturan ditinjau. Event yang sudah memiliki pendaftaran dilindungi dari penghapusan; gunakan **Jadikan draf** untuk menghentikan publikasi. Otorisasi juga diperiksa server, dan PATCH umum tidak dapat menghapus atau memulihkan record Sampah. Tidak ada penghapusan permanen atau migrasi SQL.
 
 Cover kartu event di beranda dan dashboard peserta diatur pada **Event → Edit event → Landing page → Cover kartu event**, dengan pratinjau dan hapus. Simpan event setelah unggah. **Konten website → Pembuka → Gambar pembuka beranda** mengatur gambar hero beranda secara terpisah. Tidak ada input gambar pada bagian Pembuka detail event; cover lama masih terbaca sampai editor menyatukannya pada penyimpanan berikutnya.

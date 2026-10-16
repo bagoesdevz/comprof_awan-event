@@ -15,8 +15,13 @@ export function RegistrationWizard({eventSlug,ticketId}:{eventSlug:string;ticket
  const [now,setNow]=useState(Date.now);
  useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer);},[]);
  const [completed,setCompleted]=useState<{registration:Registration;groupUrl:string}|null>(null);
+ const [profileEditingFor,setProfileEditingFor]=useState<string|null>(null);
  const destination=(r:Registration)=>r.payment==="paid"?"/dashboard/events/"+eventSlug:"/events/"+eventSlug+"/payment?registration="+encodeURIComponent(r.id);
  const event=state.events.find(e=>e.slug===eventSlug);const profile=state.profiles[state.session.email]||defaultProfile;const existing=state.registrations.find(r=>r.eventSlug===eventSlug&&r.email===state.session.email&&!["cancelled","refunded","expired"].includes(r.payment));
+ useEffect(()=>{
+  if(!ready||!state.session.loggedIn)setProfileEditingFor(null);
+  else if(!profileComplete(profile))setProfileEditingFor(state.session.email);
+ },[ready,state.session.loggedIn,state.session.email,profile]);
  if(!ready&&platformError)return <Panel title="Pendaftaran belum dapat dimuat"><p role="alert">{platformError}</p><button className="flow-button mt-4" onClick={()=>void refresh()}>Coba lagi</button></Panel>;
  if(!ready)return <p role="status">Menyiapkan pendaftaran…</p>;
  if(!event||event.publication!=="published")return <Panel title="Event belum tersedia"><p className="mb-4 text-sm">Event belum dipublikasikan atau datanya belum diperbarui. Coba muat ulang untuk memeriksa kembali.</p><button className="flow-button" onClick={()=>void refresh()}>Muat ulang event</button></Panel>;
@@ -29,7 +34,7 @@ export function RegistrationWizard({eventSlug,ticketId}:{eventSlug:string;ticket
   const opening=event.tickets.filter(t=>ticketState(event,t,now)==="scheduled"&&t.startsAt&&Date.parse(t.startsAt)>now).map(t=>Date.parse(t.startsAt!)).sort((a,b)=>a-b)[0];
   return <Empty title={status==="SOLD_OUT"?"Kuota event penuh":status==="COMING_SOON"?"Pendaftaran belum dibuka":"Pendaftaran ditutup"} description={status==="COMING_SOON"&&opening?`Pendaftaran dibuka ${eventDateTime(new Date(opening).toISOString())}.`:"Pendaftaran mengikuti jadwal dan kuota yang ditetapkan penyelenggara."} href={status==="SOLD_OUT"&&event.waitlist?"/waitlist/"+eventSlug:undefined} label="Gabung daftar tunggu"/>;
  }
- if(!profileComplete(profile))return <ProfileEditor registrationEventTitle={event.title}/>;
+ if(!profileComplete(profile)||profileEditingFor===state.session.email)return <ProfileEditor key={state.session.email} registrationEventTitle={event.title} onComplete={()=>setProfileEditingFor(null)}/>;
  const ticket=event.tickets.find(t=>t.id===selected)||event.tickets.find(t=>ticketState(event,t,now)==="available")||event.tickets[0];
  if(!ticket)return <Empty title="Tiket belum tersedia" href="/events"/>;
  const ticketAvailable=(t:typeof ticket)=>ticketState(event,t,now)==="available";

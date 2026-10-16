@@ -6,6 +6,7 @@ import type { Json } from "@/lib/supabase/database.types";
 import { blankProfile,initialState,activityAllowed,type PlatformState,type ManagedEvent,type Registration } from "@/lib/platform-model";
 import type { RecordRow,Collection,Change } from "@/lib/platform-records";
 import { HttpError } from "./http";
+import { notifyContentChanges } from "./content-notification";
 export function roleOf(user:User|null){const role=user?.app_metadata?.role;return role==="super"||role==="operational"?role:"participant";}
 export function requireUser(user:User|null){if(!user?.email)throw new HttpError(401,"Masuk untuk melanjutkan.");return user as User & {email:string};}
 export function requireAdmin(user:User|null,superOnly=false){const u=requireUser(user);if(roleOf(u)==="participant"||(superOnly&&roleOf(u)!=="super"))throw new HttpError(403,"Anda tidak memiliki akses.");return u;}
@@ -75,4 +76,5 @@ export async function snapshot(user:User|null){
 export async function commit(changes: Array<Omit<Change,"collection"> & {collection:Collection|"payment_sessions";owner_email?:string|null;published?:boolean}>){
  const {error}=await getServiceSupabaseClient().rpc("commit_platform_changes",{p_changes:changes as unknown as Json});
  if(error){if(error.code==="40001"||error.code==="23505")throw new HttpError(409,"Data sudah berubah. Muat ulang lalu coba lagi.");throw new Error(error.message);}
+ await notifyContentChanges(changes);
 }

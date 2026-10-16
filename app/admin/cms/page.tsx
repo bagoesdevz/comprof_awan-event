@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
-import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Eye, Pencil, PlusCircle, Save } from "lucide-react";
 import { usePlatform } from "@/components/platform/provider";
 import { readImage } from "@/components/platform/assets";
@@ -24,12 +25,20 @@ export default function AdminCmsPage() {
   const [editingArticle, setEditingArticle] = useState<CmsArticle | null>(null);
 
   const value = state.cms[section] ?? { title: section, body: "", image: "", status: "Draft" };
-  const [draft, setDraft] = useState(value);
+  const [draft, setDraftValue] = useState(value);
+  const dirty = useRef(false);
+  const draftSource = useRef("");
+  const [stale, setStale] = useState(false);
+  function setDraft(next: typeof draft) { dirty.current = true; setDraftValue(next); }
   const [teamPhotos, setTeamPhotos] = useState<Record<string, string>>({});
   const [uploadingPhotos, setUploadingPhotos] = useState<string[]>([]);
 
   useEffect(() => {
-    setDraft(state.cms[section] ?? { title: section, body: "", image: "", status: "Draft" });
+    const source = JSON.stringify([state.cms[section], section === "Team" ? companyProfile.team.map((_, index) => state.cms[teamPhotoSection(index)]) : null]);
+    if (dirty.current) { if (source !== draftSource.current) setStale(true); return; }
+    draftSource.current = source;
+    setStale(false);
+    setDraftValue(state.cms[section] ?? { title: section, body: "", image: "", status: "Draft" });
     setTeamPhotos(Object.fromEntries(companyProfile.team.map((_, index) => {
       const key = teamPhotoSection(index);
       return [key, state.cms[key]?.image || ""];
@@ -37,6 +46,8 @@ export default function AdminCmsPage() {
   }, [section, state.cms]);
 
   function select(key: string) {
+    if (key === section) return;
+    dirty.current = false;
     setSection(key);
     setMode("edit");
     setNotice("");
@@ -44,6 +55,7 @@ export default function AdminCmsPage() {
 
   async function save(e: FormEvent) {
     e.preventDefault();
+    if (stale) { setNoticeTone("danger"); setNotice("Konten sudah diperbarui dari halaman lain. Muat versi terbaru sebelum menyimpan."); return; }
     setNotice("");
     const payload = { ...draft, status: "Published" as const };
     const ok = await update((s) => {
@@ -55,6 +67,7 @@ export default function AdminCmsPage() {
       });
     });
     setNotice(ok ? "Konten tersimpan." : "Perubahan belum tersimpan. Coba lagi.");
+    if (ok) { dirty.current = false; setStale(false); setDraftValue(payload); }
     setNoticeTone(ok ? "success" : "danger");
   }
 
@@ -82,6 +95,7 @@ export default function AdminCmsPage() {
     setNotice("");
     try {
       const image = await readImage(file);
+      dirty.current = true;
       setTeamPhotos(current => ({ ...current, [key]: image }));
     } catch (error) {
       setNoticeTone("danger");
@@ -151,6 +165,12 @@ export default function AdminCmsPage() {
           <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
             {mode === "edit" ? (
               <Panel title={"Konten " + sectionLabels[section]}>
+                {stale && <div className="flow-alert warning mb-5" role="alert"><p>Konten diperbarui dari halaman lain. Tulisan Anda belum ditimpa. Salin perubahan yang ingin dipertahankan sebelum memuat versi terbaru.</p><button type="button" className="flow-button secondary mt-3" onClick={() => {
+                  dirty.current = false; setStale(false); setDraftValue(value);
+                  draftSource.current = JSON.stringify([state.cms[section], section === "Team" ? companyProfile.team.map((_, index) => state.cms[teamPhotoSection(index)]) : null]);
+                  setTeamPhotos(Object.fromEntries(companyProfile.team.map((_, index) => { const key = teamPhotoSection(index); return [key, state.cms[key]?.image || ""]; })));
+                  setNotice("");
+                }}>Muat versi terbaru</button></div>}
                 <form onSubmit={save} className="grid gap-5">
                   <Field label="Judul">
                     <input
@@ -167,7 +187,8 @@ export default function AdminCmsPage() {
                       placeholder="Tulis konten dalam bahasa yang mudah dipahami."
                     />
                   </Field>
-                  <Field label={section === "Team" ? "Foto tim bersama (opsional)" : "Visual / cover"}>
+                  {section === "Home" && <p className="text-sm leading-6 text-content-muted">Cover kartu event diatur per kegiatan melalui <Link href="/admin/events" className="text-primary-700 underline">Event</Link>, pilih Edit event, lalu Landing page dan Cover kartu event. Gambar di bawah hanya untuk pembuka beranda.</p>}
+                  <Field label={section === "Team" ? "Foto tim bersama (opsional)" : section === "Home" ? "Gambar pembuka beranda" : "Gambar bagian halaman"}>
                     <input
                       type="file"
                       accept="image/png,image/jpeg,image/webp"
@@ -203,7 +224,7 @@ export default function AdminCmsPage() {
                           /></Field>
                           <p className="text-xs text-content-muted">{member.role}</p>
                           {uploading && <p role="status" className="text-sm text-content-muted">Mengunggah foto…</p>}
-                          {teamPhotos[key] && <button type="button" disabled={uploading || saving} className="flow-button secondary justify-self-start" onClick={() => setTeamPhotos(current => ({ ...current, [key]: "" }))}>Hapus foto</button>}
+                          {teamPhotos[key] && <button type="button" disabled={uploading || saving} className="flow-button secondary justify-self-start" onClick={() => { dirty.current = true; setTeamPhotos(current => ({ ...current, [key]: "" })); }}>Hapus foto</button>}
                         </div>
                       </div>;
                     })}
@@ -212,7 +233,7 @@ export default function AdminCmsPage() {
                     <Badge tone={value.status === "Published" ? "success" : "warning"}>
                       {value.status === "Published" ? "Terbit" : "Draf"}
                     </Badge>
-                    <button className="flow-button" disabled={saving || uploadingPhotos.length > 0}>
+                    <button className="flow-button" disabled={saving || stale || uploadingPhotos.length > 0}>
                       <Save size={16} />
                       {saving ? "Menyimpan…" : "Simpan & terbitkan"}
                     </button>

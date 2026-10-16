@@ -125,7 +125,7 @@ export function eventLifecycleAt(event: Pick<ManagedEvent, "startAt" | "endAt" |
   return now < start ? "upcoming" : now < end ? "ongoing" : "completed";
 }
 
-export function eventVisual(event: ManagedEvent, block?: Block) {
+export function eventVisual(event: Pick<ManagedEvent, "banner" | "blocks">, block?: Block) {
   const hero = block?.type === "Hero" || !block;
   const uploaded = hero ? event.banner || block?.image || event.blocks.find(item => item.type === "Hero")?.image : block.image || event.banner;
   if (uploaded) return { src: uploaded, illustrative: false };

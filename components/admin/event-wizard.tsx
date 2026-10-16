@@ -371,7 +371,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
           </div>
         </div> : <div>
           <fieldset disabled={coverUploading} aria-busy={coverUploading} className="mb-7 grid gap-4 rounded-2xl bg-surface-muted p-5">
-            <Field label="Cover kartu event" hint="Gambar kartu event di beranda dan dashboard peserta. PNG, JPG atau WebP, maksimal 5 MB. Simpan event untuk menerapkan perubahan.">
+            <Field label="Cover kartu event" hint="Gambar yang sama untuk beranda, halaman Event dan dashboard peserta. Disarankan 1600 × 900 px (16:9). PNG, JPG atau WebP, maksimal 5 MB. Simpan event untuk menerapkan perubahan.">
               <input type="file" accept="image/png,image/jpeg,image/webp" onChange={async (event) => {
                 const input = event.currentTarget, file = input.files?.[0]; if (!file) return;
                 setCoverUploading(true); setNotice("");

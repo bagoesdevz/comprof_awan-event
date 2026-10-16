@@ -41,14 +41,17 @@ input::placeholder, textarea::placeholder { color: var(--ui-muted); opacity: 1; 
 .program-state p { margin-top: 6px; color: var(--ui-muted); font-size: 14px; line-height: 1.7; }
 .featured-program-grid--single { grid-template-columns: minmax(0,1fr); }
 .featured-program-grid--single .program-card { display: grid; grid-template-columns: minmax(0,.85fr) minmax(0,1.15fr); }
-.featured-program-grid--single .program-card-image { min-height: 280px; aspect-ratio: auto; }
+.program-card-image, .event-card-cover { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; }
+.event-card-cover { align-self: start; border-radius: 18px; background: #f7f3ff; }
+.event-cover-image { object-fit: cover; object-position: center; }
+.featured-program-grid--single .program-card-image { min-height: 0; aspect-ratio: 16 / 9; align-self: center; }
 .featured-program-grid--single .program-card-copy { padding: 32px; }
 .featured-program-grid--single h3 { font-size: clamp(22px,2.5vw,30px); }
 @media (max-width: 640px) {
  .program-state { padding: 24px; align-items: flex-start; }
  .program-state .brand-button { width: 100%; }
  .featured-program-grid--single .program-card { display: flex; }
- .featured-program-grid--single .program-card-image { min-height: 0; aspect-ratio: 1.85; }
+ .featured-program-grid--single .program-card-image { min-height: 0; aspect-ratio: 16 / 9; }
  .featured-program-grid--single .program-card-copy { padding: 24px; }
  .flow-heading { align-items: flex-start; }
  .flow-panel { padding: 20px; }

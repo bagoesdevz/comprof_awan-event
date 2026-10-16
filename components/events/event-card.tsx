@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { eventPublicPath } from "@/lib/event-sharing";
-import type { EventType, EventSummary, RegistrationStatus, TicketOption } from "@/lib/event-types";
+import type { EventType, RegistrationStatus } from "@/lib/event-types";
+import type { ManagedEvent } from "@/lib/platform-model";
+import { EventCover } from "./event-cover";
 import { registrationStatusAt } from "@/lib/event-detail";
 import { eventTimeRange } from "@/lib/event-time";
 
@@ -16,12 +18,6 @@ const typeTone: Record<EventType, string> = {
   HYBRID: "bg-[#EDE7F6] text-[#5E35B1]",
 };
 
-const visualTone: Record<EventType, string> = {
-  ONLINE: "from-[#E9F2FE] via-[#D9E9FC] to-[#B9D7F8] text-[#241656]",
-  ONSITE: "from-[#241656] via-[#3A237E] to-[#B446A2] text-white",
-  HYBRID: "from-[#170C3D] via-[#3A237E] to-[#8E63E6] text-white",
-};
-
 const registrationStatusLabel: Record<RegistrationStatus, string> = {
   OPEN: "Pendaftaran buka",
   COMING_SOON: "Segera dibuka",
@@ -31,17 +27,6 @@ const registrationStatusLabel: Record<RegistrationStatus, string> = {
 
 const dateFormatter = new Intl.DateTimeFormat("id-ID", {
   day: "2-digit",
-  month: "short",
-  year: "numeric",
-  timeZone: "Asia/Jakarta",
-});
-
-const dayFormatter = new Intl.DateTimeFormat("id-ID", {
-  day: "2-digit",
-  timeZone: "Asia/Jakarta",
-});
-
-const monthYearFormatter = new Intl.DateTimeFormat("id-ID", {
   month: "short",
   year: "numeric",
   timeZone: "Asia/Jakarta",
@@ -60,53 +45,18 @@ const priceFormatter = new Intl.NumberFormat("id-ID", {
   maximumFractionDigits: 0,
 });
 
-function EventVisual({ event, index }: EventCardProps) {
-  const eventDate = new Date(event.startAt);
-
-  return (
-    <div
-      className={`event-visual relative min-h-[310px] overflow-hidden rounded-[28px_28px_28px_6px] bg-gradient-to-br p-6 md:min-h-[380px] ${visualTone[event.type]}`}
-    >
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.07)_1px,transparent_1px)] bg-[size:52px_52px] [mask-image:linear-gradient(to_bottom,#000,transparent_82%)]" />
-      <div className="event-ring absolute -bottom-28 -right-20 h-80 w-80 rounded-full border border-current opacity-15" />
-      <div className="event-ring event-ring-delay absolute -bottom-12 -right-3 h-52 w-52 rounded-full border border-current opacity-15" />
-
-      <div className="relative z-[1] flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.15em] opacity-75">
-        <span>{String(index + 1).padStart(2, "0")}</span>
-        <span className="rounded-full border border-current/20 bg-white/10 px-3 py-2 backdrop-blur-md">
-          {typeLabel[event.type]}
-        </span>
-      </div>
-
-      <div className="event-cross absolute left-[17%] top-[34%] h-24 w-24 rotate-6" aria-hidden="true">
-        <span className="absolute inset-y-0 left-1/2 w-7 -translate-x-1/2 rounded-lg bg-current opacity-80" />
-        <span className="absolute inset-x-0 top-1/2 h-7 -translate-y-1/2 rounded-lg bg-current opacity-80" />
-      </div>
-
-      <div className="absolute bottom-6 right-7 z-[1] flex items-end gap-3 md:bottom-8 md:right-9">
-        <strong className="text-[112px] font-semibold leading-[0.72] tracking-[-0.1em] md:text-[150px]">
-          {dayFormatter.format(eventDate)}
-        </strong>
-        <span className="pb-1 font-mono text-[9px] uppercase tracking-[0.12em] [writing-mode:vertical-rl] [transform:rotate(180deg)]">
-          {monthYearFormatter.format(eventDate)}
-        </span>
-      </div>
-    </div>
-  );
-}
-
 export type EventCardProps = {
-  event: EventSummary & { tickets?: TicketOption[]; lifecycle?: "upcoming" | "ongoing" | "completed" };
+  event: ManagedEvent;
   index: number;
 };
 
-export function EventCard({ event, index }: EventCardProps) {
+export function EventCard({ event }: EventCardProps) {
   const limitedQuota = event.quotaLeft <= 25;
   const registrationStatus = registrationStatusAt(event, Date.now());
 
   return (
     <article className="group grid gap-7 border-t border-content-title/20 py-8 lg:grid-cols-[minmax(350px,.82fr)_minmax(0,1.18fr)] lg:gap-12 lg:py-11">
-      <EventVisual event={event} index={index} />
+      <div className="event-card-cover"><EventCover event={event} sizes="(max-width: 1023px) 90vw, 45vw" /></div>
 
       <div className="flex min-w-0 flex-col justify-between py-1">
         <div>

@@ -42,8 +42,8 @@
   overflow-wrap: anywhere;
 }
 .identity { display: flex; flex: 1; flex-direction: column; justify-content: center; min-height: 130px; padding: 24px; background: #5b3cc4; color: #fff; }
-.identity h3 { margin: 0; color: #fff; font-size: 20px; font-weight: 700; line-height: 1.25; letter-spacing: .015em; text-transform: uppercase; text-wrap: initial; overflow-wrap: anywhere; }
-.role { margin: 7px 0 0; font-size: 12px; font-weight: 550; line-height: 1.65; letter-spacing: .06em; text-transform: uppercase; overflow-wrap: anywhere; }
+.identity h3 { margin: 0; color: #fff; font-size: 20px; font-weight: 700; line-height: 1.25; letter-spacing: .015em; text-transform: none; text-wrap: initial; overflow-wrap: anywhere; }
+.role { margin: 7px 0 0; font-size: 12px; font-weight: 550; line-height: 1.65; letter-spacing: .06em; text-transform: none; overflow-wrap: anywhere; }
 .organization { margin: 5px 0 0; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
 .bio { margin: 0; padding: 20px 24px 24px; color: #5d607d; font-size: 14px; line-height: 1.8; white-space: pre-line; overflow-wrap: anywhere; }
 @container (min-width: 600px) {

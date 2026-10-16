@@ -1,5 +1,11 @@
 # Kartu pemateri dan tim
 
+## Revisi kapitalisasi, 16 Oktober 2026
+
+Atas permintaan pengguna, nama dan peran pada PersonCard kini memakai text-transform: none sehingga huruf besar/kecil serta gelar mengikuti input admin. Font, ukuran, warna dan struktur kartu tetap memakai sistem Awan Event; ENERGY 2 / RHYTHM 2 / MOTION 1. Komponen bersama juga menjaga konsistensi kartu beranda, tim dan pratinjau CMS. Tidak ada perubahan data atau API.
+
+Build produksi lulus lint, TypeScript dan prerender. Browser build nyata pada detail event membuktikan dr. Eka Nasrur M., Sp.OG / Narasumber dan Firda Atika AP, S.KM / Moderator memiliki computed text-transform none. Lima viewport 360/390/768/1024/1440 tanpa overflow halaman atau teks kartu. Bukti tmp/speaker-case.png dan tmp/speaker-case-qa.json. Delivery Gate dan UI checklist PASS dalam lingkup revisi kapitalisasi: tidak ada kontrol, aset, teks konten, warna, animasi atau layout baru; tipografi mengikuti ejaan admin (R-06), data asli dipertahankan (R-38), pemeriksaan browser/build lulus (R-03/R-35). Penilaian fitur kartu lainnya tetap tercatat di bawah.
+
 Referensi: gambar kartu Headliners yang dilampirkan pengguna pada 14 Oktober 2026. Arahnya foto besar, sudut membulat, judul bagian terpusat, dan nama/jabatan pada panel bawah berwarna. Revisi pengguna: foto harus berwarna asli, menggantikan efek hitam-putih pada referensi. Ungu #5B3CC4 serta font Awan Event dipertahankan. ENERGY 2 / RHYTHM 2 / MOTION 1. Pengguna meminta foto yang belum tersedia dibuat sebagai skeleton terlebih dahulu.
 
 ## Penerapan
@@ -50,7 +56,7 @@ Gate ini berlaku pada perubahan kartu dan kontrol foto tim, bukan sertifikasi se
 
 - R-01 PASS: ungu solid mengikat panel nama dengan brand; tidak menambahkan gradient.
 - R-04 PASS: Save/Eye/Pencil yang ada tetap menunjukkan tindakan; skeleton menunjukkan tempat foto.
-- R-06 PASS: font brand dipertahankan; uppercase pada panel identitas mengikuti referensi, jabatan 12px dengan tracking terbatas.
+- R-06 PASS: font brand dipertahankan; nama/peran mengikuti kapitalisasi input admin sesuai revisi 16 Oktober, jabatan 12px dengan tracking terbatas.
 - R-07 PASS: tidak menambahkan pola background.
 - R-08 PASS: tidak menambahkan panah dekoratif.
 - R-09 PASS: badge hanya menampilkan peran pemateri yang ada, tanpa klaim Keynote rekaan.

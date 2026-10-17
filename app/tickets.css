@@ -1,0 +1,40 @@
+.admission-ticket-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.admission-ticket { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid #e3dced; border-radius: 24px; background: #fff; box-shadow: 0 3px 8px -5px #21105230; }
+.admission-ticket-header { position: relative; overflow: hidden; padding: 24px; background: #5031ad; color: #fff; }
+.admission-ticket-cloud { position: absolute; right: -24px; top: 20px; width: 210px; height: 148px; opacity: .14; pointer-events: none; }
+.admission-ticket-brand { position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; }
+.admission-ticket-brand > span:first-child { display: flex; align-items: center; gap: 9px; }
+.admission-ticket-brand img { width: 32px; height: 32px; border-radius: 50%; }
+.admission-ticket-brand strong { font-size: 14px; font-weight: 650; }
+.admission-ticket-brand > span:last-child { padding: 5px 10px; border: 1px solid #bca9e1; border-radius: 8px; }
+.admission-ticket-kicker { position: relative; display: flex; align-items: center; gap: 7px; margin-top: 26px; color: #e9e0fb; font-size: 12px; }
+.dashboard-workspace .admission-ticket-header h2 { position: relative; margin-top: 10px; color: #fff; font-size: 22px; line-height: 1.4; font-weight: 650; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.admission-ticket-details { flex: 1; min-width: 0; padding: 24px; }
+.admission-ticket-owner > span, .admission-ticket-details dt { display: block; color: #65636c; font-size: 12px; line-height: 1.6; }
+.admission-ticket-owner > strong { display: block; margin-top: 5px; color: #211052; font-size: 19px; font-weight: 650; line-height: 1.5; overflow-wrap: anywhere; }
+.admission-ticket-owner > p { margin-top: 5px; color: #65636c; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.admission-ticket-details dl { display: grid; gap: 16px; margin-top: 24px; }
+.admission-ticket-details dd { margin-top: 4px; color: #252429; font-size: 14px; font-weight: 550; line-height: 1.6; overflow-wrap: anywhere; }
+.admission-ticket-stub { display: flex; align-items: center; gap: 18px; padding: 20px 24px; border-top: 1px dashed #b9a8d9; background: #f5f1fc; }
+.admission-ticket-qr { display: grid; flex: 0 0 128px; width: 128px; min-height: 128px; place-items: center; background: #fff; }
+.admission-ticket-qr img { display: block; width: 128px; height: 128px; }
+.admission-ticket-stub > div:last-child { min-width: 0; }
+.admission-ticket-status { display: block; color: #5031ad; font-size: 12px; font-weight: 600; line-height: 1.6; }
+.admission-ticket-reference { display: block; margin-top: 8px; color: #211052; font-family: var(--font-brand-mono), monospace; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.admission-ticket-stub p { margin-top: 8px; color: #65636c; font-size: 12px; line-height: 1.7; }
+.admission-ticket-footer { display: grid; gap: 12px; padding: 20px 24px 24px; }
+.admission-ticket-footer .flow-button { width: 100%; }
+.admission-ticket-footer > span { color: #65636c; font-size: 11px; line-height: 1.6; text-align: center; }
+@media (min-width: 1200px) { .admission-ticket-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 479px) {
+  .admission-ticket-header, .admission-ticket-details { padding: 20px; }
+  .dashboard-workspace .admission-ticket-header h2 { font-size: 20px; }
+  .admission-ticket-stub { flex-direction: column; align-items: stretch; padding: 20px; text-align: center; }
+  .admission-ticket-qr { align-self: center; }
+  .admission-ticket-footer { padding: 20px; }
+}
+@media (forced-colors: active) {
+  .admission-ticket, .admission-ticket-brand > span:last-child, .admission-ticket-stub { border-color: CanvasText; }
+  .admission-ticket-cloud { display: none; }
+  .admission-ticket-qr img { forced-color-adjust: none; }
+}

@@ -7,6 +7,7 @@ import { blankProfile,initialState,activityAllowed,type PlatformState,type Manag
 import type { RecordRow,Collection,Change } from "@/lib/platform-records";
 import { HttpError } from "./http";
 import { notifyContentChanges } from "./content-notification";
+import { registrationTicketPrice } from "@/lib/admission-ticket";
 export function roleOf(user:User|null){const role=user?.app_metadata?.role;return role==="super"||role==="operational"?role:"participant";}
 export function requireUser(user:User|null){if(!user?.email)throw new HttpError(401,"Masuk untuk melanjutkan.");return user as User & {email:string};}
 export function requireAdmin(user:User|null,superOnly=false){const u=requireUser(user);if(roleOf(u)==="participant"||(superOnly&&roleOf(u)!=="super"))throw new HttpError(403,"Anda tidak memiliki akses.");return u;}
@@ -74,6 +75,16 @@ export async function snapshot(user:User|null){
   else if(row.collection==="profiles")state.profiles[row.id]=row.data as unknown as PlatformState["profiles"][string];
   else (state[row.collection] as unknown[]).push(row.data);
  }
+ const legacyOrders=new Map<string,Promise<RecordRow|null>>();
+ state.registrations=await Promise.all(state.registrations.map(async registration=>{
+  if(registration.ticketPrice!==undefined||!registration.orderId)return registration;
+  let order=state.registrations.find(item=>item.id===registration.orderId);
+  if(!order){
+   if(!legacyOrders.has(registration.orderId))legacyOrders.set(registration.orderId,record("registrations",registration.orderId));
+   order=(await legacyOrders.get(registration.orderId))?.data as unknown as Registration|undefined;
+  }
+  return order&&order.eventSlug===registration.eventSlug&&order.ticketId===registration.ticketId?{...registration,ticketPrice:registrationTicketPrice(order)}:registration;
+ }));
  if(email&&!state.profiles[email])state.profiles[email]=blankProfile(email,String(user?.user_metadata?.name||""));
  state.events=state.events.map(e=>eventForViewer(e,state,admin));state.registrations.sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
  return {state,revisions};

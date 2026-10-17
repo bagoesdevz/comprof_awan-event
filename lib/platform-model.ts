@@ -28,6 +28,7 @@ export type ManagedEvent = EventDetail & {
 };
 export type Registration = {
   orderId?:string;
+  ticketPrice?:number;
   id:string; eventSlug:string; email:string; name:string; phone:string; ticketId:string; ticketName:string; attendance:"ONLINE"|"ONSITE";
   quantity:number; amount:number; payment:PaymentStatus; createdAt:string; paidAt?:string; method?:string; fee:number; refund:number;
   answers:Record<string,string>; members:{name:string;email:string}[]; progress:Record<Activity,boolean>;
@@ -63,7 +64,7 @@ export function manageEvent(event:EventDetail):ManagedEvent{
 export function newRegistration(event:ManagedEvent,ticketId:string,p:Profile):Registration{
  const t=event.tickets.find(t=>t.id===ticketId)||event.tickets[0];
  const free=t.price===0||t.pricingMode==="free";
- return {id:"AWN-"+crypto.randomUUID().replaceAll("-","").slice(0,10).toUpperCase(),eventSlug:event.slug,email:p.email,name:p.name,phone:p.phone,ticketId:t.id,ticketName:t.name,attendance:t.attendance,quantity:1,amount:t.price,payment:free?"paid":"pending",createdAt:new Date().toISOString(),paidAt:free?new Date().toISOString():undefined,method:free?"Gratis":undefined,fee:0,refund:0,answers:{},members:[],progress:emptyProgress(),attempts:{"pre-test":0,"post-test":0},scores:{}};
+ return {id:"AWN-"+crypto.randomUUID().replaceAll("-","").slice(0,10).toUpperCase(),eventSlug:event.slug,email:p.email,name:p.name,phone:p.phone,ticketId:t.id,ticketName:t.name,attendance:t.attendance,ticketPrice:free?0:t.price,quantity:1,amount:t.price,payment:free?"paid":"pending",createdAt:new Date().toISOString(),paidAt:free?new Date().toISOString():undefined,method:free?"Gratis":undefined,fee:0,refund:0,answers:{},members:[],progress:emptyProgress(),attempts:{"pre-test":0,"post-test":0},scores:{}};
 }
 export const defaultProfile=blankProfile("");
 export function initialState():PlatformState{return {

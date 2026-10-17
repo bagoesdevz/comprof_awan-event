@@ -16,12 +16,11 @@
   font-family: var(--font-inter), sans-serif;
 }
 .dashboard-workspace > main {
-  margin: 12px 12px 12px 0;
+  margin: 24px;
   border: 1px solid #fff;
   border-radius: 28px;
   background: var(--workspace-canvas);
 }
-.admin-workspace > main { margin: 24px; }
 .dashboard-workspace :is(h1, h2, h3, h4, .text-content-title) { color: var(--workspace-ink); }
 .dashboard-workspace :is(.text-content-muted, .text-content-body) { color: var(--workspace-muted); }
 .dashboard-workspace :is(h1, h2, h3, h4) { font-family: var(--font-inter), sans-serif; }
@@ -164,13 +163,11 @@
   .workspace-activity-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, .8fr); }
 }
 @media (min-width: 768px) and (max-width: 1023px) {
-  .admin-workspace > main { margin: 16px; }
+  .dashboard-workspace > main { margin: 16px; }
 }
 @media (max-width: 767px) {
-  .dashboard-workspace > main { margin: 0; border: 0; border-radius: 0; }
-  .admin-workspace > main { margin: 8px; border: 1px solid #fff; border-radius: 20px; }
-  .dashboard-workspace :is(.admin-shell-header, .workspace-header) { min-height: 68px; padding: 12px 16px; border-radius: 0; }
-  .admin-workspace .admin-shell-header { border-radius: 20px 20px 0 0; }
+  .dashboard-workspace > main { margin: 8px; border: 1px solid #fff; border-radius: 20px; }
+  .dashboard-workspace :is(.admin-shell-header, .workspace-header) { min-height: 68px; padding: 12px 16px; border-radius: 20px 20px 0 0; }
   .dashboard-workspace .admin-shell-content,
   .dashboard-workspace #participant-content { padding: 18px 16px 28px; }
   .dashboard-workspace .flow-panel,

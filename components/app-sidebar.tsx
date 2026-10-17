@@ -113,6 +113,10 @@ const adminGroups: SidebarNavigationGroup[] = [
     ],
   },
   {
+    label: "Profil",
+    items: [{ href: "/admin/profile", label: "Profil saya", icon: UserRound }],
+  },
+  {
     label: "Sistem",
     icon: ShieldCheck,
     superOnly: true,
@@ -193,6 +197,7 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
   const profileName = profile?.name || (area === "admin" ? "Admin Awan Event" : "Peserta Awan Event");
   const initials = profileName.split(" ").slice(0, 2).map((part) => part[0]).join("");
   const roleLabel = area === "participant" ? "Peserta" : platformState.session.role === "super" ? "Super Admin" : "Admin Operasional";
+  const profileHref = area === "admin" ? "/admin/profile" : "/dashboard/profile";
 
   const closeMobile = () => {
     if (isMobile) setOpenMobile(false);
@@ -233,8 +238,10 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
         </SidebarMenu>
 
         <div className="awan-sidebar-account">
-          <span className="awan-sidebar-avatar" aria-hidden="true">{initials}</span>
-          {expanded && <div className="awan-sidebar-identity"><strong title={profileName}>{profileName}</strong><small>{roleLabel}</small></div>}
+          <Link href={profileHref} aria-label="Edit profil saya" title="Edit profil saya" className="awan-sidebar-profile" onClick={closeMobile}>
+            <span className="awan-sidebar-avatar" aria-hidden="true">{initials}</span>
+            {expanded && <span className="awan-sidebar-identity"><strong title={profileName}>{profileName}</strong><small>{roleLabel}</small></span>}
+          </Link>
             <Link
               href="/login"
               onClick={() => update((draft) => { draft.session.loggedIn = false; })}

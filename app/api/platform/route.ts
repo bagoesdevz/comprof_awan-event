@@ -6,7 +6,7 @@ import { snapshot,record,records,commit,requireUser,requireAdmin,roleOf } from "
 import { createEventPublicCode } from "@/lib/server/event-links";
 import { isEventPublicCode } from "@/lib/event-sharing";
 import { sameOrigin,readBody,fail,json,rateLimit,HttpError } from "@/lib/server/http";
-import { eventSchema,profileSchema,contentSchema,articleSchema,leadSchema,templateSchema,campaignSchema } from "@/lib/server/validation";
+import { eventSchema,profileSchema,adminProfileSchema,contentSchema,articleSchema,leadSchema,templateSchema,campaignSchema } from "@/lib/server/validation";
 export const dynamic="force-dynamic";
 export async function GET(){try{return json(await snapshot(await currentUser()));}catch(error){return fail(error)}}
 const payload=z.object({changes:z.array(z.object({collection:z.enum(collections),id:z.string().min(1).max(254),revision:z.number().int().min(0),data:z.record(z.string(),z.unknown())})).min(1).max(100)});
@@ -18,7 +18,7 @@ export async function PATCH(request:Request){
   if(old&&old.revision!==change.revision)throw new HttpError(409,"Data sudah berubah. Muat ulang sebelum menyimpan.");
   if(change.collection==="profiles"){
    if(change.id!==user.email.toLowerCase())throw new HttpError(403,"Profil tidak diizinkan.");
-   data=profileSchema.parse(change.data);data.email=user.email.toLowerCase();owner_email=user.email.toLowerCase();
+   data=(roleOf(user)==="participant"?profileSchema:adminProfileSchema).parse(change.data);data.email=user.email.toLowerCase();owner_email=user.email.toLowerCase();
   }else if(change.collection==="notices"){
    if(!old||old.owner_email!==user.email.toLowerCase())throw new HttpError(403,"Notifikasi tidak diizinkan.");
    data={...old.data,read:change.data.read===true};owner_email=old.owner_email;

@@ -82,6 +82,8 @@
 .awan-nav-branch:last-child::before { bottom: calc(100% - 12px); }
 .awan-sidebar-footer { padding: 12px 14px 16px; gap: 12px; }
 .awan-sidebar-account { display: flex; align-items: center; gap: 10px; padding: 10px 0 0; border-top: 1px solid #e2dced; }
+.awan-sidebar-profile { display: flex; flex: 1; min-width: 0; min-height: 44px; align-items: center; gap: 10px; border-radius: 10px; color: var(--nav-title); transition: background-color 140ms ease; }
+.awan-sidebar-profile:hover { background: #ece7f6; }
 .awan-sidebar-avatar { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: #e8e0f8; color: #5031ad; font-size: 12px; font-weight: 650; }
 .awan-sidebar-identity { flex: 1; min-width: 0; }
 .awan-sidebar-identity strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; }
@@ -94,6 +96,7 @@
 .awan-sidebar[data-state="collapsed"] [data-sidebar="menu-button"] { justify-content: center; padding-inline: 0; }
 .awan-sidebar[data-state="collapsed"] .awan-sidebar-footer { padding-inline: 12px; }
 .awan-sidebar[data-state="collapsed"] .awan-sidebar-account { flex-direction: column; }
+.awan-sidebar[data-state="collapsed"] .awan-sidebar-profile { flex: 0 0 auto; width: 44px; justify-content: center; }
 .awan-sidebar-tooltip { max-width: 240px; background: #211052; color: #fff; padding: 8px 12px; line-height: 1.5; }
 .awan-sidebar[data-mobile="true"] { width: 300px; max-width: 88vw; }
 .awan-sidebar[data-mobile="true"] .awan-sidebar-header { padding-right: 54px; }

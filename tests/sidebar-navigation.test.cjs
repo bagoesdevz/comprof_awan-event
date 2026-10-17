@@ -17,7 +17,8 @@ test('sidebar regrouping preserves participant destinations and isolates superad
   ]);
   const operational = links(getSidebarNavigation('admin', 'operational'));
   const superadmin = links(getSidebarNavigation('admin', 'super'));
-  assert.equal(operational.length, 13);
+  assert.equal(operational.length, 14);
+  assert.ok(operational.includes('/admin/profile'));
   assert.deepEqual(superadmin.filter(href => !operational.includes(href)), ['/admin/users', '/admin/operations/settings']);
   assert.equal(getSidebarNavigation('participant', 'participant').find(group => group.icon).label, 'Kegiatan saya');
 });

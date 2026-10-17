@@ -5,7 +5,7 @@ import type { EventDetail } from "@/lib/event-types";
 
 export type PaymentStatus = "pending" | "paid" | "failed" | "expired" | "cancelled" | "refunded";
 export type Role = "participant" | "super" | "operational";
-export type Profile = { name:string; email:string; phone:string; gender:string; birthPlace:string; profession:string; institution:string; city:string } & { address:string; province:string; birthDate:string; position:string; category:string; specialization:string; source:string };
+export type Profile = { name:string; email:string; phone:string; gender:string; birthPlace:string; profession:string; institution:string; city:string; avatarUrl?:string } & { address:string; province:string; birthDate:string; position:string; category:string; specialization:string; source:string };
 export type Activity = "pre-test" | "attendance" | "post-test" | "feedback";
 export type Question = { id:string; text:string; options:string[]; correct:number; score:number };
 export type Assessment = { enabled:boolean; questions:Question[]; passingScore:number; attempts:number; timeLimit:number };
@@ -53,7 +53,7 @@ export const paymentLabels:Record<PaymentStatus,string>={pending:"Menunggu pemba
 export const lifecycleLabels={upcoming:"Akan datang",ongoing:"Berlangsung",completed:"Selesai"};
 export const money=(n:number)=>new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n);
 export const emptyProgress=():Registration["progress"]=>({"pre-test":false,attendance:false,"post-test":false,feedback:false});
-export const blankProfile=(email:string,name=""):Profile=>({name,email,phone:"",gender:"",birthPlace:"",profession:"",institution:"",city:"",address:"",province:"",birthDate:"",position:"",category:"Profesional",specialization:"",source:""});
+export const blankProfile=(email:string,name=""):Profile=>({name,email,avatarUrl:"",phone:"",gender:"",birthPlace:"",profession:"",institution:"",city:"",address:"",province:"",birthDate:"",position:"",category:"Profesional",specialization:"",source:""});
 export function profileComplete(p:Profile){return [p.name,p.email,p.phone,p.gender,p.birthPlace,p.birthDate,p.city,p.profession,p.source].every(v=>String(v||"").trim().length>0);}
 export function manageEvent(event:EventDetail):ManagedEvent{
   return {...event,detailRevision:2,programType:event.programType||(event.type==="ONSITE"?"Workshop":"Webinar"),lifecycle:"upcoming",publication:"published",endAt:new Date(new Date(event.startAt).getTime()+3600000).toISOString(),capacity:event.tickets.reduce((n,t)=>n+t.quota,0),waitlist:true,meetingProvider:"Zoom",meetingUrl:"",meetingId:"",meetingPasscode:"",accessOpensAt:"",customFields:[],

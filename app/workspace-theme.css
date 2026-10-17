@@ -164,6 +164,28 @@
 .profile-account-summary > div > span { display: block; margin-top: 4px; color: var(--workspace-muted); font-size: 12px; }
 .profile-edit-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .profile-security-panel { margin-top: 20px; }
+.profile-avatar { display: inline-grid; place-items: center; flex-shrink: 0; overflow: hidden; border-radius: 50%; background: #eee9f8; color: #5031ad; font-weight: 600; }
+.profile-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.profile-photo-editor { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--workspace-line, #e6e6e9); }
+.profile-photo-preview { width: 88px; height: 88px; font-size: 26px; border: 3px solid #fff; outline: 1px solid #ddd6ed; }
+.profile-photo-content { min-width: 0; }
+.profile-photo-content h3 { font-size: 15px; font-weight: 600; }
+.profile-photo-content h3 span { color: var(--workspace-muted, #60616b); font-size: 12px; font-weight: 400; }
+.profile-photo-content p { max-width: 48ch; margin-top: 6px; color: var(--workspace-muted, #60616b); font-size: 13px; line-height: 1.7; }
+.profile-photo-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.profile-photo-content small { display: block; margin-top: 10px; color: var(--workspace-muted, #60616b); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.participant-greeting-identity { display: flex; align-items: center; gap: 16px; min-width: 0; max-width: 100%; border-radius: 12px; }
+.participant-greeting-identity > div { min-width: 0; }
+.participant-greeting-avatar { width: 68px; height: 68px; font-size: 23px; border: 3px solid #fff; outline: 1px solid #ddd6ed; }
+.dashboard-workspace .participant-greeting-label { margin: 0 0 5px; color: var(--workspace-muted); font-size: 13px; }
+.participant-greeting h1 { overflow-wrap: anywhere; }
+.participant-greeting-identity:hover h1 { color: #5031ad; }
+@media (max-width: 599px) {
+  .profile-photo-editor { gap: 16px; flex-direction: column; }
+  .profile-photo-preview { width: 76px; height: 76px; font-size: 24px; }
+  .participant-greeting-identity { gap: 12px; }
+  .participant-greeting-avatar { width: 54px; height: 54px; font-size: 19px; }
+}
 
 @media (min-width: 1200px) {
   .workspace-summary .workspace-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }

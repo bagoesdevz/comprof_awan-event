@@ -5,6 +5,7 @@ import { collections } from "@/lib/platform-records";
 import { snapshot,record,records,commit,requireUser,requireAdmin,roleOf } from "@/lib/server/platform";
 import { createEventPublicCode } from "@/lib/server/event-links";
 import { isEventPublicCode } from "@/lib/event-sharing";
+import { isOwnProfilePhoto } from "@/lib/server/profile-photo";
 import { sameOrigin,readBody,fail,json,rateLimit,HttpError } from "@/lib/server/http";
 import { eventSchema,profileSchema,adminProfileSchema,contentSchema,articleSchema,leadSchema,templateSchema,campaignSchema } from "@/lib/server/validation";
 export const dynamic="force-dynamic";
@@ -19,6 +20,8 @@ export async function PATCH(request:Request){
   if(change.collection==="profiles"){
    if(change.id!==user.email.toLowerCase())throw new HttpError(403,"Profil tidak diizinkan.");
    data=(roleOf(user)==="participant"?profileSchema:adminProfileSchema).parse(change.data);data.email=user.email.toLowerCase();owner_email=user.email.toLowerCase();
+   if(typeof data.avatarUrl==="string"&&!isOwnProfilePhoto(data.avatarUrl,user.id))throw new HttpError(422,"Gunakan foto yang diunggah melalui profil Anda.");
+   if(data.avatarUrl===undefined)data.avatarUrl=old?.data.avatarUrl||"";
   }else if(change.collection==="notices"){
    if(!old||old.owner_email!==user.email.toLowerCase())throw new HttpError(403,"Notifikasi tidak diizinkan.");
    data={...old.data,read:change.data.read===true};owner_email=old.owner_email;

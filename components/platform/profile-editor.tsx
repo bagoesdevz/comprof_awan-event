@@ -8,6 +8,8 @@ import { Field, Panel } from "./ui";
 import { profileComplete, safeNext, type Profile } from "@/lib/platform-model";
 import { mergeProfileDraft } from "@/lib/profile-draft";
 import { Disclosure } from "@/components/ui/disclosure";
+import { ProfileAvatar } from "@/components/profile-avatar";
+import { profilePhotoUpload } from "@/lib/profile-photo-client";
 
 const genderOptions = [["male", "Laki-laki"], ["female", "Perempuan"], ["prefer_not_to_say", "Memilih tidak menjawab"]] as const;
 const sourceOptions = ["Instagram", "LinkedIn", "WhatsApp", "Rekomendasi teman atau kolega", "Pencarian Google", "Lainnya"] as const;
@@ -24,19 +26,47 @@ export function ProfileEditor({ registrationEventTitle, onComplete }: { registra
   const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [required, setRequired] = useState(false);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
+  const [photoError, setPhotoError] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInput = useRef<HTMLInputElement>(null);
+  const uploadedPhoto = useRef<{ file: File; url: string } | null>(null);
+  const uploadRequest = useRef<AbortController | null>(null);
   const registration = registrationEventTitle !== undefined;
   const admin = !registration && state.session.role !== "participant";
-  const roleLabel = state.session.role === "super" ? "Super Admin" : state.session.role === "operational" ? "Admin Operasional" : "Peserta";
   const hasChanges = edited.current.size > 0;
 
   useEffect(() => {
     if (ready) {
       setRequired(!admin && (registration || new URLSearchParams(window.location.search).get("required") === "1"));
       const accountChanged = formAccount.current !== email;
-      if (accountChanged) { edited.current.clear(); formAccount.current = email; setNotice(""); setFailed(false); }
+      if (accountChanged) { edited.current.clear(); formAccount.current = email; setNotice(""); setFailed(false); setPhoto(null); setPhotoError(""); uploadedPhoto.current = null; uploadRequest.current?.abort(); }
       setForm(current => mergeProfileDraft(email, savedProfile, accountChanged ? undefined : current, edited.current));
     }
   }, [ready, email, savedProfile, registration, admin]);
+
+  useEffect(() => {
+    if (!photo) { setPreview(""); return; }
+    const url = URL.createObjectURL(photo);
+    setPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [photo]);
+  useEffect(() => () => uploadRequest.current?.abort(), []);
+
+  function selectPhoto(file?: File) {
+    if (!file) return;
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type) || !file.size || file.size > 5 * 1024 * 1024) {
+      setPhotoError("Gunakan foto PNG, JPG, atau WebP maksimal 5 MB."); return;
+    }
+    setPhotoError(""); setPhoto(file); uploadedPhoto.current = null;
+    setField("avatarUrl", form.avatarUrl || "");
+  }
+
+  function removePhoto() {
+    setPhoto(null); setPhotoError(""); uploadedPhoto.current = null;
+    setField("avatarUrl", "");
+  }
 
   function setField<Key extends keyof Profile>(key: Key, value: Profile[Key]) {
     edited.current.add(key);
@@ -48,6 +78,7 @@ export function ProfileEditor({ registrationEventTitle, onComplete }: { registra
     edited.current.clear();
     setForm(mergeProfileDraft(email, savedProfile));
     setNotice(""); setFailed(false);
+    setPhoto(null); setPhotoError(""); uploadedPhoto.current = null;
   }
 
   async function submit(event: FormEvent) {
@@ -58,6 +89,26 @@ export function ProfileEditor({ registrationEventTitle, onComplete }: { registra
     const submitted = { ...form }, fields = new Set(edited.current);
     let saved = false, accountChanged = false;
     try {
+      if (photo) {
+        if (uploadedPhoto.current?.file !== photo) {
+          setUploadingPhoto(true);
+          const controller = new AbortController(); uploadRequest.current = controller;
+          const timeout = window.setTimeout(() => controller.abort(), 30000);
+          try {
+            const body = new FormData(); body.set("file", await profilePhotoUpload(photo, controller.signal), "foto-profil.webp");
+            const response = await fetch("/api/profile/photo", { method: "POST", body, signal: controller.signal });
+            const result = await response.json();
+            if (!response.ok || typeof result.url !== "string") throw new Error(result.error?.message || "Foto belum terunggah. Coba simpan profil lagi.");
+            if (formAccount.current !== email) return;
+            uploadedPhoto.current = { file: photo, url: result.url };
+          } catch (uploadError) {
+            if (formAccount.current === email) setPhotoError(uploadError instanceof Error && uploadError.name !== "AbortError" && !(uploadError instanceof SyntaxError) && !(uploadError instanceof TypeError) ? uploadError.message : "Foto belum terunggah. Periksa koneksi lalu coba simpan lagi.");
+            return;
+          } finally { window.clearTimeout(timeout); uploadRequest.current = null; setUploadingPhoto(false); }
+        }
+        submitted.avatarUrl = uploadedPhoto.current!.url;
+      }
+      if (formAccount.current !== email) return;
       saved = await update((draft) => {
         if (!draft.session.loggedIn || draft.session.email !== email) { accountChanged = true; return; }
         draft.profiles[email] = mergeProfileDraft(email, draft.profiles[email], submitted, fields);
@@ -65,6 +116,7 @@ export function ProfileEditor({ registrationEventTitle, onComplete }: { registra
       if (formAccount.current !== email) return;
       if (!saved || accountChanged) { setFailed(true); return; }
       edited.current.clear();
+      setPhoto(null); setPhotoError(""); uploadedPhoto.current = null;
     } catch { setFailed(true); return; }
     finally { setSaving(false); }
     if (!saved) return;
@@ -83,12 +135,24 @@ export function ProfileEditor({ registrationEventTitle, onComplete }: { registra
     <div className="profile-onboarding mx-auto max-w-4xl">
       {required && !profileComplete(form) && !registration && <div className="profile-required-notice" role="status"><strong>Lengkapi profil Anda terlebih dahulu.</strong><span>Data ini digunakan untuk pendaftaran event, komunikasi, dan penerbitan sertifikat.</span></div>}
       <div className="profile-onboarding-heading"><p className="profile-onboarding-kicker">{registration ? "Data peserta" : admin ? "Akun admin" : "Akun peserta"}</p>{registration ? <h2>Lengkapi data pendaftaran</h2> : <h1>{required ? "Lengkapi profil Anda" : "Profil saya"}</h1>}<p>{registration ? `Isi data peserta untuk ${registrationEventTitle}. Setelah disimpan, lanjutkan konfirmasi dan pilih tiket di halaman ini.` : admin ? "Perbarui nama dan kontak Anda untuk koordinasi tim Awan Event." : "Perbarui data diri untuk pendaftaran, komunikasi event, dan penerbitan sertifikat."}</p></div>
-      {!registration && <div className="profile-account-summary"><span className="profile-account-initials" aria-hidden="true">{(savedProfile?.name || "Awan Event").trim().split(/\s+/).slice(0,2).map(part=>part[0]).join("")}</span><div><strong>{savedProfile?.name || "Akun Awan Event"}</strong><span>{roleLabel}</span></div></div>}
       {notice && <p role="status" className="flow-alert success mb-6">{notice}</p>}
-      {failed && <p role="alert" className="flow-alert danger mb-6">{error || "Data belum tersimpan. Isian Anda tetap ada, silakan coba simpan lagi."}</p>}
+      {(failed || photoError) && <p role="alert" className="flow-alert danger mb-6">{photoError || error || "Data belum tersimpan. Isian Anda tetap ada, silakan coba simpan lagi."}</p>}
       <Panel title="Informasi utama">
         <form onSubmit={submit} className="profile-onboarding-form">
           <fieldset disabled={saving} aria-busy={saving} aria-label={admin ? "Informasi pribadi admin" : "Informasi pribadi peserta"} className="min-w-0">
+          {!registration && <div className="profile-photo-editor" role="group" aria-labelledby="profile-photo-title">
+            <ProfileAvatar name={form.name || "Awan Event"} src={preview || form.avatarUrl} className="profile-photo-preview" />
+            <div className="profile-photo-content">
+              <h3 id="profile-photo-title">Foto profil <span>(opsional)</span></h3>
+              <p>{admin ? "Ditampilkan pada profil dan identitas akun Anda." : "Ditampilkan di akun dan sapaan dashboard Anda."} Foto dipotong persegi dari tengah.</p>
+              <div className="profile-photo-actions">
+                <input ref={photoInput} type="file" accept="image/png,image/jpeg,image/webp" aria-label="Pilih foto profil" hidden onChange={event => { selectPhoto(event.target.files?.[0]); event.target.value = ""; }} />
+                <button type="button" className="flow-button secondary" onClick={() => photoInput.current?.click()}>{photo || form.avatarUrl ? "Ganti foto" : "Unggah foto"}</button>
+                {(photo || form.avatarUrl) && <button type="button" className="flow-button secondary" onClick={removePhoto}>Hapus foto</button>}
+              </div>
+              <small aria-live="polite">{photo ? `${photo.name} · Belum disimpan` : "PNG, JPG, atau WebP. Maksimal 5 MB."}</small>
+            </div>
+          </div>}
           <div className="profile-onboarding-grid">
             <Field label="Nama lengkap *"><input value={form.name} autoComplete="name" required minLength={2} maxLength={254} onChange={(event) => setField("name", event.target.value)} /></Field>
             <Field label="Email akun"><input value={form.email} type="email" disabled aria-describedby="profile-email-note" /><small id="profile-email-note">Email mengikuti akun yang digunakan untuk masuk.</small></Field>
@@ -107,7 +171,7 @@ export function ProfileEditor({ registrationEventTitle, onComplete }: { registra
             </>}
           </div>
           {!admin && <Disclosure className="profile-extra-details" title="Data tambahan (opsional)"><div className="profile-onboarding-grid mt-5"><Field label="Institusi atau perusahaan"><input value={form.institution} maxLength={254} onChange={(event) => setField("institution", event.target.value)} /></Field><Field label="Jabatan"><input value={form.position} maxLength={254} onChange={(event) => setField("position", event.target.value)} /></Field><Field label="Provinsi"><input value={form.province} maxLength={254} autoComplete="address-level1" onChange={(event) => setField("province", event.target.value)} /></Field><Field label="Alamat"><input value={form.address} maxLength={10000} autoComplete="street-address" onChange={(event) => setField("address", event.target.value)} /></Field><Field label="Bidang atau spesialisasi"><input value={form.specialization} maxLength={254} onChange={(event) => setField("specialization", event.target.value)} /></Field></div></Disclosure>}
-          <div className="profile-onboarding-actions"><p>{hasChanges ? "Ada perubahan yang belum disimpan." : registration ? "Kolom bertanda * wajib diisi. Menyimpan data belum mendaftarkan Anda ke event." : "Kolom bertanda * wajib diisi."}</p><div className="profile-edit-actions">{!registration && hasChanges && <button type="button" className="flow-button secondary" onClick={cancelChanges}>Batalkan perubahan</button>}<button className="flow-button" disabled={saving || (!registration && !hasChanges)}>{saving ? "Menyimpan…" : registration ? "Simpan data & lanjutkan" : "Simpan profil"}</button></div></div>
+          <div className="profile-onboarding-actions"><p>{hasChanges ? "Ada perubahan yang belum disimpan." : registration ? "Kolom bertanda * wajib diisi. Menyimpan data belum mendaftarkan Anda ke event." : "Kolom bertanda * wajib diisi."}</p><div className="profile-edit-actions">{!registration && hasChanges && <button type="button" className="flow-button secondary" onClick={cancelChanges}>Batalkan perubahan</button>}<button className="flow-button" disabled={saving || (!registration && !hasChanges)}>{uploadingPhoto ? "Mengunggah foto…" : saving ? "Menyimpan…" : registration ? "Simpan data & lanjutkan" : "Simpan profil"}</button></div></div>
           </fieldset>
         </form>
       </Panel>

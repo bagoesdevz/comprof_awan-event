@@ -12,6 +12,7 @@ import { eventPublicPath } from "@/lib/event-sharing";
 import { EventAction } from "@/components/events/event-action";
 import { EligibilityPanel } from "@/components/dashboard/eligibility-panel";
 import { EventGroupAccess } from "@/components/dashboard/event-group-access";
+import { ProfileAvatar } from "@/components/profile-avatar";
 
 function RecommendationCard({ event }: { event: ManagedEvent }) {
   const visual = eventVisual(event);
@@ -88,7 +89,13 @@ export function ParticipantWorkspace({ view = "dashboard", slug }: { view?: stri
 
   function dashboard() {
     return <div className="mx-auto max-w-6xl">
-      <PageHeading eyebrow="Dashboard peserta" title={`Halo, ${profile.name.split(" ")[0] || "selamat datang"}.`} description="" action={action ? <Link href="/events" className="flow-button secondary">Jelajahi event</Link> : undefined} />
+      <header className="flow-heading participant-greeting">
+        <Link href="/dashboard/profile" className="participant-greeting-identity" aria-label="Edit foto dan profil saya">
+          <ProfileAvatar name={profile.name || "Awan Event"} src={profile.avatarUrl} className="participant-greeting-avatar" />
+          <div><p className="participant-greeting-label">Ruang peserta</p><h1>{`Halo, ${profile.name.trim().split(/\s+/)[0] || "selamat datang"}.`}</h1></div>
+        </Link>
+        {action && <Link href="/events" className="flow-button secondary">Jelajahi event</Link>}
+      </header>
       <dl className="workspace-metrics workspace-metrics--participant" aria-label="Ringkasan peserta">
         <div><dt><CalendarDays size={17} aria-hidden="true" />Event terdaftar</dt><dd>{new Set(registrations.map(item => item.eventSlug)).size}<small>Event dalam riwayat pendaftaran Anda</small></dd></div>
         <div><dt><Award size={17} aria-hidden="true" />Sertifikat aktif</dt><dd>{registrations.filter(item => item.certificate?.status === "valid").length}<small>Diterbitkan untuk akun Anda</small></dd></div>

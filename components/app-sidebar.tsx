@@ -1,4 +1,5 @@
 "use client";
+import { ProfileAvatar } from "@/components/profile-avatar";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -195,7 +196,6 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
   const expanded = isMobile || state === "expanded";
   const profile = platformState.profiles[platformState.session.email];
   const profileName = profile?.name || (area === "admin" ? "Admin Awan Event" : "Peserta Awan Event");
-  const initials = profileName.split(" ").slice(0, 2).map((part) => part[0]).join("");
   const roleLabel = area === "participant" ? "Peserta" : platformState.session.role === "super" ? "Super Admin" : "Admin Operasional";
   const profileHref = area === "admin" ? "/admin/profile" : "/dashboard/profile";
 
@@ -239,7 +239,7 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
 
         <div className="awan-sidebar-account">
           <Link href={profileHref} aria-label="Edit profil saya" title="Edit profil saya" className="awan-sidebar-profile" onClick={closeMobile}>
-            <span className="awan-sidebar-avatar" aria-hidden="true">{initials}</span>
+            <ProfileAvatar name={profileName} src={profile?.avatarUrl} className="awan-sidebar-avatar" />
             {expanded && <span className="awan-sidebar-identity"><strong title={profileName}>{profileName}</strong><small>{roleLabel}</small></span>}
           </Link>
             <Link

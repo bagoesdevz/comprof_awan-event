@@ -38,17 +38,35 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  loading?: boolean
+  loadingLabel?: string
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, disabled, loading, loadingLabel = "Memproses…", onClickCapture, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
+    const unavailable = Boolean(disabled || loading || props["aria-disabled"] === true || props["aria-disabled"] === "true")
     return (
       <Comp
+        data-ui="button"
+        data-variant={variant ?? "default"}
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
-      />
+        disabled={asChild ? undefined : unavailable}
+        aria-disabled={asChild && unavailable ? true : props["aria-disabled"]}
+        aria-busy={loading || props["aria-busy"] || undefined}
+        tabIndex={asChild && unavailable ? -1 : props.tabIndex}
+        onClickCapture={(event) => {
+          if (unavailable) { event.preventDefault(); event.stopPropagation(); return }
+          onClickCapture?.(event)
+        }}
+      >
+        {loading !== undefined && !asChild ? <span className="ux-button-content" data-pending={Boolean(loading)}>
+          <span className="ux-button-label" aria-hidden={loading || undefined}>{children}</span>
+          <span className="ux-button-progress" aria-hidden={!loading}>{loadingLabel}</span>
+        </span> : children}
+      </Comp>
     )
   }
 )

@@ -300,7 +300,15 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
     <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between"><div><button type="button" onClick={() => { setStarted(false); setLandingSection(null); }} className="mb-4 inline-flex min-h-10 items-center gap-2 text-xs font-semibold text-primary-700">Ganti jenis event</button><h1 className="text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Buat {kind.toLowerCase()}</h1><p className="mt-2 text-sm text-content-body">{form.title || "Draft baru"}</p></div><button type="button" className="flow-button secondary self-start sm:self-auto" ref={previewTrigger} onClick={() => setPreview(true)}><Eye size={16} />Pratinjau</button></header>
     {notice && <p role="status" className={`flow-alert mb-6 ${notice.includes("Lengkapi") || notice.includes("Upload") ? "warning" : "success"}`}>{notice}</p>}
     <form onSubmit={submit} className="grid min-w-0 gap-6 xl:grid-cols-[240px_minmax(0,1fr)]">
-      <aside className="w-full min-w-0 max-w-full self-start rounded-2xl bg-white p-4 xl:sticky xl:top-24"><ol className="flex w-full min-w-0 max-w-full gap-2 overflow-x-auto pb-1 xl:grid xl:overflow-visible">{steps.map((label, index) => <li key={label} className="shrink-0 xl:shrink"><button type="button" onClick={() => { setStep(index); setLandingSection(null); }} aria-current={step === index ? "step" : undefined} className={`flex min-h-11 min-w-44 items-center gap-3 rounded-xl px-3 text-left text-xs xl:w-full xl:min-w-0 ${step === index ? "bg-primary-100 font-semibold text-primary-900" : "text-content-muted hover:bg-surface-muted hover:text-content-title"}`}><span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] ${index < step ? "bg-[#087A55] text-white" : step === index ? "bg-primary-600 text-white" : "bg-surface-muted"}`}>{index < step ? <Check size={13} /> : index + 1}</span>{label}</button></li>)}</ol></aside>
+      <aside data-ui="step-menu" aria-label="Langkah pengaturan event" className="w-full min-w-0 max-w-full self-start rounded-2xl p-4 xl:sticky xl:top-24">
+        <ol className="flex w-full min-w-0 max-w-full gap-2 overflow-x-auto pb-1 xl:grid xl:overflow-visible">
+          {steps.map((label, index) => <li key={label} className="shrink-0 xl:shrink">
+            <button type="button" onClick={() => { setStep(index); setLandingSection(null); }} aria-current={step === index ? "step" : undefined} className="flex min-h-11 min-w-44 items-center gap-3 rounded-xl px-3 text-left text-xs xl:w-full xl:min-w-0">
+              <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] ${index < step ? "bg-[#087A55] text-white" : step === index ? "bg-primary-600 text-white" : "bg-white"}`}>{index < step ? <Check size={13} /> : index + 1}</span>{label}
+            </button>
+          </li>)}
+        </ol>
+      </aside>
       <Panel className="min-w-0">
         <div className="mb-8 flex items-center justify-between gap-4"><div><p className="text-xs font-semibold text-primary-700">Langkah {step + 1} dari {steps.length}</p><h2 className="mt-2 text-2xl font-semibold tracking-[-0.025em]">{steps[step]}</h2></div><span className="rounded-full bg-primary-100 px-3 py-2 text-xs font-semibold text-primary-800">{kind}</span></div>
 

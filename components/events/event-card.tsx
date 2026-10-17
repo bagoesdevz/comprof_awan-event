@@ -55,7 +55,7 @@ export function EventCard({ event }: EventCardProps) {
   const registrationStatus = registrationStatusAt(event, Date.now());
 
   return (
-    <article className="group grid gap-7 border-t border-content-title/20 py-8 lg:grid-cols-[minmax(350px,.82fr)_minmax(0,1.18fr)] lg:gap-12 lg:py-11">
+    <article data-ui="event-card" className="group grid gap-7 border-t border-content-title/20 py-8 lg:grid-cols-[minmax(350px,.82fr)_minmax(0,1.18fr)] lg:gap-12 lg:py-11">
       <div className="event-card-cover"><EventCover event={event} sizes="(max-width: 1023px) 90vw, 45vw" /></div>
 
       <div className="flex min-w-0 flex-col justify-between py-1">
@@ -76,8 +76,8 @@ export function EventCard({ event }: EventCardProps) {
             </span>
           </div>
 
-          <h2 className="max-w-[780px] text-3xl font-semibold leading-[1.04] tracking-[-0.045em] text-content-title transition-colors duration-300 group-hover:text-primary-600 md:text-[44px]">
-            {event.title}
+          <h2 className="max-w-[780px] text-3xl font-semibold leading-[1.04] tracking-[-0.045em] text-content-title md:text-[44px]">
+            <Link href={eventPublicPath(event)} className="ux-event-title">{event.title}</Link>
           </h2>
           <p className="mt-5 text-sm text-content-muted">Bersama {event.speaker}</p>
         </div>
@@ -113,6 +113,8 @@ export function EventCard({ event }: EventCardProps) {
             <Link
               href={eventPublicPath(event)}
               aria-label={`Lihat detail ${event.title}`}
+              data-ui="button"
+              data-variant="outline"
               className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full border border-content-title/15 px-5 text-sm font-semibold text-content-title transition-colors hover:border-primary-600 hover:bg-primary-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-4"
             >
               Detail

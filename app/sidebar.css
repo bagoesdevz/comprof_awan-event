@@ -1,9 +1,9 @@
 [data-sidebar="workspace"] { display: flex; }
 .awan-sidebar {
-  --nav-surface: #f5f3fa;
-  --nav-text: #5d566e;
-  --nav-title: #211052;
-  --nav-active: #5031ad;
+  --nav-surface: var(--ux-surface, #f5f3fa);
+  --nav-text: var(--ux-muted, #5d566e);
+  --nav-title: var(--ux-title, #211052);
+  --nav-active: var(--ux-active, #5031ad);
   --nav-line: #d6cee6;
   background: var(--nav-surface);
   border-color: #e5dfef;

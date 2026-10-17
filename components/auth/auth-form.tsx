@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect,useState,type FormEvent } from "react";
 import { Eye,EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Field } from "@/components/platform/ui";
 import { usePlatform } from "@/components/platform/provider";
 import { browserSupabase } from "@/lib/supabase/client";
@@ -30,7 +31,7 @@ export function AuthForm({mode}:{mode:"login"|"register"}){
  <Field label="Email"><input name="email" type="email" autoComplete="email" required maxLength={254}/></Field>
  <div className="flow-field"><label htmlFor="auth-password">Kata sandi</label><span className="auth-password-field"><input id="auth-password" name="password" type={show?"text":"password"} required minLength={8} maxLength={128} autoComplete={mode==="login"?"current-password":"new-password"}/><button type="button" aria-label={show?"Sembunyikan kata sandi":"Tampilkan kata sandi"} aria-pressed={show} onClick={()=>setShow(!show)}>{show?<EyeOff size={18}/>:<Eye size={18}/>}</button></span>{mode==="register"&&<small>Gunakan 8 sampai 128 karakter.</small>}</div>
  {mode==="register"&&<label className="auth-consent"><input type="checkbox" required/><span>Saya menyetujui penggunaan data untuk pendaftaran event dan sertifikat.</span></label>}
- {error&&<p role="alert" className="flow-alert danger">{error}</p>}<button disabled={busy} className="flow-button auth-submit">{busy?"Memproses…":mode==="login"?"Masuk":"Buat akun"}</button>
+ {error&&<p role="alert" className="flow-alert danger">{error}</p>}<Button type="submit" loading={busy} className="flow-button auth-submit">{mode==="login"?"Masuk":"Buat akun"}</Button>
  {mode==="login"&&confirmationHelp&&<button type="button" className="flow-button secondary" disabled={busy} onClick={event=>{const input=event.currentTarget.form?.elements.namedItem("email") as HTMLInputElement|null;if(input?.reportValidity())void resendConfirmation(input.value);}}>Kirim ulang konfirmasi</button>}
  <div className="auth-form-links"><Link href={mode==="login"?"/register-account":"/login"}>{mode==="login"?"Buat akun":"Sudah punya akun? Masuk"}</Link>{mode==="login"&&<Link href="/forgot-password">Lupa sandi?</Link>}</div></form>;
 }

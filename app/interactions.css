@@ -1,0 +1,139 @@
+:root {
+  --ux-surface: #f5f3fa;
+  --ux-hover: #ece7f6;
+  --ux-pressed: #e3dbee;
+  --ux-muted: #5d566e;
+  --ux-title: #211052;
+  --ux-active: #5031ad;
+  --ux-primary: #5b3cc4;
+  --ux-primary-hover: #452a95;
+  --ux-border: #9484ae;
+  --ux-duration: 140ms;
+  --ux-ease: cubic-bezier(.2, .7, .2, 1);
+}
+:is(button, a[href], summary, input, select, textarea, [role="button"], [role="menuitem"]):focus-visible {
+  outline: 2px solid var(--ux-primary);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 2px #fff;
+}
+:is(.flow-button, .brand-button, .program-card-action, [data-ui="button"]):not(.awan-sidebar-toggle) {
+  --control-bg: var(--ux-primary);
+  --control-hover: var(--ux-primary-hover);
+  --control-pressed: #32186b;
+  --control-text: #fff;
+  --control-hover-text: #fff;
+  min-height: 44px;
+  min-width: 44px;
+  background: var(--control-bg);
+  color: var(--control-text);
+  box-shadow: none;
+  border-radius: 12px;
+  transition: background-color var(--ux-duration) var(--ux-ease), color var(--ux-duration) var(--ux-ease), border-color var(--ux-duration) var(--ux-ease), box-shadow var(--ux-duration) var(--ux-ease);
+  transform: none;
+  text-align: center;
+}
+:is(.flow-button, .brand-button, .program-card-action, [data-ui="button"]):hover,
+:is(.flow-button, .brand-button, .program-card-action, [data-ui="button"]):active { transform: none; }
+[data-ui="button"]:not(.awan-sidebar-toggle) { white-space: normal; height: auto; }
+.ux-button-content { display: inline-grid; align-items: center; justify-items: center; }
+.ux-button-label, .ux-button-progress { grid-area: 1 / 1; }
+.ux-button-label { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.ux-button-progress { visibility: hidden; }
+.ux-button-content[data-pending="true"] .ux-button-label { visibility: hidden; }
+.ux-button-content[data-pending="true"] .ux-button-progress { visibility: visible; }
+:is(.flow-button.secondary, .brand-button--outline, [data-ui="button"][data-variant="outline"]) { --control-bg: #fff; --control-text: var(--ux-active); border: 1px solid var(--ux-border); }
+[data-ui="button"][data-variant="secondary"] { --control-bg: var(--ux-surface); --control-text: var(--ux-title); }
+[data-ui="button"][data-variant="ghost"]:not(.awan-sidebar-toggle) { --control-bg: transparent; --control-text: var(--ux-muted); }
+[data-ui="button"][data-variant="link"] { --control-bg: transparent; --control-text: var(--ux-active); }
+:is(.flow-button.secondary, .brand-button--outline, [data-ui="button"][data-variant="outline"], [data-ui="button"][data-variant="secondary"], [data-ui="button"][data-variant="ghost"], [data-ui="button"][data-variant="link"]):not(.awan-sidebar-toggle) { --control-hover: var(--ux-hover); --control-pressed: var(--ux-pressed); --control-hover-text: var(--ux-title); }
+:is(.flow-button.danger, [data-ui="button"][data-variant="destructive"]) { --control-bg: #b42318; --control-hover: #8c1d14; --control-pressed: #6f1710; }
+.flow-button.secondary[data-intent="danger"] { --control-text: #b42318; --control-hover: #fef2f2; --control-pressed: #fee4e2; --control-hover-text: #8c1d14; }
+.flow-tabs:has(> button), .flow-tabs:has(> a) { gap: 4px; padding: 6px; border-radius: 14px; background: var(--ux-surface); }
+:is(.flow-tabs, .cms-section-picker, .event-attendance-switch) button, .flow-tabs > a {
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ux-muted);
+  transition: background-color var(--ux-duration) var(--ux-ease), color var(--ux-duration) var(--ux-ease), border-color var(--ux-duration) var(--ux-ease);
+}
+:is(.flow-tabs, .cms-section-picker, .event-attendance-switch) :is([aria-pressed="true"], [aria-current="page"], [aria-selected="true"]) {
+  background: #fff;
+  border-color: #cfc4e1;
+  color: var(--ux-active);
+  box-shadow: 0 2px 3px #2110520a;
+  font-weight: 650;
+}
+.event-attendance-switch { background: var(--ux-surface); border-radius: 14px; }
+[data-ui="step-menu"] { background: var(--ux-surface); }
+[data-ui="step-menu"] button { border: 1px solid transparent; color: var(--ux-muted); transition: background-color var(--ux-duration) var(--ux-ease), color var(--ux-duration) var(--ux-ease); }
+[data-ui="step-menu"] button[aria-current="step"] { background: #fff; color: var(--ux-active); border-color: #cfc4e1; font-weight: 650; box-shadow: 0 2px 3px #2110520a; }
+[role="group"] > .flow-button.secondary[aria-pressed="true"] { border-color: var(--ux-active); font-weight: 650; }
+[data-ui="nav-link"] { border: 1px solid transparent; border-radius: 12px; color: var(--ux-muted); transition: background-color var(--ux-duration) var(--ux-ease), color var(--ux-duration) var(--ux-ease); }
+[data-ui="nav-link"][aria-current="page"] { background: var(--ux-surface); border-color: #e3dbee; color: var(--ux-active); }
+[data-ui="menu"] { border-radius: 14px; border-color: #e3dbee; box-shadow: 0 8px 24px -12px #21105238; transition-duration: var(--ux-duration); }
+[data-ui="menu-item"] { min-height: 44px; border-radius: 12px; transition: background-color var(--ux-duration) var(--ux-ease), color var(--ux-duration) var(--ux-ease); }
+[data-ui="menu-item"][data-highlighted] { background: var(--ux-hover); color: var(--ux-title); }
+[data-ui="menu-item"][data-disabled] { color: var(--ux-muted); opacity: 1; cursor: not-allowed; }
+[data-ui="tooltip"] { background: var(--ux-title); color: #fff; line-height: 1.5; }
+.ux-icon-button { display: inline-grid; place-items: center; width: 44px; min-width: 44px; height: 44px; min-height: 44px; border-radius: 12px; color: var(--ux-muted); background: transparent; transition: background-color var(--ux-duration) var(--ux-ease), color var(--ux-duration) var(--ux-ease); }
+.flow-field :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]):not([type="range"]):not([type="color"]), select, textarea),
+.flow-input, [data-ui="input"], .admin-menu-search input {
+  min-height: 48px;
+  border: 1px solid var(--ux-border);
+  border-radius: 12px;
+  color: var(--ux-title);
+  background: #fcfbff;
+  box-shadow: none;
+  font-size: 16px;
+  transition: background-color var(--ux-duration) var(--ux-ease), border-color var(--ux-duration) var(--ux-ease), box-shadow var(--ux-duration) var(--ux-ease);
+}
+.flow-field :is(input, select, textarea):focus, [data-ui="input"]:focus, .flow-input:focus, .admin-menu-search input:focus { border-color: var(--ux-primary); background: #fff; }
+.flow-field :is(input, select, textarea):is([aria-invalid="true"], :user-invalid), [data-ui="input"][aria-invalid="true"] { border-color: #b42318; }
+:is(input[type="checkbox"], input[type="radio"]) { accent-color: var(--ux-primary); }
+label:has(> :is(input[type="checkbox"], input[type="radio"])) { min-height: 44px; cursor: pointer; }
+label:has(> :is(input[type="checkbox"], input[type="radio"]):disabled) { cursor: not-allowed; }
+:is(.flow-button, .brand-button, .program-card-action, [data-ui="button"]):is(:disabled, [aria-disabled="true"]),
+.event-detail-page .brand-button:disabled {
+  background: #eeebf3;
+  color: var(--ux-muted);
+  border-color: #c9c0d7;
+  box-shadow: none;
+  opacity: 1;
+  cursor: not-allowed;
+  transform: none;
+}
+:is(button, input, select, textarea)[aria-busy="true"] { cursor: progress; }
+[data-ui="button"]:is(:disabled, [aria-disabled="true"]) { pointer-events: auto; }
+.flow-field :is(input, select, textarea):disabled, [data-ui="input"]:disabled { color: var(--ux-muted); background: #eeebf3; opacity: 1; cursor: not-allowed; }
+.program-card, [data-ui="event-card"] { transition: border-color var(--ux-duration) var(--ux-ease), box-shadow var(--ux-duration) var(--ux-ease); }
+.program-card:hover, .program-card:focus-within { transform: none; box-shadow: none; }
+.program-card:hover img { transform: none; }
+.program-card-image img { transition: none; }
+.ux-event-title { display: inline-block; min-height: 44px; max-width: 100%; border-radius: 4px; transition: color var(--ux-duration) var(--ux-ease); }
+.footer-main nav a, .brand-text-link, .auth-form-links a { transition: color var(--ux-duration) var(--ux-ease); }
+summary, .auth-password-field > button, .registration-group-close,
+:is(.admin-filter-summary, .admin-section-title) > :is(button, a) { min-height: 44px; border-radius: 12px; transition: background-color var(--ux-duration) var(--ux-ease), color var(--ux-duration) var(--ux-ease); }
+.brand-text-link:hover svg { transform: none; }
+@media (hover: hover) and (pointer: fine) {
+  :is(.flow-button, .brand-button, .program-card-action, [data-ui="button"]):not(.awan-sidebar-toggle):not(:disabled):not([aria-disabled="true"]):hover { background: var(--control-hover); color: var(--control-hover-text); box-shadow: none; }
+  .ux-icon-button:hover, [data-ui="nav-link"]:hover { background: var(--ux-hover); color: var(--ux-title); border-color: #b2a2ca; }
+  [data-ui="step-menu"] button:hover { background: var(--ux-hover); color: var(--ux-title); }
+  :is(.flow-tabs, .cms-section-picker, .event-attendance-switch) :is(button, a):not(:disabled):hover { background: var(--ux-hover); color: var(--ux-title); }
+  .flow-field :is(input, select, textarea):not(:disabled):not([readonly]):not(:focus):hover, [data-ui="input"]:not(:disabled):not([readonly]):not(:focus):hover { border-color: var(--ux-active); }
+  .program-card:has(a:hover), .program-card:focus-within, [data-ui="event-card"]:has(a:hover), [data-ui="event-card"]:focus-within { border-color: #b2a2ca; }
+  .ux-event-title:hover { color: var(--ux-active); }
+  summary:hover, .auth-password-field > button:hover, .registration-group-close:hover,
+  :is(.admin-filter-summary, .admin-section-title) > :is(button, a):hover { background: var(--ux-hover); color: var(--ux-title); }
+}
+:is(.flow-button, .brand-button, .program-card-action, [data-ui="button"]):not(.awan-sidebar-toggle):not(:disabled):not([aria-disabled="true"]):active { background: var(--control-pressed); color: var(--control-hover-text); box-shadow: none; }
+.ux-icon-button:active, [data-ui="nav-link"]:active { background: var(--ux-pressed); color: var(--ux-title); }
+:is(.flow-tabs, .cms-section-picker, .event-attendance-switch) :is(button, a):not(:disabled):active,
+[data-ui="step-menu"] button:active, [data-ui="menu-item"]:not([data-disabled]):active { background: var(--ux-pressed); color: var(--ux-title); }
+@media (prefers-reduced-motion: reduce) {
+  :is(.flow-button, .brand-button, .program-card-action, [data-ui], .ux-icon-button, .ux-event-title, .flow-field input, .flow-field select, .flow-field textarea, .flow-tabs button, .flow-tabs a, .cms-section-picker button, .event-attendance-switch button, .program-card) { transition: none !important; animation: none !important; }
+}
+@media (forced-colors: active) {
+  :is(.flow-tabs, .cms-section-picker, .event-attendance-switch) :is([aria-pressed="true"], [aria-current="page"]) { border-color: Highlight; }
+  :is(button, a[href], input, select, textarea, summary):focus-visible { outline-color: Highlight; }
+}

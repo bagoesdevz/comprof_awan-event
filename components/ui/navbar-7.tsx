@@ -62,6 +62,7 @@ export function Navbar7({
       <Link
         key={item.href}
         href={item.href}
+        data-ui="nav-link"
         aria-current={active ? "page" : undefined}
         className={`relative inline-flex min-h-11 items-center justify-center rounded-full px-4 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 motion-reduce:transition-none ${
           active
@@ -91,6 +92,8 @@ export function Navbar7({
             {signedIn ? (
               <Link
                 href={accountHref}
+                data-ui="button"
+                data-variant="default"
                 className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-950 px-6 text-[13px] font-semibold text-white shadow-[0_10px_24px_-14px_rgba(33,16,82,0.8)] transition hover:-translate-y-0.5 hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
               >
                 Dashboard
@@ -99,12 +102,16 @@ export function Navbar7({
               <>
                 <Link
                   href={loginHref}
+                  data-ui="button"
+                  data-variant="ghost"
                   className="inline-flex min-h-11 items-center justify-center rounded-full px-4 text-[13px] font-semibold text-content-title transition-colors hover:bg-primary-100 hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2"
                 >
                   {loginLabel}
                 </Link>
                 <Link
                   href={ctaHref}
+                  data-ui="button"
+                  data-variant="default"
                   className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-950 px-6 text-[13px] font-semibold text-white shadow-[0_10px_24px_-14px_rgba(33,16,82,0.8)] transition hover:-translate-y-0.5 hover:bg-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
                 >
                   {ctaLabel}
@@ -116,6 +123,8 @@ export function Navbar7({
 
         <button
           ref={toggleRef}
+          data-ui="button"
+          data-variant="outline"
           type="button"
           className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-content-title/10 bg-white px-3 text-sm font-semibold text-primary-800 transition-colors hover:bg-primary-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 lg:hidden"
           aria-expanded={open}
@@ -143,6 +152,8 @@ export function Navbar7({
               {signedIn ? (
                 <Link
                   href={accountHref}
+                  data-ui="button"
+                  data-variant="default"
                   className="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-950 px-4 text-sm font-semibold text-white"
                   tabIndex={open ? undefined : -1}
                 >
@@ -152,6 +163,8 @@ export function Navbar7({
                 <>
                   <Link
                     href={loginHref}
+                    data-ui="button"
+                    data-variant="ghost"
                     className="inline-flex min-h-12 items-center justify-center rounded-full border border-content-title/10 bg-white px-4 text-sm font-semibold text-content-title"
                     tabIndex={open ? undefined : -1}
                   >
@@ -159,6 +172,8 @@ export function Navbar7({
                   </Link>
                   <Link
                     href={ctaHref}
+                    data-ui="button"
+                    data-variant="default"
                     className="inline-flex min-h-12 items-center justify-center rounded-full bg-primary-950 px-4 text-sm font-semibold text-white"
                     tabIndex={open ? undefined : -1}
                   >

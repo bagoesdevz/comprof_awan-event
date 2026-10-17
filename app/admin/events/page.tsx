@@ -60,7 +60,7 @@ export default function Page() {
             <Link className="flow-button secondary" href={`/admin/events/${event.slug}`} aria-label={`Edit ${event.title}`}><Pencil size={16} aria-hidden="true" />Edit</Link>
             <Link className="flow-button secondary" href={eventPublicPath(event)} aria-label={`Lihat ${event.title}`}><Eye size={16} aria-hidden="true" />Lihat</Link>
             <button disabled={saving} type="button" className="flow-button secondary" onClick={() => void update(draft => { const record = draft.events.find(item => item.id === event.id); if (record) record.publication = record.publication === "published" ? "draft" : "published"; })}>{event.publication === "published" ? "Jadikan draf" : "Tayangkan"}</button>
-            {isSuper && <button disabled={saving} type="button" aria-label={`Hapus ${event.title}`} className="flow-button secondary text-[#B42318]" onClick={() => { setFailed(false); setTarget({ event, restore: false }); }}><Trash2 size={16} aria-hidden="true" />Hapus</button>}
+            {isSuper && <button disabled={saving} type="button" data-intent="danger" aria-label={`Hapus ${event.title}`} className="flow-button secondary" onClick={() => { setFailed(false); setTarget({ event, restore: false }); }}><Trash2 size={16} aria-hidden="true" />Hapus</button>}
             </>}
           </div>
         </article>;

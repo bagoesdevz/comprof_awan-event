@@ -3,13 +3,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Award,
   BarChart3,
   BookOpen,
   BriefcaseBusiness,
   CalendarDays,
-  Plus,
+  ChevronDown,
   ClipboardCheck,
   CreditCard,
   Home,
@@ -52,18 +53,25 @@ import {
 
 export type SidebarArea = "participant" | "admin";
 export type SidebarNavigationItem = { href: string; label: string; icon: LucideIcon };
-export type SidebarNavigationGroup = { label: string; superOnly?: boolean; items: SidebarNavigationItem[] };
+export type SidebarNavigationGroup = { label: string; icon?: LucideIcon; superOnly?: boolean; items: SidebarNavigationItem[] };
 
 const participantGroups: SidebarNavigationGroup[] = [
   {
-    label: "Ruang peserta",
+    label: "Dashboard",
+    items: [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
+  },
+  {
+    label: "Kegiatan saya",
+    icon: BookOpen,
     items: [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { href: "/dashboard/events", label: "Kelas saya", icon: BookOpen },
       { href: "/dashboard/tickets", label: "E-tiket", icon: Ticket },
       { href: "/dashboard/certificates", label: "Sertifikat", icon: Award },
-      { href: "/dashboard/profile", label: "Profil", icon: UserRound },
     ],
+  },
+  {
+    label: "Profil",
+    items: [{ href: "/dashboard/profile", label: "Profil", icon: UserRound }],
   },
 ];
 
@@ -77,6 +85,7 @@ const adminGroups: SidebarNavigationGroup[] = [
   },
   {
     label: "Event & konten",
+    icon: CalendarDays,
     items: [
       { href: "/admin/events", label: "Event", icon: CalendarDays },
       { href: "/admin/cms", label: "Konten website", icon: PanelsTopLeft },
@@ -85,6 +94,7 @@ const adminGroups: SidebarNavigationGroup[] = [
   },
   {
     label: "Peserta & kegiatan",
+    icon: Users,
     items: [
       { href: "/admin/operations/participants", label: "Peserta", icon: Users },
       { href: "/admin/operations/waitlist", label: "Daftar tunggu", icon: ListChecks },
@@ -95,6 +105,7 @@ const adminGroups: SidebarNavigationGroup[] = [
   },
   {
     label: "Keuangan & komunikasi",
+    icon: WalletCards,
     items: [
       { href: "/admin/payments", label: "Transaksi", icon: CreditCard },
       { href: "/admin/operations/finance", label: "Keuangan", icon: WalletCards },
@@ -103,6 +114,7 @@ const adminGroups: SidebarNavigationGroup[] = [
   },
   {
     label: "Sistem",
+    icon: ShieldCheck,
     superOnly: true,
     items: [
       { href: "/admin/users", label: "Akun & peran", icon: ShieldCheck },
@@ -116,9 +128,59 @@ export function getSidebarNavigation(area: SidebarArea, role: Role) {
   return groups.filter((group) => !group.superOnly || role === "super");
 }
 
-function isActivePath(pathname: string, href: string) {
+export function isActivePath(pathname: string, href: string) {
   if (href === "/dashboard" || href === "/admin") return pathname === href;
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function NavigationGroup({ group, pathname, expanded, closeMobile }: {
+  group: SidebarNavigationGroup;
+  pathname: string;
+  expanded: boolean;
+  closeMobile: () => void;
+}) {
+  const active = group.items.some((item) => isActivePath(pathname, item.href));
+  const [open, setOpen] = useState(active || group.label === "Event & konten");
+  useEffect(() => {
+    if (active) setOpen(true);
+  }, [active, pathname]);
+  const nested = expanded && Boolean(group.icon);
+  const menu = (
+    <SidebarMenu className={nested ? "awan-nav-branches" : undefined}>
+      {group.items.map((item) => {
+        const Icon = item.icon;
+        const selected = isActivePath(pathname, item.href);
+        return (
+          <SidebarMenuItem key={item.href} className={nested ? "awan-nav-branch" : undefined}>
+            <SidebarMenuButton asChild isActive={selected} tooltip={item.label}>
+              <Link href={item.href} aria-label={item.label} aria-current={selected ? "page" : undefined} onClick={closeMobile}>
+                {!nested && <Icon aria-hidden="true" />}
+                <span>{item.label}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
+    </SidebarMenu>
+  );
+  if (!nested) return <SidebarGroup><SidebarGroupContent>{menu}</SidebarGroupContent></SidebarGroup>;
+  const GroupIcon = group.icon!;
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="awan-nav-group" data-current={active}>
+      <SidebarGroup>
+        <CollapsibleTrigger asChild>
+          <button type="button" className="awan-nav-group-trigger">
+            <GroupIcon aria-hidden="true" />
+            <span>{group.label}</span>
+            <ChevronDown className="awan-nav-disclosure" aria-hidden="true" />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="awan-nav-group-content">
+          <SidebarGroupContent>{menu}</SidebarGroupContent>
+        </CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
+  );
 }
 
 export function AppSidebar({ area }: { area: SidebarArea }) {
@@ -137,86 +199,32 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
   };
 
   return (
-    <Sidebar collapsible="icon" aria-label={area === "participant" ? "Navigasi dashboard peserta" : "Navigasi dashboard admin"}>
-      <SidebarHeader className="border-b border-primary-600/10 pr-12 md:pr-4">
+    <Sidebar collapsible="icon" className="awan-sidebar" aria-label={area === "participant" ? "Navigasi dashboard peserta" : "Navigasi dashboard admin"}>
+      <SidebarHeader className="awan-sidebar-header">
         {expanded ? (
           <div>
             <BrandLogo compact />
-            <p className="mt-3 text-[11px] font-medium text-content-muted">{area === "participant" ? "Ruang peserta" : "Pusat operasional"}</p>
+            <p className="awan-sidebar-caption">{area === "participant" ? "Ruang peserta" : "Pusat operasional"}</p>
           </div>
         ) : (
-          <Link href="/" aria-label="Awan Event | Beranda" className="mx-auto grid h-10 w-10 place-items-center overflow-hidden rounded-full ring-1 ring-primary-600/15">
+          <Link href="/" aria-label="Awan Event | Beranda" className="awan-sidebar-logo">
             <Image src="/awan-event-logo.jpeg" alt="" width={40} height={40} />
           </Link>
         )}
       </SidebarHeader>
 
-      <SidebarContent>
-        {groups.map((group) => {
-          const groupIsActive = group.items.some((item) => isActivePath(pathname, item.href));
-          const menu = (
-            <SidebarMenu className={expanded ? "ml-3 border-l border-primary-600/10 pl-2" : ""}>
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const active = isActivePath(pathname, item.href);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={active}
-                      tooltip={item.label}
-                      className={expanded ? "min-h-11 rounded-xl text-[13px] font-medium" : undefined}
-                    >
-                      <Link href={item.href} aria-current={active ? "page" : undefined} onClick={closeMobile}>
-                        <Icon aria-hidden="true" />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          );
-
-          if (!expanded) {
-            return (
-              <SidebarGroup key={group.label}>
-                <SidebarGroupContent>{menu}</SidebarGroupContent>
-              </SidebarGroup>
-            );
-          }
-
-          return (
-            <Collapsible
-              key={`${platformState.session.role}-${group.label}`}
-              defaultOpen={groupIsActive || area === "participant" || group.label === "Event & konten"}
-              className="group/collapsible"
-            >
-              <SidebarGroup>
-                <CollapsibleTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-left text-xs font-semibold text-content-body outline-none transition hover:bg-primary-100/70 hover:text-primary-800 focus-visible:ring-2 focus-visible:ring-primary-600 data-[state=open]:text-primary-800"
-                  >
-                    <span className="min-w-0 flex-1 truncate">{group.label}</span>
-                    <Plus className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-45" aria-hidden="true" />
-                  </button>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-[sidebar-collapse-up_160ms_ease-out] data-[state=open]:animate-[sidebar-collapse-down_180ms_ease-out]">
-                  <SidebarGroupContent className="pt-1">{menu}</SidebarGroupContent>
-                </CollapsibleContent>
-              </SidebarGroup>
-            </Collapsible>
-          );
-        })}
+      <SidebarContent className="awan-sidebar-content">
+        <nav aria-label={area === "participant" ? "Menu peserta" : "Menu admin"} className="awan-sidebar-navigation">
+          {groups.map((group) => <NavigationGroup key={`${platformState.session.role}-${group.label}`} group={group} pathname={pathname} expanded={expanded} closeMobile={closeMobile} />)}
+        </nav>
       </SidebarContent>
 
       <SidebarSeparator />
-      <SidebarFooter>
+      <SidebarFooter className="awan-sidebar-footer">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Lihat website">
-              <Link href="/" onClick={closeMobile}>
+              <Link href="/" aria-label={area === "participant" ? "Kembali ke beranda" : "Lihat website"} onClick={closeMobile}>
                 <Home aria-hidden="true" />
                 <span>{area === "participant" ? "Kembali ke beranda" : "Lihat website"}</span>
               </Link>
@@ -224,20 +232,18 @@ export function AppSidebar({ area }: { area: SidebarArea }) {
           </SidebarMenuItem>
         </SidebarMenu>
 
-        <div className={`flex items-center gap-3 rounded-2xl bg-primary-100/70 p-2 ${expanded ? "" : "justify-center"}`}>
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-xs font-semibold text-primary-700 shadow-sm">{initials}</span>
-          {expanded && <div className="min-w-0 flex-1"><strong className="block truncate text-xs">{profileName}</strong><small className="mt-0.5 block truncate text-[10px] text-content-muted">{roleLabel}</small></div>}
-          {expanded && (
+        <div className="awan-sidebar-account">
+          <span className="awan-sidebar-avatar" aria-hidden="true">{initials}</span>
+          {expanded && <div className="awan-sidebar-identity"><strong title={profileName}>{profileName}</strong><small>{roleLabel}</small></div>}
             <Link
               href="/login"
               onClick={() => update((draft) => { draft.session.loggedIn = false; })}
               aria-label="Keluar dari akun"
               title="Keluar"
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-content-muted transition hover:bg-white hover:text-primary-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600"
+              className="awan-sidebar-logout"
             >
               <LogOut className="h-4 w-4" aria-hidden="true" />
             </Link>
-          )}
         </div>
       </SidebarFooter>
       <SidebarRail />

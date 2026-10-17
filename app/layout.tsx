@@ -11,6 +11,7 @@ import "./production.css";
 import "./admin-polish.css";
 import "./people.css";
 import "./event-sharing.css";
+import "./sidebar.css";
 import { PlatformProvider } from "@/components/platform/provider";
 
 const mono = DM_Mono({

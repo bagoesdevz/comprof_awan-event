@@ -16,6 +16,7 @@ type SidebarContextValue = {
   openMobile: boolean;
   setOpenMobile: React.Dispatch<React.SetStateAction<boolean>>;
   isMobile: boolean;
+  sidebarId: string;
   toggleSidebar: () => void;
 };
 
@@ -34,6 +35,7 @@ export function SidebarProvider({
   ...props
 }: React.ComponentProps<"div"> & { defaultOpen?: boolean }) {
   const isMobile = useIsMobile();
+  const sidebarId = React.useId();
   const [open, setOpen] = React.useState(defaultOpen);
   const [openMobile, setOpenMobile] = React.useState(false);
   const state: SidebarContextValue["state"] = open ? "expanded" : "collapsed";
@@ -55,14 +57,14 @@ export function SidebarProvider({
   }, [toggleSidebar]);
 
   const value = React.useMemo(
-    () => ({ state, open, setOpen, openMobile, setOpenMobile, isMobile, toggleSidebar }),
-    [state, open, openMobile, isMobile, toggleSidebar],
+    () => ({ state, open, setOpen, openMobile, setOpenMobile, isMobile, sidebarId, toggleSidebar }),
+    [state, open, openMobile, isMobile, sidebarId, toggleSidebar],
   );
 
   return (
     <SidebarContext.Provider value={value}>
       <TooltipProvider delayDuration={150}>
-        <div className={cn("flex min-h-svh w-full bg-surface-base", className)} {...props}>{children}</div>
+        <div data-sidebar="workspace" className={cn("flex min-h-svh w-full bg-surface-base", className)} {...props}>{children}</div>
       </TooltipProvider>
     </SidebarContext.Provider>
   );
@@ -74,12 +76,12 @@ export function Sidebar({
   collapsible = "icon",
   ...props
 }: React.ComponentProps<"aside"> & { collapsible?: "icon" | "offcanvas" | "none" }) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, state, openMobile, setOpenMobile, sidebarId } = useSidebar();
 
   if (isMobile) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-        <SheetContent side="left" className="w-[19rem] max-w-[88vw] border-primary-600/10 bg-white p-0 text-content-title">
+        <SheetContent id={sidebarId} side="left" data-sidebar="panel" data-mobile="true" onCloseAutoFocus={(event) => { event.preventDefault(); document.getElementById(`${sidebarId}-trigger`)?.focus(); }} className={cn("w-[19rem] max-w-[88vw] border-primary-600/10 bg-white p-0 text-content-title", className)}>
           <SheetHeader className="sr-only"><SheetTitle>Navigasi</SheetTitle><SheetDescription>Menu utama Awan Event.</SheetDescription></SheetHeader>
           <div className="flex h-full min-h-0 flex-col">{children}</div>
         </SheetContent>
@@ -92,6 +94,8 @@ export function Sidebar({
 
   return (
     <aside
+      id={sidebarId}
+      data-sidebar="panel"
       data-state={state}
       data-collapsible={state === "collapsed" ? collapsible : ""}
       className={cn(
@@ -112,10 +116,12 @@ export const SidebarInset = React.forwardRef<HTMLElement, React.ComponentProps<"
 });
 
 export const SidebarTrigger = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(function SidebarTrigger({ className, onClick, ...props }, ref) {
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, state, isMobile, openMobile, sidebarId } = useSidebar();
+  const expanded = isMobile ? openMobile : state === "expanded";
   return (
-    <Button ref={ref} type="button" variant="ghost" size="icon" className={cn("h-11 w-11 rounded-xl text-content-body hover:bg-primary-100 hover:text-primary-950", className)} onClick={(event) => { onClick?.(event); toggleSidebar(); }} aria-label="Buka atau tutup sidebar" {...props}>
+    <Button ref={ref} id={`${sidebarId}-trigger`} type="button" variant="ghost" size="icon" className={cn("awan-sidebar-toggle h-11 min-w-11 rounded-xl text-content-body hover:bg-primary-100 hover:text-primary-950", isMobile ? "w-auto px-3" : "w-11", className)} onClick={(event) => { onClick?.(event); if (!event.defaultPrevented) toggleSidebar(); }} aria-label={isMobile ? (expanded ? "Tutup menu navigasi" : "Buka menu navigasi") : (expanded ? "Perkecil sidebar" : "Perbesar sidebar")} aria-expanded={expanded} aria-controls={isMobile && !openMobile ? undefined : sidebarId} {...props}>
       <PanelLeft className="h-5 w-5" aria-hidden="true" />
+      {isMobile && <span>Menu</span>}
     </Button>
   );
 });
@@ -153,6 +159,7 @@ export function SidebarMenuButton({
   const button = (
     <Comp
       data-active={isActive}
+      data-sidebar="menu-button"
       className={cn(
         "flex min-h-11 w-full items-center gap-3 overflow-hidden rounded-2xl px-3 text-left text-sm text-content-body outline-none transition hover:bg-primary-100/70 hover:text-primary-800 focus-visible:ring-2 focus-visible:ring-primary-400 data-[active=true]:bg-primary-100 data-[active=true]:font-semibold data-[active=true]:text-primary-800 [&>svg]:h-[18px] [&>svg]:w-[18px] [&>svg]:shrink-0",
         collapsed && "justify-center px-0 [&>span]:hidden",
@@ -162,7 +169,7 @@ export function SidebarMenuButton({
     />
   );
   if (!tooltip || !collapsed) return button;
-  return <Tooltip><TooltipTrigger asChild>{button}</TooltipTrigger><TooltipContent side="right">{tooltip}</TooltipContent></Tooltip>;
+  return <Tooltip><TooltipTrigger asChild>{button}</TooltipTrigger><TooltipContent side="right" className="awan-sidebar-tooltip">{tooltip}</TooltipContent></Tooltip>;
 }
 
 export function SidebarSeparator({ className, ...props }: React.ComponentProps<"div">) {

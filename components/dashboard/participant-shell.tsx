@@ -13,14 +13,14 @@ export function ParticipantShell({ children }: { children: React.ReactNode }) {
   const activeItem = items.find((item) => item.href === "/dashboard" ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`));
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className="dashboard-workspace">
       <a href="#participant-content" className="fixed left-4 top-4 z-[100] -translate-y-24 rounded-full bg-white px-5 py-3 text-sm font-semibold text-primary-950 shadow-diffusion transition focus:translate-y-0">Lewati ke konten utama</a>
       <AppSidebar area="participant" />
       <SidebarInset className="participant-workspace text-content-title">
-        <header className="sticky top-0 z-20 flex min-h-[72px] items-center gap-3 border-b border-primary-600/10 bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-10">
+        <header className="workspace-header sticky top-0 z-20 flex min-h-[72px] items-center gap-3 px-4 py-3 sm:px-6 lg:px-10">
           <SidebarTrigger />
           <div className="min-w-0 flex-1">
-            <span className="block font-mono text-[9px] uppercase tracking-[0.12em] text-content-muted">Dashboard peserta</span>
+            <span className="block text-xs text-content-muted">Dashboard peserta</span>
             <strong className="mt-1 block truncate text-sm text-content-title">{activeItem?.label || "Ruang aktivitas"}</strong>
           </div>
           <NotificationMenu compact />

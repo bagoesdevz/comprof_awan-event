@@ -47,6 +47,16 @@ function RecommendationCard({ event }: { event: ManagedEvent }) {
   );
 }
 
+function NextEventAction({ action, event }: { action: ReturnType<typeof nextAction> | null; event?: ManagedEvent }) {
+  return <article className="workspace-next-action">
+    <span className="workspace-overline">{action ? "Langkah berikutnya" : "Mulai dari sini"}</span>
+    <h2>{action?.label || "Temukan event yang sesuai."}</h2>
+    <p className="workspace-next-note">{action?.note || "Pilih webinar, seminar, atau pelatihan sesuai kebutuhan Anda."}</p>
+    {event && <div className="workspace-next-context"><CalendarDays size={20} aria-hidden="true" /><div><strong>{event.title}</strong><span>{new Date(event.startAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" })} · {lifecycleLabels[event.lifecycle]}</span></div></div>}
+    <Link href={action?.href || "/events"} className="flow-button">{action?.label || "Lihat event"}</Link>
+  </article>;
+}
+
 export function ParticipantWorkspace({ view = "dashboard", slug }: { view?: string; slug?: string }) {
   const { state, ready, update, error, refresh } = usePlatform();
   const [query, setQuery] = useState("");
@@ -79,8 +89,12 @@ export function ParticipantWorkspace({ view = "dashboard", slug }: { view?: stri
   function dashboard() {
     return <div className="mx-auto max-w-6xl">
       <PageHeading eyebrow="Dashboard peserta" title={`Halo, ${profile.name.split(" ")[0] || "selamat datang"}.`} description="" action={action ? <Link href="/events" className="flow-button secondary">Jelajahi event</Link> : undefined} />
-      <section className="mt-8 grid gap-5 xl:grid-cols-[1.25fr_.75fr]" aria-label="Aktivitas utama peserta">
-        {action && registration && event ? <article className="relative overflow-hidden rounded-[28px_28px_28px_8px] bg-primary-950 p-7 text-white sm:p-10"><span className="font-mono text-[10px] uppercase tracking-widest text-primary-400">Langkah berikutnya</span><h2 className="mt-5 text-[clamp(32px,4vw,52px)] font-semibold leading-tight tracking-tight">{action.label}</h2><p className="mt-4 max-w-xl text-sm leading-7 text-white/65">{action.note}</p><Link href={action.href} className="flow-button secondary mt-7">{action.label}</Link></article> : <div className="rounded-[28px_28px_28px_8px] bg-primary-950 p-7 text-white sm:p-10"><span className="font-mono text-[10px] uppercase tracking-widest text-primary-400">Mulai dari sini</span><h2 className="mt-5 text-4xl font-semibold tracking-tight">Temukan event yang sesuai.</h2><p className="mt-4 max-w-xl text-sm leading-7 text-white/65">Pilih webinar, seminar, atau pelatihan sesuai kebutuhan Anda.</p><Link href="/events" className="flow-button secondary mt-7">Lihat event</Link></div>}
+      <dl className="workspace-metrics workspace-metrics--participant" aria-label="Ringkasan peserta">
+        <div><dt><CalendarDays size={17} aria-hidden="true" />Event terdaftar</dt><dd>{new Set(registrations.map(item => item.eventSlug)).size}<small>Event dalam riwayat pendaftaran Anda</small></dd></div>
+        <div><dt><Award size={17} aria-hidden="true" />Sertifikat aktif</dt><dd>{registrations.filter(item => item.certificate?.status === "valid").length}<small>Diterbitkan untuk akun Anda</small></dd></div>
+      </dl>
+      <section className="workspace-activity-grid" aria-label="Aktivitas utama peserta">
+        <NextEventAction action={action} event={event} />
         <EligibilityPanel registration={registration} />
       </section>
 
@@ -103,6 +117,18 @@ export function ParticipantWorkspace({ view = "dashboard", slug }: { view?: stri
   if (view === "recommendations") return <div><PageHeading eyebrow="Dashboard / Rekomendasi" title="Rekomendasi event"  /><div className="grid gap-5 md:grid-cols-2">{recommendations.map(item => <RecommendationCard key={item.slug} event={item} />)}</div></div>;
   const filteredRegistrations = (view === "history" ? completedRegistrations : registrations).filter(item => (state.events.find(eventItem => eventItem.slug === item.eventSlug)?.title || "").toLowerCase().includes(query.trim().toLowerCase()));
   if (view === "events" || view === "history") return <div><PageHeading eyebrow={`Dashboard / ${view === "history" ? "Riwayat event" : "Event saya"}`} title={view === "history" ? "Riwayat event" : "Event saya"} /><label className="mb-6 block"><span className="sr-only">Cari event saya</span><input className="flow-input" type="search" placeholder="Cari event yang Anda ikuti" value={query} onChange={eventValue => setQuery(eventValue.target.value)} /></label><div className="grid gap-5">{filteredRegistrations.map(eventRow)}</div>{!filteredRegistrations.length && <><Empty title={query.trim() ? "Tidak ada hasil untuk pencarian ini" : view === "history" ? "Belum ada event yang selesai" : "Belum ada event"} href={query.trim() ? undefined : "/events"} />{query.trim() && <button className="flow-button secondary mt-4" onClick={() => setQuery("")}>Hapus pencarian</button>}</>}</div>;
-  if (slug && registration && event) return <div className="mx-auto max-w-6xl"><PageHeading eyebrow="Event saya / Perjalanan peserta" title={event.title} description={`${event.duration} · ${registration.ticketName}`} action={<Link href="/events" className="flow-button secondary">Jelajahi event</Link>} />{action ? <><section className="mt-8 grid gap-5 lg:grid-cols-[1.4fr_.6fr]"><article className="relative overflow-hidden rounded-[28px_28px_28px_8px] bg-primary-950 p-7 text-white sm:p-10"><span className="font-mono text-[10px] uppercase tracking-widest text-primary-400">Langkah berikutnya</span><h2 className="mt-5 text-[clamp(32px,4vw,52px)] font-semibold leading-tight tracking-tight">{action.label}</h2><p className="mt-4 max-w-xl text-sm leading-7 text-white/65">{action.note}</p><Link href={action.href} className="flow-button secondary mt-7">{action.label}</Link></article><Panel title="Keikutsertaan"><Badge tone={registration.payment === "paid" ? "success" : "warning"}>{paymentLabels[registration.payment]}</Badge><p className="mt-5 text-sm font-semibold">{event.title}</p><p className="mt-3 flex gap-2 text-xs text-content-muted"><CalendarDays size={16} />{new Date(event.startAt).toLocaleDateString("id-ID")} · {lifecycleLabels[event.lifecycle]}</p><p className="mt-3 text-xs text-content-muted">{registration.id}</p></Panel></section><div className="mt-5 grid gap-5 xl:grid-cols-2"><EligibilityPanel registration={registration} /><Panel title="Aktivitas event"><div className="grid gap-2">{[...(event.preTest.enabled ? [["pre-test", "Pre-test"]] : []), ["webinar", `${event.meetingProvider} / akses event`], ["attendance", "Kehadiran"], ...(event.postTest.enabled ? [["post-test", "Post-test"]] : []), ["feedback", "Evaluasi acara"]].map(([key, label]) => <Link className="flex min-h-12 items-center gap-3 rounded-xl border border-content-title/10 px-4 py-3 text-sm hover:bg-primary-100" key={key} href={`/dashboard/events/${event.slug}/${key}`}>{label}</Link>)}{event.certificateEnabled && <Link className="flow-button secondary mt-3" href="/dashboard/certificates"><Award size={17} />Sertifikat</Link>}</div></Panel></div></> : <EligibilityPanel registration={registration} />}</div>;
+  if (slug && registration && event) return <div className="mx-auto max-w-6xl">
+    <PageHeading eyebrow="Event saya / Perjalanan peserta" title={event.title} description={`${event.duration} · ${registration.ticketName}`} action={<Link href="/events" className="flow-button secondary">Jelajahi event</Link>} />
+    {action ? <>
+      <section className="workspace-activity-grid">
+        <NextEventAction action={action} event={event} />
+        <Panel title="Keikutsertaan"><Badge tone={registration.payment === "paid" ? "success" : "warning"}>{paymentLabels[registration.payment]}</Badge><p className="mt-5 text-sm font-semibold">{event.title}</p><p className="mt-3 flex gap-2 text-xs text-content-muted"><CalendarDays size={16} />{new Date(event.startAt).toLocaleDateString("id-ID")} · {lifecycleLabels[event.lifecycle]}</p><p className="mt-3 text-xs text-content-muted">{registration.id}</p></Panel>
+      </section>
+      <div className="mt-5 grid gap-5 xl:grid-cols-2"><EligibilityPanel registration={registration} /><Panel title="Aktivitas event"><div className="grid gap-2">
+        {[...(event.preTest.enabled ? [["pre-test", "Pre-test"]] : []), ["webinar", `${event.meetingProvider} / akses event`], ["attendance", "Kehadiran"], ...(event.postTest.enabled ? [["post-test", "Post-test"]] : []), ["feedback", "Evaluasi acara"]].map(([key, label]) => <Link className="flex min-h-12 items-center gap-3 rounded-xl border border-content-title/10 px-4 py-3 text-sm hover:bg-primary-100" key={key} href={`/dashboard/events/${event.slug}/${key}`}>{label}</Link>)}
+        {event.certificateEnabled && <Link className="flow-button secondary mt-3" href="/dashboard/certificates"><Award size={17} />Sertifikat</Link>}
+      </div></Panel></div>
+    </> : <EligibilityPanel registration={registration} />}
+  </div>;
   return dashboard();
 }

@@ -62,7 +62,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SidebarProvider className="admin-workspace">
+    <SidebarProvider className="admin-workspace dashboard-workspace">
       <a href="#admin-content" className="brand-skip-link">Lewati ke konten utama</a>
       <AppSidebar area="admin" />
       <SidebarInset className="text-content-title">

@@ -14,6 +14,7 @@ import "./event-sharing.css";
 import "./sidebar.css";
 import "./interactions.css";
 import "./select.css";
+import "./workspace-theme.css";
 import { PlatformProvider } from "@/components/platform/provider";
 
 const mono = DM_Mono({

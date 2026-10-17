@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
 import { Inbox } from "lucide-react";
-import { Children, cloneElement, isValidElement, useId, type ReactNode, type ReactElement } from "react";
+import { Children, cloneElement, createElement, isValidElement, useId, type ReactNode, type ReactElement, type SelectHTMLAttributes } from "react";
 import { Input } from "@/components/ui/input";
+import { SelectInput } from "@/components/ui/select";
 export function PageHeading({title,description,action}:{eyebrow?:string;title:string;description?:string;action?:ReactNode}){return <header className="flow-heading"><div><h1>{title}</h1>{description&&<p>{description}</p>}</div>{action}</header>;}
 export function Panel({title,children,extra,className=""}:{title?:string;children:ReactNode;extra?:ReactNode;className?:string}){return <section className={"flow-panel "+className}>{title&&<div className="mb-6 flex flex-wrap items-center justify-between gap-3"><h2 className="text-xl font-semibold tracking-tight">{title}</h2>{extra}</div>}{children}</section>;}
 export function Empty({title,description,href,label="Lihat event"}:{title:string;description?:string;href?:string;label?:string}){return <div className="flow-empty"><Inbox className="mx-auto mb-4 h-8 w-8 text-primary-400"/><h2 className="text-xl font-semibold">{title}</h2><p className="mt-2 text-sm text-content-muted">{description}</p>{href&&<Link className="flow-button mt-5" href={href}>{label}</Link>}</div>;}
@@ -10,17 +11,20 @@ export function Badge({children,tone="neutral"}:{children:ReactNode;tone?:"neutr
 export function Field({label,children,hint,className=""}:{label:string;children:ReactNode;hint?:string;className?:string}){
  const id=useId();
  type ControlProps={id?:string;"aria-labelledby"?:string;"aria-label"?:string;"aria-describedby"?:string};
- const isControl=(child:ReactNode):child is ReactElement<ControlProps>=>isValidElement(child)&&(["input","select","textarea"].includes(String(child.type))||child.type===Input);
+ const isControl=(child:ReactNode):child is ReactElement<ControlProps>=>isValidElement(child)&&(["input","select","textarea"].includes(String(child.type))||child.type===Input||child.type===SelectInput);
  const inputs=Children.toArray(children).filter(isControl);
  const controlId=inputs.length===1?(inputs[0].props.id||id+"-control"):undefined;
  const controls=Children.map(children,child=>{
   if(!isControl(child))return child;
   const control=child;
-  return cloneElement(control,{
+  const fieldProps={
    ...(controlId?{id:controlId}:{}),
    ...(!control.props["aria-label"]&&!control.props["aria-labelledby"]&&label?{"aria-labelledby":id+"-label"}:{}),
    ...(hint?{"aria-describedby":[control.props["aria-describedby"],id+"-hint"].filter(Boolean).join(" ")}:{}),
-  });
+  };
+  return control.type==="select"
+   ?createElement(SelectInput,{...control.props as SelectHTMLAttributes<HTMLSelectElement>,...fieldProps})
+   :cloneElement(control,fieldProps);
  });
  return <div className={"flow-field "+className}>{label&&(controlId?<label id={id+"-label"} htmlFor={controlId}>{label}</label>:<span id={id+"-label"}>{label}</span>)}{controls}{hint&&<small id={id+"-hint"}>{hint}</small>}</div>;
 }

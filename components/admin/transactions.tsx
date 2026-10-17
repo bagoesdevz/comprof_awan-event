@@ -28,7 +28,7 @@ export function Transactions() {
         <td>{state.events.find(event => event.slug === registration.eventSlug)?.title || registration.eventSlug}<small>{registration.ticketName}</small></td>
         <td>{money(registration.amount)}</td>
         <td><Badge tone={registration.payment === "paid" ? "success" : registration.payment === "pending" ? "warning" : registration.payment === "failed" || registration.payment === "expired" ? "danger" : "neutral"}>{paymentLabels[registration.payment]}</Badge></td>
-      </tr>)}</tbody></table></div> : <div><Empty title={filtered ? "Tidak ada transaksi yang sesuai" : "Belum ada transaksi"} description={filtered ? "Coba kata kunci atau status pembayaran lain." : "Transaksi akan muncul setelah peserta mendaftar."} />{filtered && <div className="mt-4 text-center"><button className="flow-button secondary" onClick={reset}>Hapus filter</button></div>}</div>}
+      </tr>)}</tbody></table></div> : <Empty title={filtered ? "Tidak ada transaksi yang sesuai" : "Belum ada transaksi"} description={filtered ? "Ubah pencarian atau gunakan Hapus filter di atas." : "Transaksi akan muncul setelah peserta mendaftar."} />}
     </Panel>
   </div>;
 }

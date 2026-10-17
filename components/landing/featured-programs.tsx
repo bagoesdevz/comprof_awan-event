@@ -15,7 +15,7 @@ export function FeaturedPrograms() {
   const events = state.events.filter(event => event.publication === "published" && event.lifecycle !== "completed").slice(0, 3);
   if (error) return <div className="program-state" role="alert"><CalendarDays size={28} aria-hidden="true" /><div><h3>Jadwal belum dapat dimuat</h3><p>Coba muat ulang untuk melihat event yang tersedia.</p></div><button type="button" className="brand-button" onClick={() => void refresh()}>Muat ulang jadwal</button></div>;
   if (!ready) return <div className="program-state" role="status" aria-busy="true"><CalendarDays size={28} aria-hidden="true" /><p>Memuat jadwal event…</p></div>;
-  if (!events.length) return <div className="program-state"><CalendarDays size={28} aria-hidden="true" /><div><h3>Belum ada event mendatang</h3><p>Lihat katalog untuk meninjau program yang tersedia.</p></div><Link href="/events" className="brand-button">Buka katalog event</Link></div>;
+  if (!events.length) return <div className="program-state"><CalendarDays size={28} aria-hidden="true" /><div><h3>Belum ada event mendatang</h3><p>Gunakan Lihat semua event untuk membuka katalog program.</p></div></div>;
   return <div className={`featured-program-grid ${events.length === 1 ? "featured-program-grid--single" : ""}`}>{events.map(event => {
     const price=eventPrice(event);
     return <article key={event.slug} className="program-card">

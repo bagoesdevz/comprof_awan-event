@@ -105,9 +105,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             {searchOpen ? <X size={18} aria-hidden="true" /> : <Search size={18} aria-hidden="true" />}
           </button>
 
-          <Link href="/" className="hidden min-h-11 shrink-0 items-center gap-2 rounded-2xl px-3 text-xs font-semibold text-content-body transition hover:bg-primary-100 hover:text-primary-800 xl:flex">
-            Lihat website
-          </Link>
           <span className="admin-role-label" title={roleLabel}>
             <ShieldCheck size={15} aria-hidden="true" />
             <span className="hidden sm:inline">{roleLabel}</span>

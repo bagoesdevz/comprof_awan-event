@@ -108,6 +108,8 @@ export function Footer7({
       return !ready || !state.session.loggedIn;
     }),
   }));
+  const navigationHrefs = new Set(visibleSections.flatMap(section => section.links.map(link => link.href)));
+  const visibleLegalLinks = legalLinks.filter(link => !navigationHrefs.has(link.href));
 
   return (
     <footer className="border-t border-primary-100 bg-primary-950 text-white" aria-label="Footer Awan Event">
@@ -165,13 +167,13 @@ export function Footer7({
               </a>
             </p>
           </div>
-          <ul className="flex flex-wrap gap-x-5 gap-y-2">
-            {legalLinks.map((link) => (
+          {visibleLegalLinks.length > 0 && <ul className="flex flex-wrap gap-x-5 gap-y-2">
+            {visibleLegalLinks.map((link) => (
               <li key={link.href}>
                 <a href={link.href} className="inline-flex min-h-11 items-center transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">{link.name}</a>
               </li>
             ))}
-          </ul>
+          </ul>}
         </div>
       </div>
     </footer>

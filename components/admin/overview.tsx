@@ -64,7 +64,7 @@ export function AdminOverview({ reports = false }: { reports?: boolean }) {
         {events.length ? <div className="admin-agenda">{events.map(event => <Link href={`/admin/events/${event.slug}`} key={event.id}>
           <div className="admin-agenda-date" aria-hidden="true"><strong>{day.format(new Date(event.startAt))}</strong><span>{month.format(new Date(event.startAt))}</span></div>
           <div className="admin-agenda-copy"><strong>{event.title}</strong><small><CalendarDays size={12} className="mr-1 inline" aria-hidden="true" />{new Date(event.startAt).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" })} · {time.format(new Date(event.startAt))} WIB</small><span className="mt-2 inline-block"><Badge tone={event.publication === "published" ? "success" : "neutral"}>{event.publication === "published" ? "Tayang" : "Draf"}</Badge></span></div>
-        </Link>)}</div> : <Empty title="Belum ada agenda mendatang" href="/admin/events/new" label="Buat event" />}
+        </Link>)}</div> : <Empty title="Belum ada agenda mendatang" description="Program berikutnya akan muncul setelah event dibuat." href={reports ? "/admin/events/new" : undefined} label="Buat event" />}
       </Panel>
     </div>
   </div>;

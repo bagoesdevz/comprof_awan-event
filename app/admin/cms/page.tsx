@@ -119,11 +119,6 @@ export default function AdminCmsPage() {
       <PageHeading
         title="Konten website"
         description="Kelola halaman, artikel, dan media dari satu tempat."
-        action={
-          <a className="flow-button secondary" href="/" target="_blank" rel="noopener noreferrer">
-            <Eye size={16} /> Buka website
-          </a>
-        }
       />
 
       <div className="flow-tabs" role="group" aria-label="Jenis konten">

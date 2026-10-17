@@ -364,8 +364,7 @@ function EventWizardEditor({ initialSlug }: { initialSlug?: string }) {
           <button type="button" onClick={() => setLandingSection(null)} className="mb-6 inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-primary-700">Semua bagian</button>
           <div className="flex flex-col gap-3 border-b border-primary-600/10 pb-6 sm:flex-row sm:items-center sm:justify-between"><h3 className="text-2xl font-semibold">{sectionLabels[selectedBlock.type] || selectedBlock.type}</h3><label className="flex items-center gap-3 text-sm font-semibold"><input type="checkbox" checked={selectedBlock.visible} onChange={(event) => setBlocks((current) => current.map((block) => block.id === selectedBlock.id ? { ...block, visible: event.target.checked } : block))} />Tampilkan</label></div>
           <div className="mt-6 grid gap-5">{selectedBlock.type === "Hero" ? <>
-            <p className="text-sm text-content-muted">Pembuka detail event hanya menampilkan teks. Cover kartu di beranda dan dashboard diatur melalui Cover kartu event pada daftar bagian.</p>
-            <button type="button" className="flow-button secondary justify-self-start" onClick={() => setLandingSection(null)}>Ubah cover kartu event</button>
+            <p className="text-sm text-content-muted">Pembuka detail event hanya menampilkan teks. Pilih Semua bagian di atas untuk mengatur Cover kartu event yang tampil di beranda, halaman Event, dan dashboard.</p>
             <Field label="Judul pembuka"><input value={form.title} onChange={(event) => setField("title", event.target.value)} /></Field>
             <Field label="Ringkasan pembuka"><textarea rows={5} value={form.summary || form.description} onChange={(event) => setField("summary", event.target.value)} /></Field>
           </> : <>

@@ -64,7 +64,7 @@ export default function Page() {
             </>}
           </div>
         </article>;
-      }) : filtered ? <div><Empty title="Tidak ada event yang sesuai" description="Coba nama atau status publikasi lain." /><div className="mt-4 text-center"><button className="flow-button secondary" onClick={reset}>Hapus filter</button></div></div> : trash ? <Empty title="Sampah kosong" description="Event yang dihapus akan muncul di sini dan dapat dipulihkan sebagai draf." /> : <Empty title="Belum ada event" description="Mulai dengan menyiapkan program pertama Anda." href="/admin/events/new" label="Buat event" />}
+      }) : filtered ? <Empty title="Tidak ada event yang sesuai" description="Ubah pencarian atau gunakan Hapus filter di atas." /> : trash ? <Empty title="Sampah kosong" description="Event yang dihapus akan muncul di sini dan dapat dipulihkan sebagai draf." /> : <Empty title="Belum ada event" description="Gunakan Buat event untuk menyiapkan program pertama Anda." />}
     </Panel>
     <Dialog.Root open={isSuper && !!target} onOpenChange={open => { if (!open && !saving) { setTarget(null); setFailed(false); } }}><Dialog.Portal>
       <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40" />

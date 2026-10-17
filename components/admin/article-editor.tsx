@@ -224,15 +224,6 @@ export function ArticleEditor({
             {saving ? "Menyimpan…" : "Simpan artikel"}
           </button>
 
-          {!isNew && (
-            <button
-              type="button"
-              className="flow-button secondary w-full"
-              onClick={onDone}
-            >
-              Batal
-            </button>
-          )}
         </aside>
       </form>
     </div>

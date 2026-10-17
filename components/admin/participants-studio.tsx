@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { usePlatform } from "@/components/platform/provider";
-import { Badge, PageHeading, exportCsv } from "@/components/platform/ui";
+import { Badge, Field, PageHeading, exportCsv } from "@/components/platform/ui";
 import {
   money,
   nextAction,
@@ -193,8 +193,7 @@ export function ParticipantsStudio() {
               placeholder="Cari nama, email, kode, atau event"
             />
           </label>
-          <label>
-            <span>Status pembayaran</span>
+          <Field label="Status pembayaran">
             <select value={payment} onChange={(event) => setPayment(event.target.value)}>
               <option value="all">Semua status</option>
               <option value="paid">Lunas</option>
@@ -204,9 +203,8 @@ export function ParticipantsStudio() {
               <option value="cancelled">Dibatalkan</option>
               <option value="refunded">Dikembalikan</option>
             </select>
-          </label>
-          <label>
-            <span>Event</span>
+          </Field>
+          <Field label="Event">
             <select value={eventSlug} onChange={(event) => setEventSlug(event.target.value)}>
               <option value="all">Semua event</option>
               {state.events.map((event) => (
@@ -215,7 +213,7 @@ export function ParticipantsStudio() {
                 </option>
               ))}
             </select>
-          </label>
+          </Field>
         </div>
 
         <ul className="participant-list">

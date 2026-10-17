@@ -21,6 +21,7 @@
 .ux-select-trigger > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ux-select-chevron { flex-shrink: 0; color: var(--ux-muted); transition: transform var(--ux-duration); }
 .ux-select-trigger[data-state="open"] .ux-select-chevron { transform: rotate(180deg); }
+.ux-disclosure-content[data-state="closed"] { display: none; }
 .ux-select-trigger:not(:disabled):hover { background: var(--ux-surface); border-color: var(--ux-primary); }
 .ux-select-trigger[data-state="open"] { background: white; border-color: var(--ux-primary); }
 .ux-select-trigger:focus-visible { outline: 2px solid var(--ux-primary); outline-offset: 3px; }

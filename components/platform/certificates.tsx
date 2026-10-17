@@ -116,7 +116,7 @@ export function Certificates() {
   if (!ready) return null;
   return (
     <>
-      <div className="mt-8 grid gap-5 lg:grid-cols-2">
+      <div className="workspace-card-grid mt-8 grid gap-5 lg:grid-cols-2">
         {rows.map((r) => (
           <CertificatePanel key={r.id} registration={r} />
         ))}
